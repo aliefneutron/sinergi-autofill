@@ -62,6 +62,24 @@ export const DETAIL_ITEMS_MAP: Record<string, string[]> = {
   ]
 };
 
+export const getDefaultDetailItem = (uraianTugas: string): string => {
+  const items = DETAIL_ITEMS_MAP[uraianTugas] || [];
+  if (items.length === 0) return "";
+
+  // Explicit defaults prioritizing 60 minutes
+  const defaults: Record<string, string> = {
+    "Upacara / Apel": "Mengikuti Apel Pagi rutin setiap Senin pagi",
+    "Melaksanakan tugas lain sesuai perintah atasan": "NORMA: 60 MENIT",
+    "Mendisposisi surat masuk": "Membaca/mempelajari isi surat masuk dan mendisposisi surat (perhari eselon II)", // This is the 60 menit one
+    "Menandatangani naskah dinas": "Membaca/mempelajari isi naskah dinas dan menandatangani (telaahan/kajian)", // 15 menit
+    "Memaraf naskah dinas": "NORMA: 60 MENIT",
+    "Melaksanakan perjalanan dinas": "Perjalanan dinas luar daerah",
+    "Melaksanakan tugas lain": "NORMA: 60 MENIT"
+  };
+
+  return defaults[uraianTugas] || items[0];
+};
+
 export const SAMPLE_LAPORAN: LaporanKinerja[] = [
   {
     id: "rep-1",

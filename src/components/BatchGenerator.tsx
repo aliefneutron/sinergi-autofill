@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LaporanKinerja, StatusLaporan } from "../types";
-import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP } from "../data";
+import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP, getDefaultDetailItem } from "../data";
 import { Sparkles, Play, Calendar, Clock, Plus, Trash2, CheckCircle2, ChevronRight, RefreshCw, AlertCircle, Info } from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
 import TimePicker from "./TimePicker";
@@ -92,7 +92,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
         waktuMulai: nextStart,
         waktuSelesai: nextEnd,
         uraianTugas: DEFAULT_URAIAN_TUGAS[1],
-        detailItemPekerjaan: DETAIL_ITEMS_MAP[DEFAULT_URAIAN_TUGAS[1]]?.[0] || "",
+        detailItemPekerjaan: getDefaultDetailItem(DEFAULT_URAIAN_TUGAS[1]),
         context: ""
       }
     ]);
@@ -110,9 +110,9 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     setBlocks(blocks.map((b) => {
       if (b.id === id) {
         const updated = { ...b, [key]: value };
-        // If uraianTugas changes, update detailItemPekerjaan to its default first item
+        // If uraianTugas changes, update detailItemPekerjaan to its default
         if (key === "uraianTugas") {
-          updated.detailItemPekerjaan = DETAIL_ITEMS_MAP[value]?.[0] || "";
+          updated.detailItemPekerjaan = getDefaultDetailItem(value);
         }
         return updated;
       }

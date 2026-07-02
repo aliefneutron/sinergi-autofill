@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { LaporanKinerja, StatusLaporan } from "../types";
-import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP } from "../data";
+import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP, getDefaultDetailItem } from "../data";
 import { Sparkles, Save, Clock, Calendar, Check, AlertCircle, RefreshCw, Upload, FileText, ChevronRight } from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
 import TimePicker from "./TimePicker";
@@ -54,12 +54,7 @@ export default function SinergiForm({ onSave, onClose, initialData }: SinergiFor
   // Set default detail item when Uraian Tugas changes
   useEffect(() => {
     if (!initialData) {
-      const items = DETAIL_ITEMS_MAP[uraianTugas] || [];
-      if (items.length > 0) {
-        setDetailItemPekerjaan(items[0]);
-      } else {
-        setDetailItemPekerjaan("");
-      }
+      setDetailItemPekerjaan(getDefaultDetailItem(uraianTugas));
     }
   }, [uraianTugas, initialData]);
 
