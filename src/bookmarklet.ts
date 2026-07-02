@@ -397,39 +397,84 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
       }
 
       // 3. Select Uraian Tugas
-      // 3a. SINERGI V2: Radio button matching (idpekerjaandtl)
+      // 3a. SINERGI V2: Click trigger button first, then click matching <label> card
+      function clickUraianTrigger() {
+        const isHelperWidget = (el: Element) => !!el.closest('#sinergi-auto-input-widget');
+        
+        // Method 1: The radio container has a previousElementSibling with the trigger button
+        const radioContainer = document.querySelector('.form-control.w-full.overflow-hidden');
+        if (radioContainer && !isHelperWidget(radioContainer)) {
+          const triggerSection = radioContainer.previousElementSibling;
+          if (triggerSection) {
+            const triggerBtn = triggerSection.querySelector('button[type="button"]');
+            if (triggerBtn && !isHelperWidget(triggerBtn)) {
+              console.log('⚡ Mengklik trigger Uraian Tugas:', (triggerBtn.textContent || '').substring(0, 40));
+              (triggerBtn as HTMLElement).click();
+              triggerBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+              return true;
+            }
+          }
+        }
+        
+        // Method 2: Find label with "Uraian Tugas" text and click its button
+        const allLabels = Array.from(document.querySelectorAll('label span, span.label-text')).filter(el => !isHelperWidget(el));
+        for (const lbl of allLabels) {
+          const txt = (lbl.textContent || '').toLowerCase().trim();
+          if (txt === 'uraian tugas' || txt.includes('uraian tugas')) {
+            const section = lbl.closest('.form-control, div');
+            if (section) {
+              const btn = section.querySelector('button[type="button"]');
+              if (btn && !isHelperWidget(btn)) {
+                (btn as HTMLElement).click();
+                btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                console.log('⚡ Trigger Uraian Tugas diklik via label text');
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }
+      
       function fillUraianTugasRadio() {
+        const isHelperWidget = (el: Element) => !!el.closest('#sinergi-auto-input-widget');
         const targetText = (report.uraianTugas || '').toLowerCase().trim();
         const detailText = (report.detailItemPekerjaan || '').toLowerCase().trim();
-        const radios = Array.from(document.querySelectorAll('input[type="radio"]')).filter(r => !r.closest('#sinergi-auto-input-widget'));
+        const radios = Array.from(document.querySelectorAll('input[type="radio"]')).filter(r => !isHelperWidget(r));
         
         for (const radio of radios as HTMLInputElement[]) {
-          let labelText = '';
-          if (radio.id) {
-            const lbl = document.querySelector('label[for="' + radio.id + '"]');
-            if (lbl) labelText = lbl.textContent || '';
-          }
-          if (!labelText && radio.parentElement) {
-            labelText = radio.parentElement.textContent || '';
-          }
+          // Get the parent <label> card element (the whole clickable card)
+          const labelCard = radio.closest('label');
+          const labelText = (labelCard ? labelCard.textContent : radio.parentElement?.textContent) || '';
           const lt = labelText.toLowerCase().trim();
           const matchMain = targetText.length > 5 && lt.includes(targetText.substring(0, Math.min(targetText.length, 20)));
           const matchDetail = detailText.length > 5 && lt.includes(detailText.substring(0, Math.min(detailText.length, 20)));
           
           if (matchMain || matchDetail) {
+            // Click the LABEL CARD (not just the radio input) - this is what React tracks
+            if (labelCard) {
+              labelCard.click();
+              labelCard.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            }
             radio.click();
             radio.dispatchEvent(new MouseEvent('click', { bubbles: true }));
             radio.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('⚡ Dipilih radio uraian tugas:', labelText.substring(0, 60));
+            console.log('⚡ Dipilih radio uraian tugas (label card click):', lt.substring(0, 60));
             return true;
           }
         }
         return false;
       }
 
-      fillUraianTugasRadio();
-      setTimeout(fillUraianTugasRadio, 500);
+      // Step 1: Open the Uraian Tugas accordion/dropdown trigger
+      clickUraianTrigger();
+      setTimeout(clickUraianTrigger, 200);
+
+      // Step 2: After trigger opens the section, click the matching radio label
+      setTimeout(fillUraianTugasRadio, 400);
+      setTimeout(fillUraianTugasRadio, 800);
       setTimeout(fillUraianTugasRadio, 1500);
+      setTimeout(fillUraianTugasRadio, 2500);
 
       // 3b. Native <select> dropdown fallback
       const selectElements = Array.from(document.querySelectorAll('select[name*="tugas"], select[id*="tugas"], select[name*="uraian"], select'));
