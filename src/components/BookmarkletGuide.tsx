@@ -356,9 +356,17 @@ export default function BookmarkletGuide() {
         }
 
         // 2. Fill Start & End Times
-        let startInput = findFormInputElement(['mulai', 'start', 'jam_mulai', 'jam_start', 'waktu_mulai', 'jam mulai', 'waktu mulai'], 'input');
-        let endInput = findFormInputElement(['selesai', 'end', 'jam_selesai', 'jam_end', 'waktu_selesai', 'jam selesai', 'waktu selesai'], 'input');
+        let startInput = findFormInputElement(['mulai', 'start', 'jam_mulai', 'jam_start', 'waktu_mulai', 'jam mulai', 'waktu mulai', 'dari jam', 'waktu awal'], 'input');
+        let endInput = findFormInputElement(['selesai', 'end', 'jam_selesai', 'jam_end', 'waktu_selesai', 'jam selesai', 'waktu selesai', 'sampai', 'hingga', 'waktu akhir'], 'input');
         
+        if (!startInput || !endInput) {
+          const timeInputs = Array.from(document.querySelectorAll('input[type="time"], input[class*="time" i], input[class*="jam" i], input[class*="clock" i]'));
+          if (timeInputs.length >= 2) {
+            if (!startInput) startInput = timeInputs[0];
+            if (!endInput) endInput = timeInputs[1];
+          }
+        }
+
         if (startInput) {
           const isTimeInput = startInput.type === 'time';
           setElementValue(startInput, isTimeInput ? report.waktuMulai.replace('.', ':') : report.waktuMulai.replace(':', '.'));
@@ -439,45 +447,35 @@ export default function BookmarkletGuide() {
           const isHelperWidget = (el) => !!el.closest('#sinergi-auto-input-widget');
 
           // 1. Look for label "Uraian Tugas" and click corresponding dropdown next to it
-          const labels = Array.from(document.querySelectorAll('label, div, span, p')).filter(el => !isHelperWidget(el));
+          const labels = Array.from(document.querySelectorAll('label, div, span, p, th, td')).filter(el => !isHelperWidget(el));
           for (const label of labels) {
             const text = (label.textContent || '').trim().toLowerCase();
-            if (text === 'uraian tugas' || text === 'uraian tugas:' || text.includes('uraian tugas') || text.includes('tugas jabatan') || text.includes('kegiatan tugas')) {
+            if (text.length < 50 && (text === 'uraian tugas' || text === 'uraian tugas:' || text.includes('uraian tugas') || text.includes('tugas jabatan') || text.includes('kegiatan tugas'))) {
               console.log('⚡ Menemukan label/elemen Uraian Tugas:', label);
-              const parent = label.parentElement;
-              if (parent) {
-                const trigger = parent.querySelector('[role="combobox"], [role="button"], button, .vs__dropdown-toggle, .select2-selection, [class*="select"], [class*="dropdown"], [class*="toggle"]');
+              
+              let currentParent = label.parentElement;
+              // Traverse up to 4 levels
+              for (let i = 0; i < 4; i++) {
+                if (!currentParent) break;
+                
+                const trigger = currentParent.querySelector('.select2-selection, .vs__dropdown-toggle, [role="combobox"]');
                 if (trigger) {
                   console.log('⚡ Menemukan pemicu dropdown dari label parent:', trigger);
                   triggerClickEvents(trigger);
                   return true;
                 }
                 
-                const clickableDivs = Array.from(parent.querySelectorAll('div, button, span')).filter(el => !isHelperWidget(el));
+                const clickableDivs = Array.from(currentParent.querySelectorAll('div, button, span')).filter(el => !isHelperWidget(el));
                 for (const div of clickableDivs) {
                   const divText = (div.textContent || '').trim();
-                  if (divText.includes('Pilih Uraian Tugas') || divText.includes('-- Pilih') || div.getAttribute('role') === 'combobox' || div.classList.contains('vs__dropdown-toggle')) {
+                  if (divText.includes('Pilih Uraian Tugas') || divText.includes('-- Pilih') || divText.includes('Pilih Kegiatan') || divText.includes('Pilih Tugas')) {
                     console.log('⚡ Menemukan pemicu dropdown div dari parent:', div);
                     triggerClickEvents(div);
                     return true;
                   }
                 }
-
-                // Fallback sibling click: click any sibling elements of the label that might be the custom select box
-                const children = Array.from(parent.children);
-                for (const child of children) {
-                  if (child !== label && child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE') {
-                    console.log('⚡ Mengklik sibling dari label Uraian Tugas:', child.tagName, child.className);
-                    triggerClickEvents(child);
-                    
-                    const nestedClickable = child.querySelector('div, button, span, [role="button"], [class*="select"], [class*="dropdown"]');
-                    if (nestedClickable) {
-                      console.log('⚡ Mengklik nested clickable di sibling:', nestedClickable.tagName);
-                      triggerClickEvents(nestedClickable);
-                    }
-                    return true;
-                  }
-                }
+                
+                currentParent = currentParent.parentElement;
               }
             }
           }
@@ -486,7 +484,7 @@ export default function BookmarkletGuide() {
           const allElements = Array.from(document.querySelectorAll('button, div, span, p, a, [role="combobox"], input')).filter(el => !isHelperWidget(el));
           const triggers = allElements.filter(el => {
             const text = (el.textContent || '').trim();
-            return text.includes('Pilih Uraian Tugas') || text.includes('-- Pilih Uraian Tugas --') || text === 'Pilih Uraian' || el.classList.contains('vs__search');
+            return text.includes('Pilih Uraian Tugas') || text.includes('-- Pilih Uraian Tugas --') || text === 'Pilih Uraian' || text.includes('Pilih Kegiatan') || text.includes('-- Pilih Kegiatan') || el.classList.contains('vs__search');
           });
           
           if (triggers.length > 0) {
