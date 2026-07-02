@@ -84,6 +84,11 @@ export default function SinergiHistory({
       : true;
 
     return matchesMonth && matchesYear && matchesSearch;
+  }).sort((a, b) => {
+    if (a.tanggal !== b.tanggal) {
+      return a.tanggal.localeCompare(b.tanggal);
+    }
+    return a.waktuMulai.localeCompare(b.waktuMulai);
   });
 
   // Download payload as JSON file
