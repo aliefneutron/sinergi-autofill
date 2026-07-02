@@ -1036,37 +1036,54 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
       return;
     }
 
-    const onFormPage = window.location.pathname.includes('/create') || 
-                       window.location.pathname.includes('/tambah') || 
-                       !!(document.getElementById('wkt1') || document.querySelector('input[name="wkt1"]'));
-                       
-    if (onFormPage) {
-      console.log('🤖 Otomatisasi Batch: Mengisi form ke-' + (currentIndex + 1) + ' dari ' + reports.length);
-      
+    const isFormPagePath = window.location.pathname.includes('/create') || 
+                           window.location.pathname.includes('/tambah') || 
+                           window.location.pathname.includes('/input');
+
+    if (isFormPagePath || !!(document.getElementById('wkt1') || document.querySelector('input[name="wkt1"]'))) {
       const statusBanner = document.getElementById('sinergi-fill-status');
       if (statusBanner) {
-        statusBanner.innerHTML = '🤖 <strong>Otomatisasi Batch:</strong> Menginput laporan ke-' + (currentIndex + 1) + ' dari ' + reports.length + '... Mohon tunggu.';
+        statusBanner.innerHTML = '🤖 <strong>Otomatisasi Batch:</strong> Menunggu halaman siap...';
         statusBanner.style.display = 'block';
         statusBanner.style.background = 'rgba(245,158,11,0.1)';
         statusBanner.style.color = '#f59e0b';
         statusBanner.style.border = '1px solid rgba(245,158,11,0.15)';
       }
 
-      fillForm(reports[currentIndex]);
-
-      setTimeout(function() {
-        if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
-        
-        console.log('🤖 Otomatisasi Batch: Menyimpan data...');
-        localStorage.setItem('sinergi_auto_index', (currentIndex + 1).toString());
-        
-        const submitted = clickSubmitButton();
-        if (!submitted) {
-          console.error('🤖 Gagal mensubmit secara otomatis. Mencoba submit form fallback...');
-          const form = document.querySelector('form');
-          if (form) form.submit();
+      let attempts = 0;
+      const waitInterval = setInterval(function() {
+        attempts++;
+        if (localStorage.getItem('sinergi_auto_active') !== 'true') {
+          clearInterval(waitInterval);
+          return;
         }
-      }, 6500);
+
+        const isReady = !!(document.getElementById('wkt1') || document.querySelector('input[name="wkt1"]')) || document.querySelector('input[type="date"]');
+        if (isReady || attempts > 20) { // Wait up to 10 seconds for React components to mount
+          clearInterval(waitInterval);
+          
+          if (statusBanner) {
+            statusBanner.innerHTML = '🤖 <strong>Otomatisasi Batch:</strong> Menginput laporan ke-' + (currentIndex + 1) + ' dari ' + reports.length + '... Mohon tunggu.';
+          }
+          console.log('🤖 Otomatisasi Batch: Mengisi form ke-' + (currentIndex + 1) + ' dari ' + reports.length);
+          
+          fillForm(reports[currentIndex]);
+
+          setTimeout(function() {
+            if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
+            
+            console.log('🤖 Otomatisasi Batch: Menyimpan data...');
+            localStorage.setItem('sinergi_auto_index', (currentIndex + 1).toString());
+            
+            const submitted = clickSubmitButton();
+            if (!submitted) {
+              console.error('🤖 Gagal mensubmit secara otomatis. Mencoba submit form fallback...');
+              const form = document.querySelector('form');
+              if (form) form.submit();
+            }
+          }, 6500);
+        }
+      }, 500);
     } else {
       console.log('🤖 Otomatisasi Batch: Mencari tombol "+ Tambah Laporan"...');
       const statusBanner = document.getElementById('sinergi-fill-status');
