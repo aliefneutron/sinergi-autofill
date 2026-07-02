@@ -39,9 +39,12 @@ export const DETAIL_ITEMS_MAP: Record<string, string[]> = {
     "Membaca/mempelajari isi naskah dinas dan menandatangani (Keputusan)"
   ],
   "Memaraf naskah dinas": [
-    "Paraf koordinasi draf SK Kenaikan Pangkat PNS",
-    "Paraf koordinasi draf naskah perjanjian kerja PPPK",
-    "Paraf lembar disposisi telaahan staf kepegawaian"
+    "Membaca/mempelajari naskah dinas dan memaraf (non telaahan/kajian/peraturan perundang-undangan)",
+    "Membaca/mempelajari naskah dinas dan memaraf (telaahan/kajian)",
+    "Membaca/mempelajari naskah dinas dan memaraf (Perda)",
+    "Membaca/mempelajari naskah dinas dan memaraf (Perbup)",
+    "Membaca/mempelajari naskah dinas dan memaraf (keputusan)",
+    "NORMA: 60 MENIT"
   ],
   "Melaksanakan perjalanan dinas": [
     "Perjalanan dinas luar daerah",
