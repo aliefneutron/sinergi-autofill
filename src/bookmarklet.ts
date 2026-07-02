@@ -147,6 +147,8 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
       const reader = new FileReader();
       reader.onload = function(evt) {
         const content = evt.target.result;
+        const ta = document.getElementById('sinergi-data-input');
+        if (ta) (ta as HTMLTextAreaElement).value = content as string;
         processPayload(content);
       };
       reader.readAsText(file);
@@ -170,7 +172,7 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
 
   if (startAutoBtn && stopAutoBtn) {
     startAutoBtn.onclick = function() {
-      const rawVal = lastLoadedPayload || txtArea.value.trim();
+      const rawVal = localStorage.getItem('sinergi_auto_reports_draft') || txtArea.value.trim();
       if (!rawVal) {
         alert('Silakan unggah payload JSON terlebih dahulu!');
         return;
@@ -216,13 +218,13 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
 
   function processPayload(rawVal) {
     rawVal = rawVal.trim();
-    lastLoadedPayload = rawVal;
     let reports = [];
     try {
       if (rawVal.startsWith('[') || rawVal.startsWith('{')) {
 
         const parsed = JSON.parse(rawVal);
         reports = Array.isArray(parsed) ? parsed : [parsed];
+        localStorage.setItem('sinergi_auto_reports_draft', JSON.stringify(reports));
       } else {
         alert('Format data tidak valid! Harus berupa JSON valid.');
         return;

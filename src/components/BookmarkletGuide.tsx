@@ -169,6 +169,8 @@ export default function BookmarkletGuide() {
         const reader = new FileReader();
         reader.onload = function(evt) {
           const content = evt.target.result;
+          const ta = document.getElementById('sinergi-data-input');
+          if (ta) ta.value = content;
           processPayload(content);
         };
         reader.readAsText(file);
@@ -192,9 +194,9 @@ export default function BookmarkletGuide() {
 
     if (startAutoBtn && stopAutoBtn) {
       startAutoBtn.onclick = function() {
-        const rawVal = lastLoadedPayload || txtArea.value.trim();
+        const rawVal = localStorage.getItem('sinergi_auto_reports_draft') || txtArea.value.trim();
         if (!rawVal) {
-          alert(\'Silakan unggah payload JSON terlebih dahulu!\');
+          alert('Silakan unggah payload JSON terlebih dahulu!');
           return;
         }
         
@@ -202,49 +204,53 @@ export default function BookmarkletGuide() {
         try {
           parsed = JSON.parse(rawVal);
         } catch(e) {
-          alert(\'Data JSON tidak valid!\');
+          alert('Data JSON tidak valid!');
           return;
         }
         
         const reports = Array.isArray(parsed) ? parsed : [parsed];
-        localStorage.setItem(\'sinergi_auto_reports\', JSON.stringify(reports));
-        localStorage.setItem(\'sinergi_auto_index\', \'0\');
-        localStorage.setItem(\'sinergi_auto_active\', \'true\');
+        localStorage.setItem('sinergi_auto_reports', JSON.stringify(reports));
+        localStorage.setItem('sinergi_auto_index', '0');
+        localStorage.setItem('sinergi_auto_active', 'true');
         
-        startAutoBtn.style.display = \'none\';
-        stopAutoBtn.style.display = \'flex\';
+        startAutoBtn.style.display = 'none';
+        stopAutoBtn.style.display = 'flex';
         
         // Run immediately
         checkAutoAutomation();
       };
       
       stopAutoBtn.onclick = function() {
-        localStorage.setItem(\'sinergi_auto_active\', \'false\');
-        startAutoBtn.style.display = \'flex\';
-        stopAutoBtn.style.display = \'none\';
+        localStorage.setItem('sinergi_auto_active', 'false');
+        startAutoBtn.style.display = 'flex';
+        stopAutoBtn.style.display = 'none';
         
-        const statusBanner = document.getElementById(\'sinergi-fill-status\');
+        const statusBanner = document.getElementById('sinergi-fill-status');
         if (statusBanner) {
-          statusBanner.style.display = \'none\';
+          statusBanner.style.display = 'none';
         }
         
         // Re-draw list to clear status badges
-        const rawReports = localStorage.getItem(\'sinergi_auto_reports\');
+        const rawReports = localStorage.getItem('sinergi_auto_reports');
         if (rawReports) processPayload(rawReports);
         
-        console.log(\'🤖 Otomatisasi Batch dihentikan oleh pengguna.\');
+        console.log('🤖 Otomatisasi Batch dihentikan oleh pengguna.');
       };
     }
 
     function processPayload(rawVal) {
       rawVal = rawVal.trim();
-      lastLoadedPayload = rawVal;
       let reports = [];
       try {
-        if (rawVal.startsWith(\'[\') || rawVal.startsWith(\'{\')) {
-
+        if (rawVal.startsWith('[')) {
           const parsed = JSON.parse(rawVal);
           reports = Array.isArray(parsed) ? parsed : [parsed];
+          localStorage.setItem('sinergi_auto_reports_draft', JSON.stringify(reports));
+        } else if (rawVal.startsWith('{')) {
+          const parsed = JSON.parse(rawVal);
+          reports = Array.isArray(parsed) ? parsed : [parsed];
+          localStorage.setItem('sinergi_auto_reports_draft', JSON.stringify(reports));
+
         } else {
           alert(\'Format data tidak valid! Harus berupa JSON valid.\');
           return;
