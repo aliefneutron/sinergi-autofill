@@ -404,13 +404,18 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         // Method 1: The radio container has a previousElementSibling with the trigger button
         const radioContainer = document.querySelector('.form-control.w-full.overflow-hidden');
         if (radioContainer && !isHelperWidget(radioContainer)) {
+          const isOpen = radioContainer.clientHeight > 0;
           const triggerSection = radioContainer.previousElementSibling;
           if (triggerSection) {
             const triggerBtn = triggerSection.querySelector('button[type="button"]');
             if (triggerBtn && !isHelperWidget(triggerBtn)) {
-              console.log('⚡ Mengklik trigger Uraian Tugas:', (triggerBtn.textContent || '').substring(0, 40));
-              (triggerBtn as HTMLElement).click();
-              triggerBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+              if (!isOpen) {
+                console.log('⚡ Mengklik trigger Uraian Tugas (buka accordion):', (triggerBtn.textContent || '').substring(0, 40));
+                (triggerBtn as HTMLElement).click();
+                triggerBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+              } else {
+                console.log('⚡ Accordion Uraian Tugas sudah terbuka.');
+              }
               return true;
             }
           }
@@ -435,11 +440,24 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         }
         return false;
       }
+
+      function isAccordionOpen() {
+        const radioContainer = document.querySelector('.form-control.w-full.overflow-hidden');
+        return radioContainer ? radioContainer.clientHeight > 0 : false;
+      }
       
       function fillUraianTugasRadio() {
         const isHelperWidget = (el: Element) => !!el.closest('#sinergi-auto-input-widget');
         const targetText = (report.uraianTugas || '').toLowerCase().trim();
         const detailText = (report.detailItemPekerjaan || '').toLowerCase().trim();
+
+        // Only try to fill if accordion is open
+        if (!isAccordionOpen()) {
+          console.log('⚡ Accordion belum terbuka, coba buka dulu...');
+          clickUraianTrigger();
+          return false;
+        }
+
         const radios = Array.from(document.querySelectorAll('input[type="radio"]')).filter(r => !isHelperWidget(r));
         
         for (const radio of radios as HTMLInputElement[]) {
@@ -451,30 +469,29 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
           const matchDetail = detailText.length > 5 && lt.includes(detailText.substring(0, Math.min(detailText.length, 20)));
           
           if (matchMain || matchDetail) {
-            // Click the LABEL CARD (not just the radio input) - this is what React tracks
+            // Click the LABEL CARD while accordion is open - React will detect this
             if (labelCard) {
               labelCard.click();
-              labelCard.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+              labelCard.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
             }
             radio.click();
             radio.dispatchEvent(new MouseEvent('click', { bubbles: true }));
             radio.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('⚡ Dipilih radio uraian tugas (label card click):', lt.substring(0, 60));
+            console.log('⚡ Dipilih radio uraian tugas (accordion open):', lt.substring(0, 60));
             return true;
           }
         }
         return false;
       }
 
-      // Step 1: Open the Uraian Tugas accordion/dropdown trigger
+      // Step 1: Open the Uraian Tugas accordion trigger immediately
       clickUraianTrigger();
-      setTimeout(clickUraianTrigger, 200);
 
-      // Step 2: After trigger opens the section, click the matching radio label
-      setTimeout(fillUraianTugasRadio, 400);
-      setTimeout(fillUraianTugasRadio, 800);
-      setTimeout(fillUraianTugasRadio, 1500);
-      setTimeout(fillUraianTugasRadio, 2500);
+      // Step 2: After accordion opens (wait for animation ~300-600ms), click matching radio
+      setTimeout(fillUraianTugasRadio, 500);
+      setTimeout(fillUraianTugasRadio, 1000);
+      setTimeout(fillUraianTugasRadio, 2000);
+      setTimeout(fillUraianTugasRadio, 3500);
 
       // 3b. Native <select> dropdown fallback
       const selectElements = Array.from(document.querySelectorAll('select[name*="tugas"], select[id*="tugas"], select[name*="uraian"], select'));
