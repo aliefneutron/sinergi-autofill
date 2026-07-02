@@ -343,9 +343,9 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   };
 
   return (
-    <div className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl overflow-hidden shadow-2xl">
+    <div className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl shadow-2xl">
       {/* Header */}
-      <div className="bg-white/10 border-b border-white/20 px-6 py-4 flex justify-between items-center">
+      <div className="bg-white/10 border-b border-white/20 px-6 py-4 flex justify-between items-center rounded-t-3xl">
         <div>
           <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-yellow-300" /> BATCH GENERATOR AI
