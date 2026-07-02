@@ -471,14 +471,14 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
               
               if (jamMatch) {
                   jamMatch.scrollIntoView({ block: 'nearest' });
-                  triggerClickEvents(jamMatch);
+                  setTimeout(() => triggerClickEvents(jamMatch), 100);
               }
               
-              // Add a slight delay before clicking minute to perfectly mimic human timing
+              // Add a generous delay before clicking minute to perfectly mimic human timing
               setTimeout(() => {
                   if (menitMatch) {
                       menitMatch.scrollIntoView({ block: 'nearest' });
-                      triggerClickEvents(menitMatch);
+                      setTimeout(() => triggerClickEvents(menitMatch), 100);
                   }
                   
                   console.log('⚡ Human-simulated wheel click for ' + btnId + ': ' + targetJam + ':' + targetMenit);
@@ -486,15 +486,15 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
                   // Close the popup by clicking outside
                   setTimeout(() => {
                       triggerClickEvents(document.body);
-                  }, 200);
+                  }, 500);
                   
-              }, 150);
+              }, 600);
               
            } else {
               console.log('⚡ Columns not found in popup for', btnId);
            }
            
-        }, 400); // Wait 400ms for popup to fully render/animate
+        }, 700); // Wait 700ms for popup to fully render/animate
       }
 
         // Add delay before opening time pickers to prevent text-input re-renders from destroying the popup
