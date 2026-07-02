@@ -7,7 +7,7 @@ import { createServer as createViteServer } from "vite";
 dotenv.config();
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 const PORT = process.env.PORT || 3000;
 
@@ -116,6 +116,82 @@ const URAIAN_TEMPLATES: Record<string, { desc: string; output: string }[]> = {
     }
   ]
 };
+
+// API Route for extracting Surat Tugas data using Gemini Multimodal
+app.post("/api/gemini/extract-surat-tugas", async (req, res) => {
+  const { imageBase64, date } = req.body;
+
+  if (!imageBase64 || !date) {
+    return res.status(400).json({ error: "imageBase64 dan date wajib diisi" });
+  }
+
+  const ai = getGeminiClient();
+  if (!ai) {
+    return res.status(500).json({ error: "Gemini client tidak terinisialisasi. Periksa API Key." });
+  }
+
+  try {
+    const prompt = `
+Anda adalah asisten data entry. Tugas Anda adalah membaca gambar Surat Tugas yang diberikan, dan mengekstrak konteks kegiatan HANYA untuk tanggal: ${date}.
+
+Dalam Surat Tugas biasanya terdapat:
+1. Judul Program/Kegiatan (misal: "Program Pengadaan Obat, Bahan Habis Pakai...", atau acara lainnya).
+2. Tabel jadwal yang berisi Nama/Lokasi Puskesmas beserta Tanggal Pelaksanaannya.
+
+Instruksi:
+- Cari baris di tabel yang memiliki tanggal yang sesuai dengan ${date} (atau yang paling mendekati jika format penulisan beda, misal '22 Juni 2026' = '2026-06-22').
+- Ambil Nama/Lokasi/Puskesmas dari baris tersebut.
+- Gabungkan Judul Program/Kegiatan dengan Nama Lokasi tersebut menjadi satu kalimat ringkas.
+Contoh: "Program Pengadaan Obat, Bahan Habis Pakai Medis, Vaksin, Makanan dan Minuman di Puskesmas Pragaan"
+
+Format output HANYA berupa JSON persis seperti skema berikut, tanpa tambahan markdown:
+{
+  "context": "Hasil ekstraksi gabungan (Judul Kegiatan + Lokasi/Puskesmas sesuai tanggal)"
+}
+`;
+
+    const matches = imageBase64.match(/^data:(image\/[a-zA-Z0-9]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ error: "Format gambar tidak valid" });
+    }
+    const mimeType = matches[1];
+    const data = matches[2];
+
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: [
+        prompt,
+        {
+          inlineData: {
+            data: data,
+            mimeType: mimeType
+          }
+        }
+      ],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            context: {
+              type: Type.STRING,
+              description: "Konteks kegiatan gabungan dari judul acara dan lokasi/Puskesmas yang sesuai tanggal",
+            },
+          },
+          required: ["context"],
+        },
+      },
+    });
+
+    const text = response.text || "{}";
+    const parsed = JSON.parse(text.trim());
+    return res.json(parsed);
+
+  } catch (error: any) {
+    console.error("Gemini Extraction Error:", error);
+    return res.status(500).json({ error: "Gagal mengekstrak data dari gambar" });
+  }
+});
 
 // API Route for generating reports using Gemini with custom variations
 app.post("/api/gemini/generate", async (req, res) => {
