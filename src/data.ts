@@ -34,9 +34,9 @@ export const DETAIL_ITEMS_MAP: Record<string, string[]> = {
     "Membaca/mempelajari isi surat masuk dan mendisposisi surat (perhari eselon IV)"
   ],
   "Menandatangani naskah dinas": [
-    "Penandatanganan berkas usulan cuti tahunan pegawai",
-    "Penandatanganan surat pengantar berkas kepegawaian",
-    "Pengesahan Surat Perintah Tugas (SPT) staf"
+    "Membaca/mempelajari isi naskah dinas dan menandatangani (non telaahan/kajian)",
+    "Membaca/mempelajari isi naskah dinas dan menandatangani (telaahan/kajian)",
+    "Membaca/mempelajari isi naskah dinas dan menandatangani (Keputusan)"
   ],
   "Memaraf naskah dinas": [
     "Paraf koordinasi draf SK Kenaikan Pangkat PNS",
