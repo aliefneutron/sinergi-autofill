@@ -84,9 +84,17 @@ export default function BookmarkletGuide() {
     // Widget Body
     const body = document.createElement('div');
     body.style.cssText = 'padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;font-size:12px;';
-    body.innerHTML = \'<div style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;"><label style="font-weight:bold;display:block;color:#a5b4fc;font-size:12px;">Unggah File Payload Kinerja:</label><div style="display:flex;flex-direction:column;gap:6px;"><button id="sinergi-btn-upload-trigger" style="width:100%;background:linear-gradient(135deg, #6366f1, #ec4899);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(99,102,241,0.2);">📁 Pilih & Unggah File Payload (.json)</button><input type="file" id="sinergi-file-input" accept=".json" style="display:none;" /></div><div id="sinergi-file-name" style="color:#34d399;font-weight:bold;font-size:11px;text-align:center;display:none;background:rgba(52,211,153,0.1);padding:6px;border-radius:6px;border:1px solid rgba(52,211,153,0.15);"></div><details style="margin-top:4px;border-top:1px solid rgba(255,255,255,0.08);padding-top:6px;"><summary style="cursor:pointer;color:#64748b;font-weight:bold;font-size:11px;user-select:none;">Atau Tempel Teks Manual</summary><div style="margin-top:6px;display:flex;flex-direction:column;gap:6px;"><textarea id="sinergi-data-input" placeholder="Tempel JSON atau Payload e-Kinerja di sini..." style="width:100%;height:60px;background:#1e2230;color:white;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px;box-sizing:border-box;font-family:monospace;font-size:11px;resize:none;outline:none;"></textarea><button id="sinergi-btn-load" style="width:100%;background:#334155;color:white;border:none;border-radius:6px;padding:6px;font-weight:bold;cursor:pointer;">Muat Manual</button></div></details></div><div id="sinergi-report-list-container" style="display:none;border-top:1px dashed rgba(255,255,255,0.1);padding-top:12px;"><div style="font-weight:bold;margin-bottom:8px;color:#a5b4fc;display:flex;justify-content:space-between;align-items:center;"><span>Pilih Laporan Hari Ini:</span><span id="sinergi-count" style="background:linear-gradient(135deg, #6366f1, #ec4899);color:white;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">0</span></div><div id="sinergi-report-items" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;"></div></div><div id="sinergi-fill-status" style="padding:10px;border-radius:8px;background:rgba(16,185,129,0.1);color:#34d399;font-weight:bold;display:none;text-align:center;border:1px solid rgba(16,185,129,0.2);">🎉 Laporan berhasil diisi! Periksa & simpan.</div>\';
+    body.innerHTML = '<div style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;"><label style="font-weight:bold;display:block;color:#a5b4fc;font-size:12px;">Unggah File Payload Kinerja:</label><div style="display:flex;flex-direction:column;gap:6px;"><button id="sinergi-btn-upload-trigger" style="width:100%;background:linear-gradient(135deg, #6366f1, #ec4899);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(99,102,241,0.2);">📁 Pilih & Unggah File Payload (.json)</button><input type="file" id="sinergi-file-input" accept=".json" style="display:none;" /></div><div id="sinergi-file-name" style="color:#34d399;font-weight:bold;font-size:11px;text-align:center;display:none;background:rgba(52,211,153,0.1);padding:6px;border-radius:6px;border:1px solid rgba(52,211,153,0.15);"></div><details style="margin-top:4px;border-top:1px solid rgba(255,255,255,0.08);padding-top:6px;"><summary style="cursor:pointer;color:#64748b;font-weight:bold;font-size:11px;user-select:none;">Atau Tempel Teks Manual</summary><div style="margin-top:6px;display:flex;flex-direction:column;gap:6px;"><textarea id="sinergi-data-input" placeholder="Tempel JSON atau Payload e-Kinerja di sini..." style="width:100%;height:60px;background:#1e2230;color:white;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px;box-sizing:border-box;font-family:monospace;font-size:11px;resize:none;outline:none;"></textarea><button id="sinergi-btn-load" style="width:100%;background:#334155;color:white;border:none;border-radius:6px;padding:6px;font-weight:bold;cursor:pointer;">Muat Manual</button></div></details></div><div id="sinergi-auto-control-section" style="margin-bottom:12px;display:none;flex-direction:column;gap:8px;"><button id="sinergi-btn-start-auto" style="width:100%;background:linear-gradient(135deg, #10b981, #059669);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(16,185,129,0.2);">🚀 Jalankan Otomatisasi Batch (Simpan & Lanjut)</button><button id="sinergi-btn-stop-auto" style="width:100%;background:linear-gradient(135deg, #ef4444, #dc2626);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:none;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(239,68,68,0.2);">🛑 Hentikan Otomatisasi Batch</button></div><div id="sinergi-report-list-container" style="display:none;border-top:1px dashed rgba(255,255,255,0.1);padding-top:12px;"><div style="font-weight:bold;margin-bottom:8px;color:#a5b4fc;display:flex;justify-content:space-between;align-items:center;"><span>Pilih Laporan Hari Ini:</span><span id="sinergi-count" style="background:linear-gradient(135deg, #6366f1, #ec4899);color:white;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">0</span></div><div id="sinergi-report-items" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;"></div></div><div id="sinergi-fill-status" style="padding:10px;border-radius:8px;background:rgba(16,185,129,0.1);color:#34d399;font-weight:bold;display:none;text-align:center;border:1px solid rgba(16,185,129,0.2);">🎉 Laporan berhasil diisi! Periksa & simpan.</div>';
     widget.appendChild(body);
     document.body.appendChild(widget);
+
+    // Inject custom animation styles for widget
+    if (!document.getElementById('sinergi-helper-styles')) {
+      const styleEl = document.createElement('style');
+      styleEl.id = 'sinergi-helper-styles';
+      styleEl.textContent = '@keyframes sinergi-pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } } .sinergi-anim-pulse { animation: sinergi-pulse 1.5s infinite ease-in-out; }';
+      document.head.appendChild(styleEl);
+    }
 
     // Style elements hover / focus on target
     const ta = document.getElementById(\'sinergi-data-input\');
@@ -176,6 +184,57 @@ export default function BookmarkletGuide() {
       processPayload(rawVal);
     };
 
+    // Start / Stop Auto Automation
+    const controlSection = document.getElementById(\'sinergi-auto-control-section\');
+    const startAutoBtn = document.getElementById(\'sinergi-btn-start-auto\');
+    const stopAutoBtn = document.getElementById(\'sinergi-btn-stop-auto\');
+
+    if (startAutoBtn && stopAutoBtn) {
+      startAutoBtn.onclick = function() {
+        const rawVal = txtArea.value.trim();
+        if (!rawVal) {
+          alert(\'Silakan unggah payload JSON terlebih dahulu!\');
+          return;
+        }
+        
+        let parsed;
+        try {
+          parsed = JSON.parse(rawVal);
+        } catch(e) {
+          alert(\'Data JSON tidak valid!\');
+          return;
+        }
+        
+        const reports = Array.isArray(parsed) ? parsed : [parsed];
+        localStorage.setItem(\'sinergi_auto_reports\', JSON.stringify(reports));
+        localStorage.setItem(\'sinergi_auto_index\', \'0\');
+        localStorage.setItem(\'sinergi_auto_active\', \'true\');
+        
+        startAutoBtn.style.display = \'none\';
+        stopAutoBtn.style.display = \'flex\';
+        
+        // Run immediately
+        checkAutoAutomation();
+      };
+      
+      stopAutoBtn.onclick = function() {
+        localStorage.setItem(\'sinergi_auto_active\', \'false\');
+        startAutoBtn.style.display = \'flex\';
+        stopAutoBtn.style.display = \'none\';
+        
+        const statusBanner = document.getElementById(\'sinergi-fill-status\');
+        if (statusBanner) {
+          statusBanner.style.display = \'none\';
+        }
+        
+        // Re-draw list to clear status badges
+        const rawReports = localStorage.getItem(\'sinergi_auto_reports\');
+        if (rawReports) processPayload(rawReports);
+        
+        console.log(\'🤖 Otomatisasi Batch dihentikan oleh pengguna.\');
+      };
+    }
+
     function processPayload(rawVal) {
       rawVal = rawVal.trim();
       let reports = [];
@@ -219,7 +278,21 @@ export default function BookmarkletGuide() {
           dateFormatted = d.toLocaleDateString(\'id-ID\', options);
         } catch(e) {}
 
-        item.innerHTML = \'<div style="display:flex;justify-content:space-between;align-items:center;font-weight:bold;"><span style="color:#a5b4fc;">\' + dateFormatted + \'</span><span style="color:#94a3b8;font-size:10px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:6px;">\' + report.waktuMulai + \' - \' + report.waktuSelesai + \'</span></div><div style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white;margin-top:2px;">\' + report.uraianTugas + \'</div><div style="color:#94a3b8;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\' + report.deskripsiPekerjaan + \'</div>\';
+        const autoActive = localStorage.getItem(\'sinergi_auto_active\') === \'true\';
+        const autoIndex = parseInt(localStorage.getItem(\'sinergi_auto_index\') || \'0\', 10);
+        
+        let statusBadge = '';
+        if (autoActive) {
+          if (index < autoIndex) {
+            statusBadge = \'<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Selesai</span>\';
+          } else if (index === autoIndex) {
+            statusBadge = \'<span class="sinergi-anim-pulse" style="color:#f59e0b;font-size:10px;font-weight:bold;margin-left:auto;">⏳ Proses</span>\';
+          } else {
+            statusBadge = \'<span style="color:#64748b;font-size:10px;font-weight:bold;margin-left:auto;">Antrean</span>\';
+          }
+        }
+
+        item.innerHTML = \'<div style="display:flex;justify-content:space-between;align-items:center;font-weight:bold;"><span style="color:#a5b4fc;">\' + dateFormatted + \'</span><div style="display:flex;align-items:center;gap:6px;">\' + statusBadge + \'<span style="color:#94a3b8;font-size:10px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:6px;">\' + report.waktuMulai + \' - \' + report.waktuSelesai + \'</span></div></div><div style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white;margin-top:2px;">\' + report.uraianTugas + \'</div><div style="color:#94a3b8;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\' + report.deskripsiPekerjaan + \'</div>\';
 
         item.onclick = function() {
           fillForm(report);
@@ -230,6 +303,19 @@ export default function BookmarkletGuide() {
 
       countBadge.textContent = reports.length;
       listContainer.style.display = \'block\';
+
+      // Show auto control buttons
+      if (controlSection) {
+        controlSection.style.display = \'flex\';
+        const autoActive = localStorage.getItem(\'sinergi_auto_active\') === \'true\';
+        if (autoActive) {
+          startAutoBtn.style.display = \'none\';
+          stopAutoBtn.style.display = \'flex\';
+        } else {
+          startAutoBtn.style.display = \'flex\';
+          stopAutoBtn.style.display = \'none\';
+        }
+      }
     }
 
     function fillForm(report) {
@@ -888,9 +974,181 @@ export default function BookmarkletGuide() {
     }
   }
 
+  function clickSubmitButton() {
+    const isHelperWidget = (el) => !!el.closest('#sinergi-auto-input-widget');
+    
+    // 1. Look for button with type="submit"
+    const submitBtn = Array.from(document.querySelectorAll('button[type="submit"]')).find(btn => !isHelperWidget(btn));
+    if (submitBtn) {
+      console.log('🤖 Otomatisasi: Mengklik button[type="submit"]...');
+      submitBtn.click();
+      return true;
+    }
+    
+    // 2. Look for button containing text "simpan" or "kirim"
+    const buttons = Array.from(document.querySelectorAll('button, input[type="button"], input[type="submit"]')).filter(el => !isHelperWidget(el));
+    for (const btn of buttons) {
+      const txt = (btn.textContent || btn.value || '').toLowerCase().trim();
+      if (txt === 'simpan' || txt === 'kirim' || txt === 'save' || txt === 'submit' || txt.includes('simpan laporan') || txt.includes('kirim laporan')) {
+        console.log('🤖 Otomatisasi: Mengklik tombol simpan via teks:', txt);
+        btn.click();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function checkAutoAutomation() {
+    const autoActive = localStorage.getItem('sinergi_auto_active') === 'true';
+    if (!autoActive) return;
+
+    const rawReports = localStorage.getItem('sinergi_auto_reports');
+    if (!rawReports) {
+      localStorage.setItem('sinergi_auto_active', 'false');
+      return;
+    }
+
+    let reports = [];
+    try {
+      reports = JSON.parse(rawReports);
+    } catch(e) {
+      localStorage.setItem('sinergi_auto_active', 'false');
+      return;
+    }
+
+    const currentIndex = parseInt(localStorage.getItem('sinergi_auto_index') || '0', 10);
+    if (currentIndex >= reports.length) {
+      localStorage.setItem('sinergi_auto_active', 'false');
+      localStorage.removeItem('sinergi_auto_reports');
+      localStorage.removeItem('sinergi_auto_index');
+      
+      const startBtn = document.getElementById('sinergi-btn-start-auto');
+      const stopBtn = document.getElementById('sinergi-btn-stop-auto');
+      if (startBtn) startBtn.style.display = 'flex';
+      if (stopBtn) stopBtn.style.display = 'none';
+      
+      const statusBanner = document.getElementById('sinergi-fill-status');
+      if (statusBanner) {
+        statusBanner.innerHTML = '🎉 Semua laporan (' + reports.length + ' item) telah berhasil diinput!';
+        statusBanner.style.display = 'block';
+        statusBanner.style.background = 'rgba(16,185,129,0.1)';
+        statusBanner.style.color = '#34d399';
+        statusBanner.style.border = '1px solid rgba(16,185,129,0.2)';
+      }
+      alert('🎉 Semua laporan (' + reports.length + ' item) telah selesai diinput!');
+      
+      // Re-draw list to clear status badges
+      processPayload(rawReports);
+      return;
+    }
+
+    const onFormPage = !!(document.getElementById('wkt1') || document.querySelector('input[name="wkt1"]'));
+    if (onFormPage) {
+      console.log('🤖 Otomatisasi Batch: Mengisi form ke-' + (currentIndex + 1) + ' dari ' + reports.length);
+      
+      const statusBanner = document.getElementById('sinergi-fill-status');
+      if (statusBanner) {
+        statusBanner.innerHTML = '🤖 <strong>Otomatisasi Batch:</strong> Menginput laporan ke-' + (currentIndex + 1) + ' dari ' + reports.length + '... Mohon tunggu.';
+        statusBanner.style.display = 'block';
+        statusBanner.style.background = 'rgba(245,158,11,0.1)';
+        statusBanner.style.color = '#f59e0b';
+        statusBanner.style.border = '1px solid rgba(245,158,11,0.15)';
+      }
+
+      fillForm(reports[currentIndex]);
+
+      setTimeout(function() {
+        if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
+        
+        console.log('🤖 Otomatisasi Batch: Menyimpan data...');
+        localStorage.setItem('sinergi_auto_index', (currentIndex + 1).toString());
+        
+        const submitted = clickSubmitButton();
+        if (!submitted) {
+          console.error('🤖 Gagal mensubmit secara otomatis. Mencoba submit form fallback...');
+          const form = document.querySelector('form');
+          if (form) form.submit();
+        }
+      }, 6500);
+    } else {
+      console.log('🤖 Otomatisasi Batch: Mencari tombol "+ Tambah Laporan"...');
+      const statusBanner = document.getElementById('sinergi-fill-status');
+      if (statusBanner) {
+        statusBanner.innerHTML = '🤖 <strong>Otomatisasi Batch:</strong> Mengalihkan ke Halaman Tambah Laporan...';
+        statusBanner.style.display = 'block';
+        statusBanner.style.background = 'rgba(99,102,241,0.1)';
+        statusBanner.style.color = '#a5b4fc';
+        statusBanner.style.border = '1px solid rgba(99,102,241,0.15)';
+      }
+
+      setTimeout(function() {
+        if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
+
+        const tambahBtn = Array.from(document.querySelectorAll('a, button')).find(el => {
+          if (el.closest('#sinergi-auto-input-widget')) return false;
+          const txt = (el.textContent || '').toLowerCase().trim();
+          return txt === 'tambah' || txt.includes('tambah laporan') || txt.includes('tambah pekerjaan') || txt.includes('tambah aktivitas') || txt === '+ tambah';
+        });
+
+        if (tambahBtn) {
+          console.log('🤖 Otomatisasi Batch: Mengklik tombol Tambah.');
+          tambahBtn.click();
+          tambahBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        } else {
+          const currentUrl = window.location.href;
+          if (currentUrl.includes('/pekerjaan')) {
+            const baseUrl = currentUrl.split('/pekerjaan')[0];
+            console.log('🤖 Otomatisasi Batch: Mengalihkan via URL redirect ke create page.');
+            window.location.href = baseUrl + '/pekerjaan/create';
+          }
+        }
+      }, 2500);
+    }
+  }
+
+  // Auto-confirm SweetAlert/Swal dialogs if batch automation is active
+  setInterval(function() {
+    if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
+    
+    const swalConfirm = document.querySelector('.swal2-confirm, .swal-button--confirm');
+    if (swalConfirm) {
+      console.log('🤖 Mengkonfirmasi dialog SweetAlert otomatis...');
+      swalConfirm.click();
+    }
+    
+    const dialogButtons = Array.from(document.querySelectorAll('button')).filter(btn => {
+      if (btn.closest('#sinergi-auto-input-widget')) return false;
+      const txt = (btn.textContent || '').toLowerCase().trim();
+      return txt === 'ya' || txt === 'yakin' || txt === 'ya, simpan' || txt === 'ya, kirim' || txt === 'setuju' || txt.includes('proses');
+    });
+    
+    dialogButtons.forEach(btn => {
+      btn.click();
+    });
+  }, 1200);
+
   // Interval periodik untuk selalu memastikan asisten melayang aktif
-  setInterval(initAssistant, 1500);
+  const autoActiveOnLoad = localStorage.getItem('sinergi_auto_active') === 'true';
+  if (autoActiveOnLoad) {
+    createWidget();
+    const rawReports = localStorage.getItem('sinergi_auto_reports');
+    if (rawReports) {
+      const widget = document.getElementById('sinergi-auto-input-widget');
+      if (widget) widget.style.display = 'flex';
+      setTimeout(function() {
+        const textArea = document.getElementById('sinergi-data-input');
+        if (textArea) {
+          textArea.value = rawReports;
+        }
+        processPayload(rawReports);
+        checkAutoAutomation();
+      }, 1000);
+    }
+  } else {
+    setInterval(initAssistant, 1500);
+  }
 })();`;
+
 
   const handleCopyUserscript = async () => {
     try {
