@@ -17,14 +17,14 @@ export const DETAIL_ITEMS_MAP: Record<string, string[]> = {
     "Mengikuti Apel Sore sebelum pulang kerja"
   ],
   "Melaksanakan tugas lain sesuai perintah atasan": [
-    "NORMA: 5 MENIT",
-    "NORMA: 10 MENIT",
-    "NORMA: 15 MENIT",
-    "NORMA: 20 MENIT",
-    "NORMA: 30 MENIT",
-    "NORMA: 40 MENIT",
-    "NORMA: 50 MENIT",
-    "NORMA: 60 MENIT"
+    "Mengerjakan tugas lain NORMA: 5 MENIT",
+    "Mengerjakan tugas lain NORMA: 10 MENIT",
+    "Mengerjakan tugas lain NORMA: 15 MENIT",
+    "Mengerjakan tugas lain NORMA: 20 MENIT",
+    "Mengerjakan tugas lain NORMA: 30 MENIT",
+    "Mengerjakan tugas lain NORMA: 40 MENIT",
+    "Mengerjakan tugas lain NORMA: 50 MENIT",
+    "Mengerjakan tugas lain NORMA: 60 MENIT"
   ],
   "Mendisposisi surat masuk": [
     "Membaca/mempelajari isi surat masuk",
@@ -44,21 +44,21 @@ export const DETAIL_ITEMS_MAP: Record<string, string[]> = {
     "Membaca/mempelajari naskah dinas dan memaraf (Perda)",
     "Membaca/mempelajari naskah dinas dan memaraf (Perbup)",
     "Membaca/mempelajari naskah dinas dan memaraf (keputusan)",
-    "NORMA: 60 MENIT"
+    "Memaraf naskah dinas NORMA: 60 MENIT"
   ],
   "Melaksanakan perjalanan dinas": [
     "Perjalanan dinas luar daerah",
     "Perjalanan dinas dalam daerah"
   ],
   "Melaksanakan tugas lain": [
-    "NORMA: 5 MENIT",
-    "NORMA: 10 MENIT",
-    "NORMA: 15 MENIT",
-    "NORMA: 20 MENIT",
-    "NORMA: 25 MENIT",
-    "NORMA: 30 MENIT",
-    "NORMA: 45 MENIT",
-    "NORMA: 60 MENIT"
+    "Mengerjakan tugas lain NORMA: 5 MENIT",
+    "Mengerjakan tugas lain NORMA: 10 MENIT",
+    "Mengerjakan tugas lain NORMA: 15 MENIT",
+    "Mengerjakan tugas lain NORMA: 20 MENIT",
+    "Mengerjakan tugas lain NORMA: 25 MENIT",
+    "Mengerjakan tugas lain NORMA: 30 MENIT",
+    "Mengerjakan tugas lain NORMA: 45 MENIT",
+    "Mengerjakan tugas lain NORMA: 60 MENIT"
   ]
 };
 
@@ -69,12 +69,12 @@ export const getDefaultDetailItem = (uraianTugas: string): string => {
   // Explicit defaults prioritizing 60 minutes
   const defaults: Record<string, string> = {
     "Upacara / Apel": "Mengikuti Apel Pagi rutin setiap Senin pagi",
-    "Melaksanakan tugas lain sesuai perintah atasan": "NORMA: 60 MENIT",
+    "Melaksanakan tugas lain sesuai perintah atasan": "Mengerjakan tugas lain NORMA: 60 MENIT",
     "Mendisposisi surat masuk": "Membaca/mempelajari isi surat masuk dan mendisposisi surat (perhari eselon II)", // This is the 60 menit one
     "Menandatangani naskah dinas": "Membaca/mempelajari isi naskah dinas dan menandatangani (telaahan/kajian)", // 15 menit
-    "Memaraf naskah dinas": "NORMA: 60 MENIT",
+    "Memaraf naskah dinas": "Memaraf naskah dinas NORMA: 60 MENIT",
     "Melaksanakan perjalanan dinas": "Perjalanan dinas luar daerah",
-    "Melaksanakan tugas lain": "NORMA: 60 MENIT"
+    "Melaksanakan tugas lain": "Mengerjakan tugas lain NORMA: 60 MENIT"
   };
 
   return defaults[uraianTugas] || items[0];
