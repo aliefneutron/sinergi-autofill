@@ -558,6 +558,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                       label="Mulai"
                       value={block.waktuMulai}
                       onChange={(t) => updateBlock(block.id, "waktuMulai", t)}
+                      placement={index >= blocks.length - 2 && blocks.length > 3 ? "top" : "bottom"}
                     />
                   </div>
 
@@ -567,6 +568,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                       label="Selesai"
                       value={block.waktuSelesai}
                       onChange={(t) => updateBlock(block.id, "waktuSelesai", t)}
+                      placement={index >= blocks.length - 2 && blocks.length > 3 ? "top" : "bottom"}
                     />
                   </div>
 

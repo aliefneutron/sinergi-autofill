@@ -7,6 +7,7 @@ interface TimePickerProps {
   label?: string;
   minTime?: string;
   maxTime?: string;
+  placement?: "top" | "bottom";
 }
 
 const PRESETS = [
@@ -18,7 +19,7 @@ const PRESETS = [
 const HOURS = ["07", "08", "09", "10", "11", "12", "13", "14", "15", "16"];
 const MINUTES = ["00", "15", "30", "45"];
 
-export default function TimePicker({ value, onChange, label, minTime, maxTime }: TimePickerProps) {
+export default function TimePicker({ value, onChange, label, minTime, maxTime, placement = "bottom" }: TimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -116,7 +117,9 @@ export default function TimePicker({ value, onChange, label, minTime, maxTime }:
       )}
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 z-50 w-72 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200/50 p-4 transition-all animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className={`absolute right-0 z-50 w-72 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200/50 p-4 transition-all animate-in fade-in duration-200 ${
+          placement === "top" ? "bottom-full mb-2 slide-in-from-bottom-2" : "top-full mt-2 slide-in-from-top-2"
+        }`}>
           <div className="grid grid-cols-2 gap-4">
             {/* Left: Hour & Minute Selector Grid */}
             <div className="space-y-3 pr-2 border-r border-slate-100">
