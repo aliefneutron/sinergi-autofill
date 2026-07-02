@@ -38,17 +38,13 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   const [totalTasks, setTotalTasks] = useState(0);
 
   // New Modes
-  const [mode, setMode] = useState<"MULTI_DAY" | "ONE_DAY_SURAT" | "INSTANT_INTERVAL">("MULTI_DAY");
+  const [mode, setMode] = useState<"MULTI_DAY" | "INSTANT_INTERVAL">("MULTI_DAY");
   const [instantGlobalStart, setInstantGlobalStart] = useState("07.30");
   const [instantGlobalEnd, setInstantGlobalEnd] = useState("15.30");
   const [instantDuration, setInstantDuration] = useState(60);
   const [instantUraianTugas, setInstantUraianTugas] = useState(DEFAULT_URAIAN_TUGAS[1]);
   const [instantDeskripsi, setInstantDeskripsi] = useState("Melaksanakan perjalanan dinas daerah");
   const [instantHasil, setInstantHasil] = useState("Laporan hasil perjalanan dinas");
-  const [suratTugasName, setSuratTugasName] = useState<string | undefined>(undefined);
-  const [suratTugasBase64, setSuratTugasBase64] = useState<string | undefined>(undefined);
-  const [isExtracting, setIsExtracting] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
 
   // Daily block schedules
   const [blocks, setBlocks] = useState<Block[]>([
@@ -170,94 +166,6 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       }
       return b;
     }));
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      processFile(files[0]);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      processFile(files[0]);
-    }
-  };
-
-  const processFile = (file: File) => {
-    setSuratTugasName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSuratTugasBase64(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleExtractSuratTugas = async () => {
-    if (!suratTugasBase64 || !startDate) {
-      alert("Harap pilih tanggal dan unggah gambar Surat Tugas.");
-      return;
-    }
-
-    setIsExtracting(true);
-    try {
-      const response = await fetch("/api/gemini/extract-surat-tugas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: suratTugasBase64, date: startDate }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || "Gagal mengekstrak Surat Tugas");
-      }
-
-      const data = await response.json();
-      const extractedContext = data.context || "Mengikuti kegiatan sesuai surat tugas";
-
-      // Create 8 blocks 07:30 to 15:30 (1 hour each)
-      const newBlocks: Block[] = [];
-      let currentHour = 7;
-      let currentMinute = 30;
-
-      for (let i = 0; i < 8; i++) {
-        const startStr = `${currentHour.toString().padStart(2, "0")}.${currentMinute.toString().padStart(2, "0")}`;
-        
-        // Add 60 minutes
-        currentHour += 1;
-        const endStr = `${currentHour.toString().padStart(2, "0")}.${currentMinute.toString().padStart(2, "0")}`;
-        
-        newBlocks.push({
-          id: `b${Date.now()}-${i}`,
-          waktuMulai: startStr,
-          waktuSelesai: endStr,
-          uraianTugas: "Melaksanakan tugas lain",
-          detailItemPekerjaan: getDefaultDetailItem("Melaksanakan tugas lain"),
-          context: extractedContext
-        });
-      }
-
-      setBlocks(newBlocks);
-      alert("Berhasil mengekstrak Surat Tugas dan membagi jadwal menjadi blok 60 menit secara otomatis!");
-    } catch (error) {
-      console.error(error);
-      alert(`Terjadi kesalahan: ${error instanceof Error ? error.message : "Pastikan format file valid (Gambar/PDF)."}`);
-    } finally {
-      setIsExtracting(false);
-    }
   };
 
   const handleInstantGenerate = () => {
@@ -506,16 +414,6 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             </button>
             <button
               type="button"
-              onClick={() => setMode("ONE_DAY_SURAT")}
-              className={`px-4 py-2 whitespace-nowrap rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                mode === "ONE_DAY_SURAT" ? "bg-white text-indigo-700 shadow" : "text-white hover:bg-white/10"
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              Mode Surat Tugas (1 Hari)
-            </button>
-            <button
-              type="button"
               onClick={() => setMode("INSTANT_INTERVAL")}
               className={`px-4 py-2 whitespace-nowrap rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
                 mode === "INSTANT_INTERVAL" ? "bg-white text-indigo-700 shadow" : "text-white hover:bg-white/10"
@@ -527,114 +425,38 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
           </div>
 
           {/* Config Date Range */}
-          {mode === "MULTI_DAY" || mode === "INSTANT_INTERVAL" ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <CalendarPicker
-                  label="Tanggal Mulai"
-                  value={startDate}
-                  onChange={(d) => {
-                    setStartDate(d);
-                    if (new Date(endDate) < new Date(d)) {
-                      setEndDate(d);
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <CalendarPicker
-                  label="Tanggal Selesai"
-                  value={endDate}
-                  onChange={setEndDate}
-                />
-              </div>
-              <div className="flex items-center pt-5">
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-white font-bold">
-                  <input
-                    type="checkbox"
-                    checked={excludeWeekends}
-                    onChange={(e) => setExcludeWeekends(e.target.checked)}
-                    className="w-4 h-4 accent-indigo-600 rounded border-white/30 bg-white/20 cursor-pointer"
-                  />
-                  Lompati Hari Sabtu & Minggu
-                </label>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <CalendarPicker
+                label="Tanggal Mulai"
+                value={startDate}
+                onChange={(d) => {
+                  setStartDate(d);
+                  if (new Date(endDate) < new Date(d)) {
+                    setEndDate(d);
+                  }
+                }}
+              />
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <CalendarPicker
-                  label="Tanggal Surat Tugas"
-                  value={startDate}
-                  onChange={(d) => {
-                    setStartDate(d);
-                    setEndDate(d); // Sync endDate with startDate for single day mode
-                  }}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-white uppercase tracking-wider block mb-1.5">
-                  Upload Gambar Surat Tugas (PDF/JPG/PNG)
-                </label>
-                <div
-                  className={`w-full relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${
-                    isDragging
-                      ? "border-yellow-400 bg-yellow-400/10 scale-[1.02]"
-                      : "border-white/30 hover:border-white/50 bg-white/5 hover:bg-white/10"
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  <input
-                    type="file"
-                    accept="image/*,application/pdf"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={handleFileChange}
-                  />
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    {suratTugasBase64 ? (
-                      <>
-                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-300">
-                          <CheckCircle2 className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-white">{suratTugasName}</p>
-                          <p className="text-[10px] text-green-300 mt-0.5">File berhasil dimuat</p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70">
-                          <Upload className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-white">Klik / Tarik File Surat Tugas</p>
-                          <p className="text-[10px] text-white/60 mt-0.5">Mendukung gambar & dokumen</p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-                
-                {suratTugasBase64 && (
-                  <button
-                    type="button"
-                    disabled={isExtracting}
-                    onClick={handleExtractSuratTugas}
-                    className="mt-3 w-full px-4 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-yellow-950 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50"
-                  >
-                    {isExtracting ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-4 h-4" />
-                    )}
-                    {isExtracting ? "Sedang Mengekstrak..." : "Ekstrak & Buat Jadwal Otomatis"}
-                  </button>
-                )}
-              </div>
+            <div>
+              <CalendarPicker
+                label="Tanggal Selesai"
+                value={endDate}
+                onChange={setEndDate}
+              />
             </div>
-          )}
+            <div className="flex items-center pt-5">
+              <label className="flex items-center gap-2.5 cursor-pointer text-xs text-white font-bold">
+                <input
+                  type="checkbox"
+                  checked={excludeWeekends}
+                  onChange={(e) => setExcludeWeekends(e.target.checked)}
+                  className="w-4 h-4 accent-indigo-600 rounded border-white/30 bg-white/20 cursor-pointer"
+                />
+                Lompati Hari Sabtu & Minggu
+              </label>
+            </div>
+          </div>
 
           {/* Blocks Configuration */}
           {mode !== "INSTANT_INTERVAL" ? (
