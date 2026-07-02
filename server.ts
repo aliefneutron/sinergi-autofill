@@ -97,12 +97,12 @@ const URAIAN_TEMPLATES: Record<string, { desc: string; output: string }[]> = {
   ],
   "Melaksanakan perjalanan dinas": [
     {
-      desc: "Melaksanakan perjalanan dinas luar daerah ke Kantor Regional II BKN Surabaya dalam rangka koordinasi penyelesaian permasalahan penetapan NIP PPPK formasi tahun sebelumnya.",
-      output: "Laporan hasil perjalanan dinas koordinasi penetapan NIP PPPK dan surat perintah tugas (SPT) tercap."
+      desc: "Melaksanakan perjalanan dinas luar daerah ke instansi terkait dalam rangka koordinasi penyelesaian permasalahan kepegawaian.",
+      output: "Laporan hasil perjalanan dinas koordinasi kepegawaian dan surat perintah tugas yang telah ditandatangani."
     },
     {
-      desc: "Melakukan perjalanan dinas dalam daerah ke beberapa unit kerja kecamatan di Sumenep untuk sosialisasi pengisian aplikasi e-Kinerja Sinergi V2.",
-      output: "Laporan kegiatan sosialisasi e-Kinerja dan daftar hadir peserta sosialisasi."
+      desc: "Melakukan perjalanan dinas dalam daerah ke beberapa unit kerja kecamatan/puskesmas di lingkungan Pemkab Sumenep untuk sosialisasi atau inspeksi kerja.",
+      output: "Laporan kegiatan perjalanan dinas dalam daerah dan daftar hadir kunjungan kerja."
     }
   ],
   "Melaksanakan tugas lain": [
@@ -195,7 +195,7 @@ Format output HANYA berupa JSON persis seperti skema berikut, tanpa tambahan mar
 
 // API Route for generating reports using Gemini with custom variations
 app.post("/api/gemini/generate", async (req, res) => {
-  const { uraianTugas, context, count = 3 } = req.body;
+  const { uraianTugas, subTugas, context, count = 3 } = req.body;
 
   if (!uraianTugas) {
     return res.status(400).json({ error: "uraianTugas is required" });
@@ -207,9 +207,14 @@ app.post("/api/gemini/generate", async (req, res) => {
   if (!ai) {
     console.warn("Gemini client is not initialized, using template fallbacks.");
     const templates = URAIAN_TEMPLATES[uraianTugas] || URAIAN_TEMPLATES["Melaksanakan tugas lain"];
+    let selectedTemplates = templates;
+    if (subTugas && uraianTugas === "Melaksanakan perjalanan dinas") {
+      selectedTemplates = templates.filter(t => t.desc.toLowerCase().includes(subTugas.toLowerCase().replace("perjalanan dinas ", "")));
+      if (selectedTemplates.length === 0) selectedTemplates = templates;
+    }
     const results = [];
     for (let i = 0; i < count; i++) {
-      const template = templates[i % templates.length];
+      const template = selectedTemplates[i % selectedTemplates.length];
       const detailMod = context ? ` (${context})` : "";
       results.push({
         deskripsi: `${template.desc}${detailMod}`,
@@ -225,6 +230,7 @@ Anda adalah asisten khusus ASN Pemerintah Kabupaten Sumenep, Madura, Jawa Timur.
 Tugas Anda adalah membuat variasi "Deskripsi Pekerjaan" (Job Description) dan "Hasil Pekerjaan" (Work Output) untuk pengisian laporan kinerja harian pada aplikasi SINERGI V2 BKPSDM Kabupaten Sumenep.
 
 Uraian Tugas Pokok: "${uraianTugas}"
+Sub Tugas / Detail Pekerjaan: "${subTugas || 'Sesuai Tupoksi'}"
 Konteks / Detail Spesifik Tambahan (jika ada): "${context || 'Tidak ada konteks khusus, buatlah yang umum dan realistis sesuai tupoksi umum BKPSDM/staf pemda'}"
 
 Hasilkan ${count} variasi alternatif yang berbeda, terdengar profesional, formal, dan realistis untuk ASN Kabupaten Sumenep.
@@ -240,7 +246,7 @@ Format output harus berupa JSON Array dengan objek yang memiliki kunci "deskrips
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-1.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -271,9 +277,14 @@ Format output harus berupa JSON Array dengan objek yang memiliki kunci "deskrips
     console.error("Gemini Generation Error:", error);
     // On error, fallback gracefully
     const templates = URAIAN_TEMPLATES[uraianTugas] || URAIAN_TEMPLATES["Melaksanakan tugas lain"];
+    let selectedTemplates = templates;
+    if (subTugas && uraianTugas === "Melaksanakan perjalanan dinas") {
+      selectedTemplates = templates.filter(t => t.desc.toLowerCase().includes(subTugas.toLowerCase().replace("perjalanan dinas ", "")));
+      if (selectedTemplates.length === 0) selectedTemplates = templates;
+    }
     const results = [];
     for (let i = 0; i < count; i++) {
-      const template = templates[i % templates.length];
+      const template = selectedTemplates[i % selectedTemplates.length];
       const detailMod = context ? ` (${context})` : "";
       results.push({
         deskripsi: `${template.desc}${detailMod}`,

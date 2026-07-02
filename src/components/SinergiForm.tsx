@@ -70,6 +70,7 @@ export default function SinergiForm({ onSave, onClose, initialData }: SinergiFor
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           uraianTugas,
+          subTugas: detailItemPekerjaan,
           context: context || detailItemPekerjaan,
           count: 3
         }),

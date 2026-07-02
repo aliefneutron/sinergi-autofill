@@ -266,6 +266,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               uraianTugas: block.uraianTugas,
+              subTugas: block.detailItemPekerjaan,
               context: combinedContext,
               count: 1 // We only need 1 per day block
             })
