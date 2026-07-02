@@ -497,8 +497,9 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         }, 400); // Wait 400ms for popup to fully render/animate
       }
 
-      fillSinergiTimePicker('wkt1', report.waktuMulai);
-      setTimeout(() => fillSinergiTimePicker('wkt2', report.waktuSelesai), 900);
+        // Add delay before opening time pickers to prevent text-input re-renders from destroying the popup
+        setTimeout(() => fillSinergiTimePicker('wkt1', report.waktuMulai), 1000);
+        setTimeout(() => fillSinergiTimePicker('wkt2', report.waktuSelesai), 2500);
 
       // Generic fallback for other sites
       const startInput = findFormInputElement(['mulai', 'start', 'jam_mulai', 'waktu_mulai'], 'input');
