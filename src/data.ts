@@ -51,9 +51,14 @@ export const DETAIL_ITEMS_MAP: Record<string, string[]> = {
     "Perjalanan dinas dalam daerah"
   ],
   "Melaksanakan tugas lain": [
-    "Penataan dokumen dan arsip fisik file kepegawaian",
-    "Penginputan database ke dalam aplikasi SIMPEG",
-    "Mengikuti seminar bimbingan teknis e-Kinerja secara online"
+    "NORMA: 5 MENIT",
+    "NORMA: 10 MENIT",
+    "NORMA: 15 MENIT",
+    "NORMA: 20 MENIT",
+    "NORMA: 25 MENIT",
+    "NORMA: 30 MENIT",
+    "NORMA: 45 MENIT",
+    "NORMA: 60 MENIT"
   ]
 };
 
