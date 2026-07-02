@@ -1065,23 +1065,35 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
           if (statusBanner) {
             statusBanner.innerHTML = '🤖 <strong>Otomatisasi Batch:</strong> Menginput laporan ke-' + (currentIndex + 1) + ' dari ' + reports.length + '... Mohon tunggu.';
           }
-          console.log('🤖 Otomatisasi Batch: Mengisi form ke-' + (currentIndex + 1) + ' dari ' + reports.length);
           
-          fillForm(reports[currentIndex]);
-
+          // Beri jeda 1.5 detik ekstra agar React selesai memasang event listener (hydration)
           setTimeout(function() {
             if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
             
-            console.log('🤖 Otomatisasi Batch: Menyimpan data...');
-            localStorage.setItem('sinergi_auto_index', (currentIndex + 1).toString());
+            console.log('🤖 Otomatisasi Batch: Mensimulasikan klik pada daftar laporan ke-' + (currentIndex + 1) + ' dari ' + reports.length);
             
-            const submitted = clickSubmitButton();
-            if (!submitted) {
-              console.error('🤖 Gagal mensubmit secara otomatis. Mencoba submit form fallback...');
-              const form = document.querySelector('form');
-              if (form) form.submit();
+            // Seperti saran user, kita trigger klik langsung pada elemen daftar di asisten
+            const listItems = document.getElementById('sinergi-report-items');
+            if (listItems && listItems.children[currentIndex]) {
+              (listItems.children[currentIndex] as HTMLElement).click();
+            } else {
+              fillForm(reports[currentIndex]);
             }
-          }, 6500);
+
+            setTimeout(function() {
+              if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
+              
+              console.log('🤖 Otomatisasi Batch: Menyimpan data...');
+              localStorage.setItem('sinergi_auto_index', (currentIndex + 1).toString());
+              
+              const submitted = clickSubmitButton();
+              if (!submitted) {
+                console.error('🤖 Gagal mensubmit secara otomatis. Mencoba submit form fallback...');
+                const form = document.querySelector('form');
+                if (form) form.submit();
+              }
+            }, 6500);
+          }, 1500);
         }
       }, 500);
     } else {
