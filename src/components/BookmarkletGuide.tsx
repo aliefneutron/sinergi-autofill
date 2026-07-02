@@ -116,6 +116,7 @@ export default function BookmarkletGuide() {
     let initialY = 0;
     let xOffset = 0;
     let yOffset = 0;
+    let lastLoadedPayload = '';
 
     header.addEventListener(\'mousedown\', function(e) {
       initialX = e.clientX - xOffset;
@@ -191,7 +192,7 @@ export default function BookmarkletGuide() {
 
     if (startAutoBtn && stopAutoBtn) {
       startAutoBtn.onclick = function() {
-        const rawVal = txtArea.value.trim();
+        const rawVal = lastLoadedPayload || txtArea.value.trim();
         if (!rawVal) {
           alert(\'Silakan unggah payload JSON terlebih dahulu!\');
           return;
@@ -237,9 +238,11 @@ export default function BookmarkletGuide() {
 
     function processPayload(rawVal) {
       rawVal = rawVal.trim();
+      lastLoadedPayload = rawVal;
       let reports = [];
       try {
         if (rawVal.startsWith(\'[\') || rawVal.startsWith(\'{\')) {
+
           const parsed = JSON.parse(rawVal);
           reports = Array.isArray(parsed) ? parsed : [parsed];
         } else {

@@ -127,6 +127,8 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
   const listContainer = document.getElementById('sinergi-report-list-container');
   const itemsContainer = document.getElementById('sinergi-report-items');
   const countBadge = document.getElementById('sinergi-count');
+  let lastLoadedPayload = '';
+
 
   if (uploadTrigger && fileInput) {
     uploadTrigger.onclick = function() {
@@ -168,7 +170,7 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
 
   if (startAutoBtn && stopAutoBtn) {
     startAutoBtn.onclick = function() {
-      const rawVal = txtArea.value.trim();
+      const rawVal = lastLoadedPayload || txtArea.value.trim();
       if (!rawVal) {
         alert('Silakan unggah payload JSON terlebih dahulu!');
         return;
@@ -214,9 +216,11 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
 
   function processPayload(rawVal) {
     rawVal = rawVal.trim();
+    lastLoadedPayload = rawVal;
     let reports = [];
     try {
       if (rawVal.startsWith('[') || rawVal.startsWith('{')) {
+
         const parsed = JSON.parse(rawVal);
         reports = Array.isArray(parsed) ? parsed : [parsed];
       } else {
