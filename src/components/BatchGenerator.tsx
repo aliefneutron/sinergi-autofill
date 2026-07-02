@@ -17,6 +17,8 @@ interface Block {
   uraianTugas: string;
   detailItemPekerjaan?: string;
   context: string;
+  buktiDukungName?: string;
+  buktiDukungBase64?: string;
 }
 
 export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorProps) {
@@ -168,6 +170,18 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       }
       return b;
     }));
+  };
+
+  const handleBlockFileChange = (blockId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        setBlocks(blocks.map(b => b.id === blockId ? { ...b, buktiDukungName: file.name, buktiDukungBase64: reader.result as string } : b));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Drag & Drop Upload Logic
@@ -356,8 +370,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             detailItemPekerjaan: block.detailItemPekerjaan || block.context || block.uraianTugas,
             deskripsiPekerjaan: variation.deskripsi,
             hasilPekerjaan: variation.hasil,
-            buktiDukungName: globalBuktiName,
-            buktiDukungBase64: globalBuktiBase64,
+            buktiDukungName: block.buktiDukungName || globalBuktiName,
+            buktiDukungBase64: block.buktiDukungBase64 || globalBuktiBase64,
             dokumenLainnya: "",
             status: StatusLaporan.BELUM_DIPERIKSA
           });
@@ -373,8 +387,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             detailItemPekerjaan: block.detailItemPekerjaan || block.context || block.uraianTugas,
             deskripsiPekerjaan: `Melaksanakan kegiatan harian untuk tupoksi ${block.uraianTugas} secara tertib dan disiplin.`,
             hasilPekerjaan: `Laporan kegiatan ${block.uraianTugas} terdokumentasi.`,
-            buktiDukungName: globalBuktiName,
-            buktiDukungBase64: globalBuktiBase64,
+            buktiDukungName: block.buktiDukungName || globalBuktiName,
+            buktiDukungBase64: block.buktiDukungBase64 || globalBuktiBase64,
             status: StatusLaporan.BELUM_DIPERIKSA
           });
         }
@@ -597,8 +611,23 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                       />
                     </div>
 
-                    {/* Delete action */}
-                    <div className="md:col-span-1 flex items-center justify-center pt-4 md:pt-0">
+                    {/* Delete & Upload action */}
+                    <div className="md:col-span-1 flex items-center justify-center pt-4 md:pt-0 gap-2">
+                      <div className="relative">
+                        <button
+                          type="button"
+                          className={`p-1.5 border text-white rounded-xl transition-colors cursor-pointer ${block.buktiDukungBase64 ? "bg-emerald-500/20 hover:bg-emerald-500/35 border-emerald-500/35" : "bg-indigo-500/20 hover:bg-indigo-500/35 border-indigo-500/35"}`}
+                          title="Upload bukti dukung untuk tugas ini"
+                        >
+                          <input
+                            type="file"
+                            accept="image/*,application/pdf"
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            onChange={(e) => handleBlockFileChange(block.id, e)}
+                          />
+                          {block.buktiDukungBase64 ? <CheckCircle2 className="w-4 h-4 text-emerald-300" /> : <Upload className="w-4 h-4" />}
+                        </button>
+                      </div>
                       <button
                         type="button"
                         onClick={() => removeBlock(block.id)}
