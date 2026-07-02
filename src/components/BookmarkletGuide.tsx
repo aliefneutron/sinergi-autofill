@@ -1090,7 +1090,7 @@ export default function BookmarkletGuide() {
             // Seperti saran user, kita trigger klik langsung pada elemen daftar di asisten
             const listItems = document.getElementById('sinergi-report-items');
             if (listItems && listItems.children[currentIndex]) {
-              (listItems.children[currentIndex] as HTMLElement).click();
+              listItems.children[currentIndex].click();
             } else {
               fillForm(reports[currentIndex]);
             }
