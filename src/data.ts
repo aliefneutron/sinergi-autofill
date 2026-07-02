@@ -17,15 +17,21 @@ export const DETAIL_ITEMS_MAP: Record<string, string[]> = {
     "Mengikuti Apel Sore sebelum pulang kerja"
   ],
   "Melaksanakan tugas lain sesuai perintah atasan": [
-    "Verifikasi dokumen usulan kenaikan pangkat PNS",
-    "Penyusunan rekapitulasi data absensi bulanan ASN",
-    "Pengecekan berkas administrasi seleksi seleksi PPPK",
-    "Penyusunan bahan tayang presentasi rapat koordinasi kepegawaian"
+    "NORMA: 5 MENIT",
+    "NORMA: 10 MENIT",
+    "NORMA: 15 MENIT",
+    "NORMA: 20 MENIT",
+    "NORMA: 30 MENIT",
+    "NORMA: 40 MENIT",
+    "NORMA: 50 MENIT",
+    "NORMA: 60 MENIT"
   ],
   "Mendisposisi surat masuk": [
-    "Disposisi surat masuk dari BKN Regional II",
-    "Disposisi surat undangan rapat teknis kedinasan",
-    "Pencatatan dan klasifikasi surat masuk BKPSDM"
+    "Membaca/mempelajari isi surat masuk",
+    "Mendisposisi surat",
+    "Membaca/mempelajari isi surat masuk dan mendisposisi surat (perhari eselon II)",
+    "Membaca/mempelajari isi surat masuk dan mendisposisi surat (perhari eselon III)",
+    "Membaca/mempelajari isi surat masuk dan mendisposisi surat (perhari eselon IV)"
   ],
   "Menandatangani naskah dinas": [
     "Penandatanganan berkas usulan cuti tahunan pegawai",

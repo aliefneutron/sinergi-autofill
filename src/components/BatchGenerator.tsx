@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LaporanKinerja, StatusLaporan } from "../types";
-import { DEFAULT_URAIAN_TUGAS } from "../data";
+import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP } from "../data";
 import { Sparkles, Play, Calendar, Clock, Plus, Trash2, CheckCircle2, ChevronRight, RefreshCw, AlertCircle, Info } from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
 import TimePicker from "./TimePicker";
@@ -15,6 +15,7 @@ interface Block {
   waktuMulai: string;
   waktuSelesai: string;
   uraianTugas: string;
+  detailItemPekerjaan?: string;
   context: string;
 }
 
@@ -43,6 +44,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       waktuMulai: "07.30",
       waktuSelesai: "09.00",
       uraianTugas: "Upacara / Apel",
+      detailItemPekerjaan: "Mengikuti Apel Pagi rutin setiap Senin pagi",
       context: "Mengikuti Apel Pagi kedisiplinan rutin serta mendengarkan arahan pimpinan"
     },
     {
@@ -50,6 +52,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       waktuMulai: "09.30",
       waktuSelesai: "11.30",
       uraianTugas: "Melaksanakan tugas lain sesuai perintah atasan",
+      detailItemPekerjaan: "NORMA: 20 MENIT",
       context: "Verifikasi berkas persyaratan kenaikan pangkat PNS"
     },
     {
@@ -57,6 +60,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       waktuMulai: "13.00",
       waktuSelesai: "15.30",
       uraianTugas: "Melaksanakan tugas lain",
+      detailItemPekerjaan: "Penataan dokumen dan arsip fisik file kepegawaian",
       context: "Merapikan arsip fisik kepegawaian ASN purna tugas"
     }
   ]);
@@ -88,6 +92,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
         waktuMulai: nextStart,
         waktuSelesai: nextEnd,
         uraianTugas: DEFAULT_URAIAN_TUGAS[1],
+        detailItemPekerjaan: DETAIL_ITEMS_MAP[DEFAULT_URAIAN_TUGAS[1]]?.[0] || "",
         context: ""
       }
     ]);
@@ -102,9 +107,17 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   };
 
   const updateBlock = (id: string, key: keyof Block, value: string) => {
-    setBlocks(
-      blocks.map((b) => (b.id === id ? { ...b, [key]: value } : b))
-    );
+    setBlocks(blocks.map((b) => {
+      if (b.id === id) {
+        const updated = { ...b, [key]: value };
+        // If uraianTugas changes, update detailItemPekerjaan to its default first item
+        if (key === "uraianTugas") {
+          updated.detailItemPekerjaan = DETAIL_ITEMS_MAP[value]?.[0] || "";
+        }
+        return updated;
+      }
+      return b;
+    }));
   };
 
   // Run Batch AI generation
@@ -173,7 +186,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             waktuMulai: block.waktuMulai,
             waktuSelesai: block.waktuSelesai,
             uraianTugas: block.uraianTugas,
-            detailItemPekerjaan: block.context || block.uraianTugas,
+            detailItemPekerjaan: block.detailItemPekerjaan || block.context || block.uraianTugas,
             deskripsiPekerjaan: variation.deskripsi,
             hasilPekerjaan: variation.hasil,
             status: StatusLaporan.BELUM_DIPERIKSA
@@ -187,7 +200,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             waktuMulai: block.waktuMulai,
             waktuSelesai: block.waktuSelesai,
             uraianTugas: block.uraianTugas,
-            detailItemPekerjaan: block.context || block.uraianTugas,
+            detailItemPekerjaan: block.detailItemPekerjaan || block.context || block.uraianTugas,
             deskripsiPekerjaan: `Melaksanakan kegiatan harian untuk tupoksi ${block.uraianTugas} secara tertib dan disiplin.`,
             hasilPekerjaan: `Laporan kegiatan ${block.uraianTugas} terdokumentasi.`,
             status: StatusLaporan.BELUM_DIPERIKSA
@@ -338,11 +351,11 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
 
                   {/* Uraian Tugas */}
                   <div className="md:col-span-3 space-y-1">
-                    <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas</span>
+                    <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas & Sub</span>
                     <select
                       value={block.uraianTugas}
                       onChange={(e) => updateBlock(block.id, "uraianTugas", e.target.value)}
-                      className="w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-medium cursor-pointer"
+                      className="w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none rounded-t-xl p-2 text-xs font-medium cursor-pointer"
                     >
                       {DEFAULT_URAIAN_TUGAS.map((item) => (
                         <option key={item} value={item} className="bg-slate-800 text-white font-sans text-xs">
@@ -350,6 +363,19 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                         </option>
                       ))}
                     </select>
+                    {DETAIL_ITEMS_MAP[block.uraianTugas] && DETAIL_ITEMS_MAP[block.uraianTugas].length > 0 && (
+                      <select
+                        value={block.detailItemPekerjaan || ""}
+                        onChange={(e) => updateBlock(block.id, "detailItemPekerjaan", e.target.value)}
+                        className="w-full bg-white/30 text-slate-900 border-x border-b border-white/35 focus:border-white/50 focus:outline-none rounded-b-xl p-2 text-xs font-medium cursor-pointer"
+                      >
+                        {DETAIL_ITEMS_MAP[block.uraianTugas].map((opt) => (
+                          <option key={opt} value={opt} className="bg-slate-800 text-white font-sans text-xs">
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   {/* Context / Keywords */}
