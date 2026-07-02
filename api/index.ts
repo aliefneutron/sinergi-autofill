@@ -8,6 +8,10 @@ dotenv.config();
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 
+app.get("/api/ping", (req, res) => {
+  res.json({ status: "ok", message: "API is running on Vercel!" });
+});
+
 const PORT = process.env.PORT || 3000;
 
 // Lazy initialization of Gemini Client to prevent crash on startup if API key is missing/placeholder
@@ -188,7 +192,7 @@ Format output HANYA berupa JSON persis seperti skema berikut, tanpa tambahan mar
 
   } catch (error: any) {
     console.error("Gemini Extraction Error:", error);
-    return res.status(500).json({ error: "Gagal mengekstrak data dari gambar" });
+    return res.status(500).json({ error: `Gagal mengekstrak data dari gambar: ${error.message || JSON.stringify(error)}` });
   }
 });
 
