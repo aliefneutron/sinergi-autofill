@@ -21,15 +21,11 @@ interface Block {
 
 export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorProps) {
   const [startDate, setStartDate] = useState(() => {
-    const today = new Date();
-    today.setDate(today.getDate() - today.getDay() + 1); // Set to this week's Monday
-    return today.toISOString().split("T")[0];
+    return new Date().toISOString().split("T")[0];
   });
 
   const [endDate, setEndDate] = useState(() => {
-    const today = new Date();
-    today.setDate(today.getDate() - today.getDay() + 5); // Set to this week's Friday
-    return today.toISOString().split("T")[0];
+    return new Date().toISOString().split("T")[0];
   });
 
   const [excludeWeekends, setExcludeWeekends] = useState(true);
