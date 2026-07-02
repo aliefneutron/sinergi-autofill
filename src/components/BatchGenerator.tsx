@@ -113,6 +113,25 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     setBlocks(blocks.filter((b) => b.id !== id));
   };
 
+  const addMinutesToTimeStr = (timeStr: string, addMins: number): string => {
+    const separator = timeStr.includes(':') ? ':' : '.';
+    const parts = timeStr.split(separator);
+    if (parts.length !== 2) return timeStr;
+    
+    let hours = parseInt(parts[0], 10);
+    let mins = parseInt(parts[1], 10);
+    if (isNaN(hours) || isNaN(mins)) return timeStr;
+
+    mins += addMins;
+    hours += Math.floor(mins / 60);
+    mins = mins % 60;
+    hours = hours % 24;
+
+    const hStr = hours.toString().padStart(2, '0');
+    const mStr = mins.toString().padStart(2, '0');
+    return `${hStr}${separator}${mStr}`;
+  };
+
   const updateBlock = (id: string, key: keyof Block, value: string) => {
     setBlocks(blocks.map((b) => {
       if (b.id === id) {
@@ -120,6 +139,10 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
         // If uraianTugas changes, update detailItemPekerjaan to its default
         if (key === "uraianTugas") {
           updated.detailItemPekerjaan = getDefaultDetailItem(value);
+        }
+        // Auto-adjust waktuSelesai if waktuMulai changes
+        if (key === "waktuMulai") {
+          updated.waktuSelesai = addMinutesToTimeStr(value, 60);
         }
         return updated;
       }

@@ -59,6 +59,25 @@ export default function SinergiForm({ onSave, onClose, initialData }: SinergiFor
   }, [uraianTugas, initialData]);
 
   // Handle AI generation
+  const addMinutesToTimeStr = (timeStr: string, addMins: number): string => {
+    const separator = timeStr.includes(':') ? ':' : '.';
+    const parts = timeStr.split(separator);
+    if (parts.length !== 2) return timeStr;
+    
+    let hours = parseInt(parts[0], 10);
+    let mins = parseInt(parts[1], 10);
+    if (isNaN(hours) || isNaN(mins)) return timeStr;
+
+    mins += addMins;
+    hours += Math.floor(mins / 60);
+    mins = mins % 60;
+    hours = hours % 24;
+
+    const hStr = hours.toString().padStart(2, '0');
+    const mStr = mins.toString().padStart(2, '0');
+    return `${hStr}${separator}${mStr}`;
+  };
+
   const handleAiGenerate = async () => {
     setIsGenerating(true);
     setAiError(null);
@@ -190,7 +209,10 @@ export default function SinergiForm({ onSave, onClose, initialData }: SinergiFor
             <TimePicker
               label="Jam Mulai *"
               value={waktuMulai}
-              onChange={(time) => setWaktuMulai(time)}
+              onChange={(time) => {
+                setWaktuMulai(time);
+                setWaktuSelesai(addMinutesToTimeStr(time, 60));
+              }}
               minTime="07.30"
             />
           </div>
