@@ -150,9 +150,9 @@ Format output HANYA berupa JSON persis seperti skema berikut, tanpa tambahan mar
 }
 `;
 
-    const matches = imageBase64.match(/^data:(image\/[a-zA-Z0-9]+);base64,(.+)$/);
+    const matches = imageBase64.match(/^data:(image\/[a-zA-Z0-9\-]+|application\/pdf);base64,(.+)$/);
     if (!matches || matches.length !== 3) {
-      return res.status(400).json({ error: "Format gambar tidak valid" });
+      return res.status(400).json({ error: "Format file tidak valid. Harus gambar atau PDF." });
     }
     const mimeType = matches[1];
     const data = matches[2];
