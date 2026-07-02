@@ -158,7 +158,7 @@ Format output HANYA berupa JSON persis seperti skema berikut, tanpa tambahan mar
     const data = matches[2];
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash-latest",
       contents: [
         prompt,
         {
@@ -246,7 +246,7 @@ Format output harus berupa JSON Array dengan objek yang memiliki kunci "deskrips
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
