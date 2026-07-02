@@ -38,7 +38,13 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   const [totalTasks, setTotalTasks] = useState(0);
 
   // New Modes
-  const [mode, setMode] = useState<"MULTI_DAY" | "ONE_DAY_SURAT">("MULTI_DAY");
+  const [mode, setMode] = useState<"MULTI_DAY" | "ONE_DAY_SURAT" | "INSTANT_INTERVAL">("MULTI_DAY");
+  const [instantGlobalStart, setInstantGlobalStart] = useState("07.30");
+  const [instantGlobalEnd, setInstantGlobalEnd] = useState("15.30");
+  const [instantDuration, setInstantDuration] = useState(60);
+  const [instantUraianTugas, setInstantUraianTugas] = useState(DEFAULT_URAIAN_TUGAS[1]);
+  const [instantDeskripsi, setInstantDeskripsi] = useState("Melaksanakan perjalanan dinas daerah");
+  const [instantHasil, setInstantHasil] = useState("Laporan hasil perjalanan dinas");
   const [suratTugasName, setSuratTugasName] = useState<string | undefined>(undefined);
   const [suratTugasBase64, setSuratTugasBase64] = useState<string | undefined>(undefined);
   const [isExtracting, setIsExtracting] = useState(false);
@@ -254,6 +260,81 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     }
   };
 
+  const handleInstantGenerate = () => {
+    if (!startDate || !endDate) {
+      alert("Harap tentukan tanggal mulai dan tanggal selesai!");
+      return;
+    }
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (end < start) {
+      alert("Tanggal selesai tidak boleh mendahului tanggal mulai!");
+      return;
+    }
+
+    const dates: string[] = [];
+    const curr = new Date(start);
+    while (curr <= end) {
+      const dayOfWeek = curr.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      if (!excludeWeekends || !isWeekend) {
+        dates.push(curr.toISOString().split("T")[0]);
+      }
+      curr.setDate(curr.getDate() + 1);
+    }
+    if (dates.length === 0) {
+      alert("Tidak ada hari kerja yang valid di rentang tanggal yang dipilih!");
+      return;
+    }
+
+    const intervals: {start: string, end: string}[] = [];
+    const [startH, startM] = instantGlobalStart.split(/[.:]/).map(Number);
+    const [endH, endM] = instantGlobalEnd.split(/[.:]/).map(Number);
+    
+    let currentTotalMinutes = startH * 60 + (startM || 0);
+    const endTotalMinutes = endH * 60 + (endM || 0);
+    
+    while (currentTotalMinutes < endTotalMinutes) {
+      const sh = Math.floor(currentTotalMinutes / 60);
+      const sm = currentTotalMinutes % 60;
+      
+      const nextTotalMinutes = currentTotalMinutes + instantDuration;
+      const eh = Math.floor(nextTotalMinutes / 60);
+      const em = nextTotalMinutes % 60;
+      
+      intervals.push({
+        start: `${String(sh).padStart(2, '0')}.${String(sm).padStart(2, '0')}`,
+        end: `${String(eh).padStart(2, '0')}.${String(em).padStart(2, '0')}`
+      });
+      
+      currentTotalMinutes = nextTotalMinutes;
+    }
+    
+    if (intervals.length === 0) {
+      alert("Rentang waktu tidak valid atau durasi terlalu besar!");
+      return;
+    }
+
+    const newReports: LaporanKinerja[] = [];
+    for (const date of dates) {
+      for (const interval of intervals) {
+        newReports.push({
+          id: `r-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          tanggal: date,
+          waktuMulai: interval.start,
+          waktuSelesai: interval.end,
+          uraianTugas: instantUraianTugas,
+          deskripsiPekerjaan: instantDeskripsi,
+          hasilPekerjaan: instantHasil,
+          dokumenLainnya: "",
+          tautan: ""
+        });
+      }
+    }
+    
+    onSaveBatch(newReports);
+  };
+
   // Run Batch AI generation
   const handleBatchGenerate = async () => {
     if (!startDate || !endDate) {
@@ -413,11 +494,11 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
           </div>
 
           {/* Mode Selector */}
-          <div className="flex bg-white/10 p-1 rounded-xl w-fit mb-4">
+          <div className="flex bg-white/10 p-1 rounded-xl w-fit mb-4 overflow-x-auto">
             <button
               type="button"
               onClick={() => setMode("MULTI_DAY")}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-4 py-2 whitespace-nowrap rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 mode === "MULTI_DAY" ? "bg-white text-indigo-700 shadow" : "text-white hover:bg-white/10"
               }`}
             >
@@ -426,17 +507,27 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             <button
               type="button"
               onClick={() => setMode("ONE_DAY_SURAT")}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
+              className={`px-4 py-2 whitespace-nowrap rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
                 mode === "ONE_DAY_SURAT" ? "bg-white text-indigo-700 shadow" : "text-white hover:bg-white/10"
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
               Mode Surat Tugas (1 Hari)
             </button>
+            <button
+              type="button"
+              onClick={() => setMode("INSTANT_INTERVAL")}
+              className={`px-4 py-2 whitespace-nowrap rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                mode === "INSTANT_INTERVAL" ? "bg-white text-indigo-700 shadow" : "text-white hover:bg-white/10"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Mode Instan (Tanpa AI)
+            </button>
           </div>
 
           {/* Config Date Range */}
-          {mode === "MULTI_DAY" ? (
+          {mode === "MULTI_DAY" || mode === "INSTANT_INTERVAL" ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <CalendarPicker
@@ -545,110 +636,162 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             </div>
           )}
 
-          {/* Pattern blocks creator */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Rancangan Blok Jadwal Harian Anda (Sequential)
-              </h3>
-              <button
-                type="button"
-                onClick={addBlock}
-                className="px-3 py-1.5 bg-white text-indigo-700 hover:bg-white/95 text-xs font-bold rounded-xl flex items-center gap-1 transition-transform cursor-pointer shadow-md"
-              >
-                <Plus className="w-3.5 h-3.5 text-indigo-750" /> Tambah Blok Waktu
-              </button>
-            </div>
-
+          {/* Blocks Configuration */}
+          {mode !== "INSTANT_INTERVAL" ? (
             <div className="space-y-3">
-              {blocks.map((block, index) => (
-                <div
-                  key={block.id}
-                  className="bg-white/15 border border-white/20 rounded-2xl p-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-center shadow-md text-white"
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                  Rancangan Blok Jadwal Harian Anda (Sequential)
+                </h3>
+                <button
+                  type="button"
+                  onClick={addBlock}
+                  className="px-3 py-1.5 bg-white text-indigo-700 hover:bg-white/95 text-xs font-bold rounded-xl flex items-center gap-1 transition-transform cursor-pointer shadow-md"
                 >
-                  {/* Number Badge */}
-                  <div className="md:col-span-1 flex items-center justify-center">
-                    <span className="w-6 h-6 rounded-full bg-white/25 border border-white/30 font-mono text-xs font-black text-white flex items-center justify-center">
-                      {index + 1}
-                    </span>
-                  </div>
+                  <Plus className="w-3.5 h-3.5 text-indigo-750" /> Tambah Blok Waktu
+                </button>
+              </div>
 
-                  {/* Start time */}
-                  <div className="md:col-span-2">
-                    <TimePicker
-                      label="Mulai"
-                      value={block.waktuMulai}
-                      onChange={(t) => updateBlock(block.id, "waktuMulai", t)}
-                      placement={index >= blocks.length - 2 && blocks.length > 3 ? "top" : "bottom"}
-                    />
-                  </div>
+              <div className="space-y-3">
+                {blocks.map((block, index) => (
+                  <div
+                    key={block.id}
+                    className="bg-white/15 border border-white/20 rounded-2xl p-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-center shadow-md text-white"
+                  >
+                    {/* Number Badge */}
+                    <div className="md:col-span-1 flex items-center justify-center">
+                      <span className="w-6 h-6 rounded-full bg-white/25 border border-white/30 font-mono text-xs font-black text-white flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                    </div>
 
-                  {/* End time */}
-                  <div className="md:col-span-2">
-                    <TimePicker
-                      label="Selesai"
-                      value={block.waktuSelesai}
-                      onChange={(t) => updateBlock(block.id, "waktuSelesai", t)}
-                      placement={index >= blocks.length - 2 && blocks.length > 3 ? "top" : "bottom"}
-                    />
-                  </div>
+                    {/* Start time */}
+                    <div className="md:col-span-2">
+                      <TimePicker
+                        label="Mulai"
+                        value={block.waktuMulai}
+                        onChange={(t) => updateBlock(block.id, "waktuMulai", t)}
+                        placement={index >= blocks.length - 2 && blocks.length > 3 ? "top" : "bottom"}
+                      />
+                    </div>
 
-                  {/* Uraian Tugas */}
-                  <div className="md:col-span-3 space-y-1">
-                    <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas & Sub</span>
-                    <select
-                      value={block.uraianTugas}
-                      onChange={(e) => updateBlock(block.id, "uraianTugas", e.target.value)}
-                      className="w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none rounded-t-xl p-2 text-xs font-medium cursor-pointer"
-                    >
-                      {DEFAULT_URAIAN_TUGAS.map((item) => (
-                        <option key={item} value={item} className="bg-slate-800 text-white font-sans text-xs">
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                    {DETAIL_ITEMS_MAP[block.uraianTugas] && DETAIL_ITEMS_MAP[block.uraianTugas].length > 0 && (
+                    {/* End time */}
+                    <div className="md:col-span-2">
+                      <TimePicker
+                        label="Selesai"
+                        value={block.waktuSelesai}
+                        onChange={(t) => updateBlock(block.id, "waktuSelesai", t)}
+                        placement={index >= blocks.length - 2 && blocks.length > 3 ? "top" : "bottom"}
+                      />
+                    </div>
+
+                    {/* Task details */}
+                    <div className="md:col-span-3 space-y-1">
+                      <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas Utama</span>
                       <select
-                        value={block.detailItemPekerjaan || ""}
-                        onChange={(e) => updateBlock(block.id, "detailItemPekerjaan", e.target.value)}
-                        className="w-full bg-white/30 text-slate-900 border-x border-b border-white/35 focus:border-white/50 focus:outline-none rounded-b-xl p-2 text-xs font-medium cursor-pointer"
+                        value={block.uraianTugas}
+                        onChange={(e) => updateBlock(block.id, "uraianTugas", e.target.value)}
+                        className="w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-bold cursor-pointer appearance-none truncate"
                       >
-                        {DETAIL_ITEMS_MAP[block.uraianTugas].map((opt) => (
-                          <option key={opt} value={opt} className="bg-slate-800 text-white font-sans text-xs">
-                            {opt}
-                          </option>
+                        {DEFAULT_URAIAN_TUGAS.map((u, i) => (
+                          <option key={i} value={u}>{u}</option>
                         ))}
                       </select>
-                    )}
-                  </div>
+                    </div>
 
-                  {/* Context / Keywords */}
-                  <div className="md:col-span-3 space-y-1">
-                    <span className="text-[10px] text-white/80 uppercase font-black">Konteks / Kata Kunci</span>
+                    {/* Context / Keywords */}
+                    <div className="md:col-span-3 space-y-1">
+                      <span className="text-[10px] text-white/80 uppercase font-black">Konteks / Kata Kunci</span>
+                      <input
+                        type="text"
+                        placeholder="Misal: verifikasi berkas usulan cuti..."
+                        value={block.context}
+                        onChange={(e) => updateBlock(block.id, "context", e.target.value)}
+                        className="w-full bg-white/40 text-slate-900 placeholder-slate-600 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-medium"
+                      />
+                    </div>
+
+                    {/* Delete action */}
+                    <div className="md:col-span-1 flex items-center justify-center pt-4 md:pt-0">
+                      <button
+                        type="button"
+                        onClick={() => removeBlock(block.id)}
+                        className="p-1.5 bg-red-500/20 hover:bg-red-500/35 border border-red-500/35 text-white rounded-xl transition-colors cursor-pointer"
+                        title="Hapus blok jadwal"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                Konfigurasi Laporan Instan
+              </h3>
+              <div className="bg-white/15 border border-white/20 rounded-2xl p-4 md:p-6 grid grid-cols-1 gap-5 shadow-md">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <TimePicker
+                    label="Rentang Waktu Mulai (Global)"
+                    value={instantGlobalStart}
+                    onChange={setInstantGlobalStart}
+                  />
+                  <TimePicker
+                    label="Rentang Waktu Selesai (Global)"
+                    value={instantGlobalEnd}
+                    onChange={setInstantGlobalEnd}
+                  />
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-white/80 uppercase font-black">Durasi Tiap Laporan (Menit)</span>
                     <input
-                      type="text"
-                      placeholder="Misal: verifikasi berkas usulan cuti..."
-                      value={block.context}
-                      onChange={(e) => updateBlock(block.id, "context", e.target.value)}
-                      className="w-full bg-white/40 text-slate-900 placeholder-slate-600 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-medium"
+                      type="number"
+                      value={instantDuration}
+                      onChange={(e) => setInstantDuration(Number(e.target.value) || 60)}
+                      className="w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-bold"
+                      min={10}
+                      max={480}
                     />
                   </div>
+                </div>
 
-                  {/* Delete action */}
-                  <div className="md:col-span-1 flex items-center justify-center pt-4 md:pt-0">
-                    <button
-                      type="button"
-                      onClick={() => removeBlock(block.id)}
-                      className="p-1.5 bg-red-500/20 hover:bg-red-500/35 border border-red-500/35 text-white rounded-xl transition-colors cursor-pointer"
-                      title="Hapus blok jadwal"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                <div className="space-y-1">
+                  <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas</span>
+                  <select
+                    value={instantUraianTugas}
+                    onChange={(e) => setInstantUraianTugas(e.target.value)}
+                    className="w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2.5 text-xs font-bold cursor-pointer"
+                  >
+                    {DEFAULT_URAIAN_TUGAS.map((u, i) => (
+                      <option key={i} value={u}>{u}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-white/80 uppercase font-black">Deskripsi Pekerjaan</span>
+                    <textarea
+                      value={instantDeskripsi}
+                      onChange={(e) => setInstantDeskripsi(e.target.value)}
+                      className="w-full bg-white/40 text-slate-900 placeholder-slate-600 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-3 text-xs font-medium resize-none h-24"
+                      placeholder="Masukkan deskripsi statis untuk semua laporan..."
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-white/80 uppercase font-black">Kuantitas / Hasil Pekerjaan</span>
+                    <textarea
+                      value={instantHasil}
+                      onChange={(e) => setInstantHasil(e.target.value)}
+                      className="w-full bg-white/40 text-slate-900 placeholder-slate-600 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-3 text-xs font-medium resize-none h-24"
+                      placeholder="Masukkan hasil pekerjaan statis..."
+                    />
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Action Footer */}
           <div className="pt-4 border-t border-white/20 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
@@ -667,22 +810,28 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                   if (!excludeWeekends || !isWeekend) count++;
                   curr.setDate(curr.getDate() + 1);
                 }
-                return count;
-              })()} Hari Kerja &times; {blocks.length} Tugas = <span className="text-yellow-300 text-sm ml-1">{(() => {
-                if (!startDate || !endDate) return 0;
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                if (end < start) return 0;
-                let count = 0;
-                const curr = new Date(start);
-                while (curr <= end) {
-                  const dayOfWeek = curr.getDay();
-                  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                  if (!excludeWeekends || !isWeekend) count++;
-                  curr.setDate(curr.getDate() + 1);
+                
+                let blockCount = blocks.length;
+                if (mode === "INSTANT_INTERVAL") {
+                  const [startH, startM] = instantGlobalStart.split(/[.:]/).map(Number);
+                  const [endH, endM] = instantGlobalEnd.split(/[.:]/).map(Number);
+                  const duration = instantDuration || 60;
+                  let m1 = startH * 60 + (startM || 0);
+                  const m2 = endH * 60 + (endM || 0);
+                  let tempC = 0;
+                  while (m1 < m2) {
+                    tempC++;
+                    m1 += duration;
+                  }
+                  blockCount = tempC;
                 }
-                return count;
-              })() * blocks.length} Laporan</span>
+                
+                return (
+                  <>
+                    {count} Hari Kerja &times; {blockCount} Tugas = <span className="text-yellow-300 text-sm ml-1">{count * blockCount} Laporan</span>
+                  </>
+                );
+              })()}
             </div>
             <div className="flex gap-3 w-full sm:w-auto">
               <button
@@ -694,10 +843,18 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
               </button>
               <button
                 type="button"
-                onClick={handleBatchGenerate}
+                onClick={mode === "INSTANT_INTERVAL" ? handleInstantGenerate : handleBatchGenerate}
                 className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm bg-white text-indigo-700 hover:bg-white/95 font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg cursor-pointer"
               >
-                <Sparkles className="w-4 h-4" /> Mulai Batch AI Generator
+                {mode === "INSTANT_INTERVAL" ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" /> Buat Instan Tanpa AI
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" /> Mulai Batch AI Generator
+                  </>
+                )}
               </button>
             </div>
           </div>
