@@ -437,28 +437,52 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         }
       }
 
+      function forceReactState(element: HTMLElement | null, value: string, name: string) {
+        if (!element) return;
+        let current: HTMLElement | null = element;
+        while (current && current !== document.body) {
+          const reactKey = Object.keys(current).find(k => k.startsWith('__reactProps$'));
+          if (reactKey && (current as any)[reactKey]) {
+            const props = (current as any)[reactKey];
+            if (props && typeof props.onChange === 'function') {
+              try { props.onChange({ target: { value: value, name: name } }); } catch (e) {}
+              try { props.onChange(value); } catch (e) {}
+            }
+            if (props && typeof props.onBlur === 'function') {
+              try { props.onBlur({ target: { value: value, name: name } }); } catch (e) {}
+              try { props.onBlur(); } catch (e) {}
+            }
+          }
+          current = current.parentElement;
+        }
+      }
+
       // 2. Fill Start & End Times - SINERGI V2 specific: button#wkt1 / button#wkt2 + hidden input
       function fillSinergiTimePicker(btnId: string, timeValue: string) {
         const timeWithDot = timeValue.includes(':') ? timeValue.replace(':', '.') : timeValue;
         const timeWithColon = timeValue.includes('.') ? timeValue.replace('.', ':') : timeValue;
+        const timeWithSeconds = timeWithColon.length === 5 ? timeWithColon + ':00' : timeWithColon;
 
-        // 1. Set input value directly (for React Hook Form / Zod validation)
-        // Find ALL inputs that might be holding the state for this time field
+        // 1. Hack internal React State and DOM value
         const inputs = document.querySelectorAll('input[name="' + btnId + '"], input#' + btnId + ', input[id*="' + btnId + '"]');
         inputs.forEach(input => {
           const el = input as HTMLInputElement;
-          const desc = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+          const proto = Object.getPrototypeOf(el) || window.HTMLInputElement.prototype;
+          const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+          
           if (desc && desc.set) desc.set.call(el, timeWithColon);
           else el.value = timeWithColon;
           
           el.dispatchEvent(new Event('focus', { bubbles: true }));
           el.dispatchEvent(new Event('input', { bubbles: true }));
           el.dispatchEvent(new Event('change', { bubbles: true }));
-          el.dispatchEvent(new Event('blur', { bubbles: true })); // RHF needs blur for validation
-          console.log('⚡ Set time input state for ' + btnId + ':', timeWithColon);
+          el.dispatchEvent(new Event('blur', { bubbles: true }));
+          
+          forceReactState(el, timeWithColon, btnId);
+          forceReactState(el, timeWithSeconds, btnId); // Fallback for strict Zod schemas
         });
 
-        // 2. Update the visual display button span
+        // 2. Update the visual display button span and hack its React wrapper
         const btn = document.getElementById(btnId) as HTMLButtonElement;
         if (btn) {
           const span = btn.querySelector('span');
@@ -466,69 +490,16 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
             span.textContent = timeWithColon;
             span.className = 'font-bold text-base-content';
           }
+          forceReactState(btn, timeWithColon, btnId);
+          forceReactState(btn, timeWithSeconds, btnId);
 
-          // 3. Click button to open popup, then select the matching time option (Polling)
+          // 3. Briefly open the popup to mount any lazy components, then force state and close
           triggerClickEvents(btn);
-
-          const [targetJam, targetMenit] = timeWithColon.split(':');
-          
-          let attempts = 0;
-          const timeInterval = setInterval(function() {
-            attempts++;
-            const isHelperWidget = (el: Element) => !!el.closest('#sinergi-auto-input-widget');
-            const allEls = Array.from(document.querySelectorAll('button, li, span, div, a, td'))
-              .filter(el => !isHelperWidget(el) && el !== btn && (el as HTMLElement).offsetParent !== null);
-            
-            // Case 1: Simple dropdown (text === "08:30")
-            const fullMatch = allEls.find(el => {
-              if (el.children.length > 2) return false;
-              const text = (el.textContent || '').trim();
-              return text === timeWithColon || text === timeWithDot;
-            });
-            
-            if (fullMatch) {
-              clearInterval(timeInterval);
-              triggerClickEvents(fullMatch);
-              console.log('⚡ Clicked exact time option in popup:', fullMatch.textContent);
-              return;
-            }
-
-            // Case 2: Dual Wheel Picker (JAM and MENIT separate, e.g., "08" and "30")
-            const jamMatches = allEls.filter(el => {
-              if (el.children.length > 0) return false;
-              return (el.textContent || '').trim() === targetJam;
-            });
-            
-            const menitMatches = allEls.filter(el => {
-              if (el.children.length > 0) return false;
-              return (el.textContent || '').trim() === targetMenit;
-            });
-
-            // The picker must be open if we find these isolated numbers. 
-            // In a dual wheel, there's usually a left column (Jam) and right column (Menit).
-            if (jamMatches.length > 0 || menitMatches.length > 0) {
-               clearInterval(timeInterval);
-               
-               if (jamMatches.length > 0) {
-                 triggerClickEvents(jamMatches[0]);
-               }
-               
-               if (menitMatches.length > 0) {
-                 // If the same number exists in both columns (e.g., 08:08), pick the last one for minutes
-                 const mMatch = menitMatches.length > 1 ? menitMatches[menitMatches.length - 1] : menitMatches[0];
-                 triggerClickEvents(mMatch);
-               }
-               
-               console.log('⚡ Clicked dual-wheel time options:', targetJam, targetMenit);
-               
-               // Close popup by clicking outside
-               setTimeout(() => triggerClickEvents(document.body), 300);
-            } else if (attempts > 15) { // 3 seconds timeout
-              clearInterval(timeInterval);
-              triggerClickEvents(document.body);
-              console.log('⚡ Timeout: Gagal menemukan opsi waktu di popup untuk', timeValue);
-            }
-          }, 200);
+          setTimeout(() => {
+             forceReactState(btn, timeWithColon, btnId);
+             triggerClickEvents(document.body); // Close popup
+             console.log('⚡ Injected React state for ' + btnId + ':', timeWithColon);
+          }, 150);
         }
       }
 
