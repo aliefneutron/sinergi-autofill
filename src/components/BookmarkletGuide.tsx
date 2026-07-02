@@ -284,7 +284,7 @@ export default function BookmarkletGuide() {
         function findFormInputElement(keywords, selector = 'input') {
           // Direct attribute match first - most specific and reliable!
           for (const kw of keywords) {
-            const el = document.querySelector(selector + '[name*="' + kw + '"], ' + selector + '[id*="' + kw + '"], ' + selector + '[placeholder*="' + kw + '"]');
+            const el = document.querySelector(selector + '[name*="' + kw + '" i], ' + selector + '[id*="' + kw + '" i], ' + selector + '[placeholder*="' + kw + '" i]');
             if (el) return el;
           }
 
@@ -364,7 +364,7 @@ export default function BookmarkletGuide() {
           setElementValue(startInput, isTimeInput ? report.waktuMulai.replace('.', ':') : report.waktuMulai.replace(':', '.'));
           console.log('⚡ Mengisi input Mulai dengan:', report.waktuMulai);
         } else {
-          const startInputs = Array.from(document.querySelectorAll('input[name*="mulai"], input[id*="mulai"], input[placeholder*="Mulai"], input[placeholder*="07.30"], input[placeholder*="07:30"]'));
+          const startInputs = Array.from(document.querySelectorAll('input[name*="mulai" i], input[id*="mulai" i], input[placeholder*="mulai" i], input[name*="waktu" i], input[id*="waktu" i], input[placeholder*="waktu" i], input[placeholder*="07.30"], input[placeholder*="07:30"]'));
           for (const input of startInputs) {
             const isTimeInput = input.type === 'time';
             setElementValue(input, isTimeInput ? report.waktuMulai.replace('.', ':') : report.waktuMulai.replace(':', '.'));
@@ -376,7 +376,7 @@ export default function BookmarkletGuide() {
           setElementValue(endInput, isTimeInput ? report.waktuSelesai.replace('.', ':') : report.waktuSelesai.replace(':', '.'));
           console.log('⚡ Mengisi input Selesai dengan:', report.waktuSelesai);
         } else {
-          const endInputs = Array.from(document.querySelectorAll('input[name*="selesai"], input[id*="selesai"], input[placeholder*="Selesai"], input[placeholder*="15.30"], input[placeholder*="15:30"]'));
+          const endInputs = Array.from(document.querySelectorAll('input[name*="selesai" i], input[id*="selesai" i], input[placeholder*="selesai" i], input[placeholder*="15.30"], input[placeholder*="15:30"]'));
           for (const input of endInputs) {
             const isTimeInput = input.type === 'time';
             setElementValue(input, isTimeInput ? report.waktuSelesai.replace('.', ':') : report.waktuSelesai.replace(':', '.'));
@@ -384,7 +384,7 @@ export default function BookmarkletGuide() {
         }
 
         // 3. Select Uraian Tugas (Dropdown & Custom Dropdown Support)
-        const selectElements = Array.from(document.querySelectorAll('select[name*="tugas"], select[id*="tugas"], select[name*="uraian"], select'));
+        const selectElements = Array.from(document.querySelectorAll('select[name*="tugas" i], select[id*="tugas" i], select[name*="uraian" i], select'));
         let selectedDropdown = false;
         
         for (const select of selectElements) {
@@ -442,7 +442,7 @@ export default function BookmarkletGuide() {
           const labels = Array.from(document.querySelectorAll('label, div, span, p')).filter(el => !isHelperWidget(el));
           for (const label of labels) {
             const text = (label.textContent || '').trim().toLowerCase();
-            if (text === 'uraian tugas' || text === 'uraian tugas:' || text.includes('uraian tugas')) {
+            if (text === 'uraian tugas' || text === 'uraian tugas:' || text.includes('uraian tugas') || text.includes('tugas jabatan') || text.includes('kegiatan tugas')) {
               console.log('⚡ Menemukan label/elemen Uraian Tugas:', label);
               const parent = label.parentElement;
               if (parent) {
