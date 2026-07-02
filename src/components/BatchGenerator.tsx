@@ -176,7 +176,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       });
 
       if (!response.ok) {
-        throw new Error("Gagal mengekstrak Surat Tugas");
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || "Gagal mengekstrak Surat Tugas");
       }
 
       const data = await response.json();
@@ -208,7 +209,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       alert("Berhasil mengekstrak Surat Tugas dan membagi jadwal menjadi blok 60 menit secara otomatis!");
     } catch (error) {
       console.error(error);
-      alert("Terjadi kesalahan saat mengekstrak Surat Tugas. Pastikan format gambar valid (JPG/PNG).");
+      alert(`Terjadi kesalahan: ${error instanceof Error ? error.message : "Pastikan format file valid (Gambar/PDF)."}`);
     } finally {
       setIsExtracting(false);
     }
