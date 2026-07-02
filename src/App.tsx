@@ -83,9 +83,14 @@ export default function App() {
     saveReports(newReports);
   };
 
-  // Clear all data
-  const handleClearAll = () => {
-    saveReports([]);
+  // Clear all data or specific subset
+  const handleClearAll = (idsToRemove?: string[]) => {
+    if (idsToRemove && idsToRemove.length > 0) {
+      const newReports = reports.filter((r) => !idsToRemove.includes(r.id));
+      saveReports(newReports);
+    } else {
+      saveReports([]);
+    }
   };
 
   // Import Backup Data

@@ -426,7 +426,12 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 <CalendarPicker
                   label="Tanggal Mulai"
                   value={startDate}
-                  onChange={setStartDate}
+                  onChange={(d) => {
+                    setStartDate(d);
+                    if (new Date(endDate) < new Date(d)) {
+                      setEndDate(d);
+                    }
+                  }}
                 />
               </div>
               <div>
@@ -630,21 +635,55 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
           </div>
 
           {/* Action Footer */}
-          <div className="pt-4 border-t border-white/20 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2.5 rounded-xl text-sm bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold transition-colors cursor-pointer"
-            >
-              Batal
-            </button>
-            <button
-              type="button"
-              onClick={handleBatchGenerate}
-              className="px-6 py-2.5 rounded-xl text-sm bg-white text-indigo-700 hover:bg-white/95 font-bold flex items-center gap-1.5 transition-all shadow-lg cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4" /> Mulai Batch AI Generator
-            </button>
+          <div className="pt-4 border-t border-white/20 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
+            <div className="text-xs text-white/90 font-bold bg-white/10 px-3 py-1.5 rounded-lg border border-white/20 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Estimasi: {(() => {
+                if (!startDate || !endDate) return 0;
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                if (end < start) return 0;
+                let count = 0;
+                const curr = new Date(start);
+                while (curr <= end) {
+                  const dayOfWeek = curr.getDay();
+                  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                  if (!excludeWeekends || !isWeekend) count++;
+                  curr.setDate(curr.getDate() + 1);
+                }
+                return count;
+              })()} Hari Kerja &times; {blocks.length} Tugas = <span className="text-yellow-300 text-sm ml-1">{(() => {
+                if (!startDate || !endDate) return 0;
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                if (end < start) return 0;
+                let count = 0;
+                const curr = new Date(start);
+                while (curr <= end) {
+                  const dayOfWeek = curr.getDay();
+                  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                  if (!excludeWeekends || !isWeekend) count++;
+                  curr.setDate(curr.getDate() + 1);
+                }
+                return count;
+              })() * blocks.length} Laporan</span>
+            </div>
+            <div className="flex gap-3 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleBatchGenerate}
+                className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm bg-white text-indigo-700 hover:bg-white/95 font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" /> Mulai Batch AI Generator
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -7,7 +7,7 @@ interface SinergiHistoryProps {
   onAddClick: () => void;
   onEditClick: (report: LaporanKinerja) => void;
   onDeleteClick: (id: string) => void;
-  onClearAllClick: () => void;
+  onClearAllClick: (ids?: string[]) => void;
   onImportBackup: (imported: LaporanKinerja[]) => void;
 }
 
@@ -256,7 +256,8 @@ export default function SinergiHistory({
                 <span className="text-[10px] font-black text-red-200 uppercase tracking-wider pl-1">Hapus semua?</span>
                 <button
                   onClick={() => {
-                    onClearAllClick();
+                    const idsToRemove = filteredReports.map(r => r.id);
+                    onClearAllClick(idsToRemove);
                     setConfirmClearAll(false);
                   }}
                   className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black rounded cursor-pointer"
