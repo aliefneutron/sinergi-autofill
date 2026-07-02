@@ -43,6 +43,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   const [instantGlobalEnd, setInstantGlobalEnd] = useState("15.30");
   const [instantDuration, setInstantDuration] = useState(60);
   const [instantUraianTugas, setInstantUraianTugas] = useState(DEFAULT_URAIAN_TUGAS[1]);
+  const [instantDetailPekerjaan, setInstantDetailPekerjaan] = useState(getDefaultDetailItem(DEFAULT_URAIAN_TUGAS[1]));
   const [instantDeskripsi, setInstantDeskripsi] = useState("Melaksanakan perjalanan dinas daerah");
   const [instantHasil, setInstantHasil] = useState("Laporan hasil perjalanan dinas");
 
@@ -232,6 +233,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
           waktuMulai: interval.start,
           waktuSelesai: interval.end,
           uraianTugas: instantUraianTugas,
+          detailItemPekerjaan: instantDetailPekerjaan,
           deskripsiPekerjaan: instantDeskripsi,
           hasilPekerjaan: instantHasil,
           dokumenLainnya: "",
@@ -509,16 +511,33 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
 
                     {/* Task details */}
                     <div className="md:col-span-3 space-y-1">
-                      <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas Utama</span>
+                      <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas Utama & Sub</span>
                       <select
                         value={block.uraianTugas}
                         onChange={(e) => updateBlock(block.id, "uraianTugas", e.target.value)}
-                        className="w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-bold cursor-pointer appearance-none truncate"
+                        className={`w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none p-2 text-xs font-bold cursor-pointer appearance-none truncate ${
+                          DETAIL_ITEMS_MAP[block.uraianTugas] && DETAIL_ITEMS_MAP[block.uraianTugas].length > 0 
+                            ? "rounded-t-xl" 
+                            : "rounded-xl"
+                        }`}
                       >
                         {DEFAULT_URAIAN_TUGAS.map((u, i) => (
-                          <option key={i} value={u}>{u}</option>
+                          <option key={i} value={u} className="bg-slate-800 text-white font-sans text-xs">{u}</option>
                         ))}
                       </select>
+                      {DETAIL_ITEMS_MAP[block.uraianTugas] && DETAIL_ITEMS_MAP[block.uraianTugas].length > 0 && (
+                        <select
+                          value={block.detailItemPekerjaan || ""}
+                          onChange={(e) => updateBlock(block.id, "detailItemPekerjaan", e.target.value)}
+                          className="w-full bg-white/30 text-slate-900 border-x border-b border-white/35 focus:border-white/50 focus:outline-none rounded-b-xl p-2 text-xs font-medium cursor-pointer"
+                        >
+                          {DETAIL_ITEMS_MAP[block.uraianTugas].map((opt) => (
+                            <option key={opt} value={opt} className="bg-slate-800 text-white font-sans text-xs">
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
 
                     {/* Context / Keywords */}
@@ -579,16 +598,36 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas</span>
+                  <span className="text-[10px] text-white/80 uppercase font-black">Uraian Tugas & Sub Tugas</span>
                   <select
                     value={instantUraianTugas}
-                    onChange={(e) => setInstantUraianTugas(e.target.value)}
-                    className="w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2.5 text-xs font-bold cursor-pointer"
+                    onChange={(e) => {
+                      setInstantUraianTugas(e.target.value);
+                      setInstantDetailPekerjaan(getDefaultDetailItem(e.target.value));
+                    }}
+                    className={`w-full bg-white/40 text-slate-900 border border-white/35 focus:border-white/50 focus:outline-none p-2.5 text-xs font-bold cursor-pointer ${
+                      DETAIL_ITEMS_MAP[instantUraianTugas] && DETAIL_ITEMS_MAP[instantUraianTugas].length > 0 
+                        ? "rounded-t-xl" 
+                        : "rounded-xl"
+                    }`}
                   >
                     {DEFAULT_URAIAN_TUGAS.map((u, i) => (
-                      <option key={i} value={u}>{u}</option>
+                      <option key={i} value={u} className="bg-slate-800 text-white font-sans text-xs">{u}</option>
                     ))}
                   </select>
+                  {DETAIL_ITEMS_MAP[instantUraianTugas] && DETAIL_ITEMS_MAP[instantUraianTugas].length > 0 && (
+                    <select
+                      value={instantDetailPekerjaan}
+                      onChange={(e) => setInstantDetailPekerjaan(e.target.value)}
+                      className="w-full bg-white/30 text-slate-900 border-x border-b border-white/35 focus:border-white/50 focus:outline-none rounded-b-xl p-2.5 text-xs font-medium cursor-pointer"
+                    >
+                      {DETAIL_ITEMS_MAP[instantUraianTugas].map((opt) => (
+                        <option key={opt} value={opt} className="bg-slate-800 text-white font-sans text-xs">
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
