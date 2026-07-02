@@ -504,14 +504,12 @@ export default function BookmarkletGuide() {
               
               if (match) {
                 clearInterval(timeInterval);
-                match.click();
-                match.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-                match.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                triggerClickEvents(match);
                 console.log('⚡ Clicked time option in popup:', match.textContent);
               } else if (attempts > 15) { // 3 seconds timeout
                 clearInterval(timeInterval);
                 // Close popup by clicking outside
-                document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                triggerClickEvents(document.body);
                 console.log('⚡ Timeout: Gagal menemukan opsi waktu di popup untuk', timeValue);
               }
             }, 200);
