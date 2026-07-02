@@ -437,52 +437,41 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         }
       }
 
-      function forceReactState(element: HTMLElement | null, value: string, name: string) {
-        if (!element) return;
-        let current: HTMLElement | null = element;
-        while (current && current !== document.body) {
-          const reactKey = Object.keys(current).find(k => k.startsWith('__reactProps$'));
-          if (reactKey && (current as any)[reactKey]) {
-            const props = (current as any)[reactKey];
-            if (props && typeof props.onChange === 'function') {
-              try { props.onChange({ target: { value: value, name: name } }); } catch (e) {}
-              try { props.onChange(value); } catch (e) {}
-            }
-            if (props && typeof props.onBlur === 'function') {
-              try { props.onBlur({ target: { value: value, name: name } }); } catch (e) {}
-              try { props.onBlur(); } catch (e) {}
-            }
-          }
-          current = current.parentElement;
-        }
-      }
-
       // 2. Fill Start & End Times - SINERGI V2 specific: button#wkt1 / button#wkt2 + hidden input
       function fillSinergiTimePicker(btnId: string, timeValue: string) {
         const timeWithDot = timeValue.includes(':') ? timeValue.replace(':', '.') : timeValue;
         const timeWithColon = timeValue.includes('.') ? timeValue.replace('.', ':') : timeValue;
-        const timeWithSeconds = timeWithColon.length === 5 ? timeWithColon + ':00' : timeWithColon;
 
-        // 1. Hack internal React State and DOM value
+        // 1. Hack React's internal valueTracker and DOM value
         const inputs = document.querySelectorAll('input[name="' + btnId + '"], input#' + btnId + ', input[id*="' + btnId + '"]');
         inputs.forEach(input => {
           const el = input as HTMLInputElement;
-          const proto = Object.getPrototypeOf(el) || window.HTMLInputElement.prototype;
-          const desc = Object.getOwnPropertyDescriptor(proto, 'value');
           
-          if (desc && desc.set) desc.set.call(el, timeWithColon);
-          else el.value = timeWithColon;
+          // Set value via native setter to bypass React's wrapper
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value");
+          if (nativeInputValueSetter && nativeInputValueSetter.set) {
+            nativeInputValueSetter.set.call(el, timeWithColon);
+          } else {
+            el.value = timeWithColon;
+          }
           
-          el.dispatchEvent(new Event('focus', { bubbles: true }));
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-          el.dispatchEvent(new Event('blur', { bubbles: true }));
+          // The ultimate React hack: Reset the valueTracker so React thinks the value has changed!
+          if ((el as any).valueTracker && typeof (el as any).valueTracker.setValue === 'function') {
+            (el as any).valueTracker.setValue('');
+          } else if ((el as any)._valueTracker && typeof (el as any)._valueTracker.setValue === 'function') {
+            (el as any)._valueTracker.setValue('');
+          }
           
-          forceReactState(el, timeWithColon, btnId);
-          forceReactState(el, timeWithSeconds, btnId); // Fallback for strict Zod schemas
+          // Dispatch events that React Hook Form listens to
+          el.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+          el.dispatchEvent(new Event('blur', { bubbles: true, cancelable: true }));
+          el.dispatchEvent(new Event('focusout', { bubbles: true, cancelable: true }));
+          
+          console.log('⚡ Set native React input state for ' + btnId + ':', timeWithColon);
         });
 
-        // 2. Update the visual display button span and hack its React wrapper
+        // 2. Update the visual display button span
         const btn = document.getElementById(btnId) as HTMLButtonElement;
         if (btn) {
           const span = btn.querySelector('span');
@@ -490,16 +479,10 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
             span.textContent = timeWithColon;
             span.className = 'font-bold text-base-content';
           }
-          forceReactState(btn, timeWithColon, btnId);
-          forceReactState(btn, timeWithSeconds, btnId);
 
-          // 3. Briefly open the popup to mount any lazy components, then force state and close
-          triggerClickEvents(btn);
-          setTimeout(() => {
-             forceReactState(btn, timeWithColon, btnId);
-             triggerClickEvents(document.body); // Close popup
-             console.log('⚡ Injected React state for ' + btnId + ':', timeWithColon);
-          }, 150);
+          // 3. Optional: Trigger blur on the button to force UI validation updates
+          btn.dispatchEvent(new Event('blur', { bubbles: true }));
+          btn.dispatchEvent(new Event('focusout', { bubbles: true }));
         }
       }
 
