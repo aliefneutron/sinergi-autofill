@@ -49,7 +49,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     {
       id: "b1",
       waktuMulai: "07.30",
-      waktuSelesai: "09.00",
+      waktuSelesai: "08.30",
       uraianTugas: "Upacara / Apel",
       detailItemPekerjaan: "Mengikuti Apel Pagi rutin setiap Senin pagi",
       context: "Mengikuti Apel Pagi kedisiplinan rutin serta mendengarkan arahan pimpinan"
@@ -57,7 +57,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     {
       id: "b2",
       waktuMulai: "09.30",
-      waktuSelesai: "11.30",
+      waktuSelesai: "10.30",
       uraianTugas: "Melaksanakan tugas lain sesuai perintah atasan",
       detailItemPekerjaan: "NORMA: 20 MENIT",
       context: "Verifikasi berkas persyaratan kenaikan pangkat PNS"
@@ -65,7 +65,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     {
       id: "b3",
       waktuMulai: "13.00",
-      waktuSelesai: "15.30",
+      waktuSelesai: "14.00",
       uraianTugas: "Melaksanakan tugas lain",
       detailItemPekerjaan: "Penataan dokumen dan arsip fisik file kepegawaian",
       context: "Merapikan arsip fisik kepegawaian ASN purna tugas"
@@ -79,13 +79,13 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   const addBlock = () => {
     const lastBlock = blocks[blocks.length - 1];
     let nextStart = "13.00";
-    let nextEnd = "15.30";
+    let nextEnd = "14.00";
 
     if (lastBlock) {
-      // Calculate a reasonable subsequent slot
+      // Calculate a reasonable subsequent slot (60 mins)
       const [endH, endM] = lastBlock.waktuSelesai.split(/[.:]/).map(Number);
       const startH = endH + 1;
-      const finishH = startH + 2;
+      const finishH = startH + 1;
       if (startH < 15) {
         nextStart = `${String(startH).padStart(2, "0")}.00`;
         nextEnd = `${String(finishH).padStart(2, "0")}.00`;

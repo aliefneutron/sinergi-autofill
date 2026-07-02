@@ -14,7 +14,7 @@ interface SinergiFormProps {
 export default function SinergiForm({ onSave, onClose, initialData }: SinergiFormProps) {
   const [tanggal, setTanggal] = useState("");
   const [waktuMulai, setWaktuMulai] = useState("07:30");
-  const [waktuSelesai, setWaktuSelesai] = useState("09:00");
+  const [waktuSelesai, setWaktuSelesai] = useState("08:30");
   const [uraianTugas, setUraianTugas] = useState(DEFAULT_URAIAN_TUGAS[1]); // Default to "Melaksanakan tugas lain sesuai perintah atasan"
   const [detailItemPekerjaan, setDetailItemPekerjaan] = useState("");
   const [deskripsiPekerjaan, setDeskripsiPekerjaan] = useState("");
