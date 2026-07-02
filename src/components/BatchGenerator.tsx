@@ -50,41 +50,41 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       id: "b1",
       waktuMulai: "07.30",
       waktuSelesai: "08.30",
-      uraianTugas: "Upacara / Apel",
-      detailItemPekerjaan: "Mengikuti Apel Pagi rutin setiap Senin pagi",
-      context: "Mengikuti Apel Pagi kedisiplinan rutin serta mendengarkan arahan pimpinan"
+      uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
+      detailItemPekerjaan: "Persiapan dan keberangkatan menuju lokasi dinas",
+      context: "Persiapan administrasi dan perjalanan menuju lokasi dinas daerah"
     },
     {
       id: "b2",
       waktuMulai: "08.30",
       waktuSelesai: "09.30",
-      uraianTugas: "Melaksanakan tugas lain sesuai perintah atasan",
-      detailItemPekerjaan: "NORMA: 20 MENIT",
-      context: "Menganalisis berkas dokumen terkait tupoksi"
+      uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
+      detailItemPekerjaan: "Melakukan koordinasi dengan instansi setempat",
+      context: "Rapat koordinasi dan sinkronisasi data dengan instansi terkait di lokasi"
     },
     {
       id: "b3",
       waktuMulai: "09.30",
       waktuSelesai: "10.30",
-      uraianTugas: "Melaksanakan tugas lain sesuai perintah atasan",
-      detailItemPekerjaan: "NORMA: 20 MENIT",
-      context: "Verifikasi berkas persyaratan administrasi"
+      uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
+      detailItemPekerjaan: "Meninjau lapangan dan pengumpulan data",
+      context: "Survei lapangan dan observasi langsung terkait kegiatan dinas"
     },
     {
       id: "b4",
       waktuMulai: "10.30",
       waktuSelesai: "11.30",
-      uraianTugas: "Melaksanakan tugas lain",
-      detailItemPekerjaan: "Penataan dokumen dan arsip fisik file",
-      context: "Merapikan arsip fisik dokumen administrasi"
+      uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
+      detailItemPekerjaan: "Evaluasi hasil tinjauan dan pengolahan data awal",
+      context: "Melakukan rekapitulasi dan evaluasi data hasil tinjauan lapangan"
     },
     {
       id: "b5",
       waktuMulai: "11.30",
       waktuSelesai: "12.30",
-      uraianTugas: "Melaksanakan tugas lain",
-      detailItemPekerjaan: "Merekapitulasi data harian",
-      context: "Menyusun laporan rekapitulasi data harian"
+      uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
+      detailItemPekerjaan: "Penyusunan draf laporan dan perjalanan kembali",
+      context: "Penyusunan laporan hasil dinas sementara dan perjalanan pulang"
     }
   ]);
 
@@ -114,8 +114,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
         id: `block-${Date.now()}`,
         waktuMulai: nextStart,
         waktuSelesai: nextEnd,
-        uraianTugas: DEFAULT_URAIAN_TUGAS[1],
-        detailItemPekerjaan: getDefaultDetailItem(DEFAULT_URAIAN_TUGAS[1]),
+        uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
+        detailItemPekerjaan: "Melaksanakan perjalanan dinas daerah lanjutan",
         context: ""
       }
     ]);
