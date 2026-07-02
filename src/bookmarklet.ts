@@ -442,25 +442,21 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         const timeWithDot = timeValue.includes(':') ? timeValue.replace(':', '.') : timeValue;
         const timeWithColon = timeValue.includes('.') ? timeValue.replace('.', ':') : timeValue;
 
-        // 1. Set hidden input value directly (for React Hook Form / Zod validation)
-        const hiddenInput = document.querySelector('input[name="' + btnId + '"]') as HTMLInputElement;
-        if (hiddenInput) {
+        // 1. Set input value directly (for React Hook Form / Zod validation)
+        // Find ALL inputs that might be holding the state for this time field
+        const inputs = document.querySelectorAll('input[name="' + btnId + '"], input#' + btnId + ', input[id*="' + btnId + '"]');
+        inputs.forEach(input => {
+          const el = input as HTMLInputElement;
           const desc = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
-          if (desc && desc.set) desc.set.call(hiddenInput, timeWithColon); // Use colon format as default standard
-          else hiddenInput.value = timeWithColon;
-          hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
-          hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-          hiddenInput.dispatchEvent(new Event('blur', { bubbles: true })); // RHF needs blur for validation
+          if (desc && desc.set) desc.set.call(el, timeWithColon);
+          else el.value = timeWithColon;
           
-          // Also try dot format just in case
-          if (desc && desc.set) desc.set.call(hiddenInput, timeWithDot);
-          else hiddenInput.value = timeWithDot;
-          hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
-          hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-          hiddenInput.dispatchEvent(new Event('blur', { bubbles: true }));
-          
-          console.log('⚡ Set hidden time input ' + btnId + ':', timeValue);
-        }
+          el.dispatchEvent(new Event('focus', { bubbles: true }));
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          el.dispatchEvent(new Event('blur', { bubbles: true })); // RHF needs blur for validation
+          console.log('⚡ Set time input state for ' + btnId + ':', timeWithColon);
+        });
 
         // 2. Update the visual display button span
         const btn = document.getElementById(btnId) as HTMLButtonElement;
@@ -472,30 +468,63 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
           }
 
           // 3. Click button to open popup, then select the matching time option (Polling)
-          btn.click();
-          btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+          triggerClickEvents(btn);
 
+          const [targetJam, targetMenit] = timeWithColon.split(':');
+          
           let attempts = 0;
           const timeInterval = setInterval(function() {
             attempts++;
             const isHelperWidget = (el: Element) => !!el.closest('#sinergi-auto-input-widget');
-            const allEls = Array.from(document.querySelectorAll('button, li, span[class], div[class]'))
-              .filter(el => !isHelperWidget(el) && el !== btn);
+            const allEls = Array.from(document.querySelectorAll('button, li, span, div, a, td'))
+              .filter(el => !isHelperWidget(el) && el !== btn && (el as HTMLElement).offsetParent !== null);
             
-            // Find option matching 08.30 or 08:30
-            const match = allEls.find(el => {
-              if (el.children.length > 3) return false;
+            // Case 1: Simple dropdown (text === "08:30")
+            const fullMatch = allEls.find(el => {
+              if (el.children.length > 2) return false;
               const text = (el.textContent || '').trim();
               return text === timeWithColon || text === timeWithDot;
             });
             
-            if (match) {
+            if (fullMatch) {
               clearInterval(timeInterval);
-              triggerClickEvents(match);
-              console.log('⚡ Clicked time option in popup:', match.textContent);
+              triggerClickEvents(fullMatch);
+              console.log('⚡ Clicked exact time option in popup:', fullMatch.textContent);
+              return;
+            }
+
+            // Case 2: Dual Wheel Picker (JAM and MENIT separate, e.g., "08" and "30")
+            const jamMatches = allEls.filter(el => {
+              if (el.children.length > 0) return false;
+              return (el.textContent || '').trim() === targetJam;
+            });
+            
+            const menitMatches = allEls.filter(el => {
+              if (el.children.length > 0) return false;
+              return (el.textContent || '').trim() === targetMenit;
+            });
+
+            // The picker must be open if we find these isolated numbers. 
+            // In a dual wheel, there's usually a left column (Jam) and right column (Menit).
+            if (jamMatches.length > 0 || menitMatches.length > 0) {
+               clearInterval(timeInterval);
+               
+               if (jamMatches.length > 0) {
+                 triggerClickEvents(jamMatches[0]);
+               }
+               
+               if (menitMatches.length > 0) {
+                 // If the same number exists in both columns (e.g., 08:08), pick the last one for minutes
+                 const mMatch = menitMatches.length > 1 ? menitMatches[menitMatches.length - 1] : menitMatches[0];
+                 triggerClickEvents(mMatch);
+               }
+               
+               console.log('⚡ Clicked dual-wheel time options:', targetJam, targetMenit);
+               
+               // Close popup by clicking outside
+               setTimeout(() => triggerClickEvents(document.body), 300);
             } else if (attempts > 15) { // 3 seconds timeout
               clearInterval(timeInterval);
-              // Close popup by clicking outside
               triggerClickEvents(document.body);
               console.log('⚡ Timeout: Gagal menemukan opsi waktu di popup untuk', timeValue);
             }
