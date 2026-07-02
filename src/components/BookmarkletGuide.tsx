@@ -455,15 +455,24 @@ export default function BookmarkletGuide() {
           const timeWithDot = timeValue.includes(':') ? timeValue.replace(':', '.') : timeValue;
           const timeWithColon = timeValue.includes('.') ? timeValue.replace('.', ':') : timeValue;
 
-          // 1. Set hidden input value directly
+          // 1. Set hidden input value directly (for React Hook Form / Zod validation)
           const hiddenInput = document.querySelector('input[name="' + btnId + '"]');
           if (hiddenInput) {
             const desc = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+            if (desc && desc.set) desc.set.call(hiddenInput, timeWithColon); // Use colon format as default standard
+            else hiddenInput.value = timeWithColon;
+            hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            hiddenInput.dispatchEvent(new Event('blur', { bubbles: true })); // RHF needs blur for validation
+            
+            // Also try dot format just in case
             if (desc && desc.set) desc.set.call(hiddenInput, timeWithDot);
             else hiddenInput.value = timeWithDot;
             hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
             hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('⚡ Set hidden time input ' + btnId + ':', timeWithDot);
+            hiddenInput.dispatchEvent(new Event('blur', { bubbles: true }));
+            
+            console.log('⚡ Set hidden time input ' + btnId + ':', timeValue);
           }
 
           // 2. Update the visual display button span
@@ -475,15 +484,18 @@ export default function BookmarkletGuide() {
               span.className = 'font-bold text-base-content';
             }
 
-            // 3. Click button to open popup, then select the matching time option
+            // 3. Click button to open popup, then select the matching time option (Polling)
             btn.click();
             btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 
-            setTimeout(function() {
+            let attempts = 0;
+            const timeInterval = setInterval(function() {
+              attempts++;
               const isHelperWidget = (el) => !!el.closest('#sinergi-auto-input-widget');
               const allEls = Array.from(document.querySelectorAll('button, li, span[class], div[class]'))
                 .filter(el => !isHelperWidget(el) && el !== btn);
               
+              // Find option matching 08.30 or 08:30
               const match = allEls.find(el => {
                 if (el.children.length > 3) return false;
                 const text = (el.textContent || '').trim();
@@ -491,14 +503,18 @@ export default function BookmarkletGuide() {
               });
               
               if (match) {
+                clearInterval(timeInterval);
                 match.click();
+                match.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
                 match.dispatchEvent(new MouseEvent('click', { bubbles: true }));
                 console.log('⚡ Clicked time option in popup:', match.textContent);
-              } else {
+              } else if (attempts > 15) { // 3 seconds timeout
+                clearInterval(timeInterval);
                 // Close popup by clicking outside
                 document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                console.log('⚡ Timeout: Gagal menemukan opsi waktu di popup untuk', timeValue);
               }
-            }, 500);
+            }, 200);
           }
         }
 
