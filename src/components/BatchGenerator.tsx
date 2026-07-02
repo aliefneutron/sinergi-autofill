@@ -503,52 +503,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             </div>
           </div>
 
-          {/* Global Upload */}
-          <div>
-            <label className="text-xs font-bold text-white uppercase tracking-wider block mb-1.5">
-              Upload Bukti Dukung Global (Opsional)
-            </label>
-            <div
-              className={`w-full relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${
-                isDragging
-                  ? "border-indigo-400 bg-indigo-400/10 scale-[1.02]"
-                  : "border-white/30 hover:border-white/50 bg-white/5 hover:bg-white/10"
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                onChange={handleFileChange}
-              />
-              <div className="flex flex-col items-center justify-center gap-2">
-                {globalBuktiBase64 ? (
-                  <>
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-300">
-                      <CheckCircle2 className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">{globalBuktiName}</p>
-                      <p className="text-[10px] text-emerald-300 mt-0.5">File berhasil dimuat & akan dilampirkan ke semua laporan</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70">
-                      <Upload className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">Klik / Tarik File Bukti Dukung</p>
-                      <p className="text-[10px] text-white/60 mt-0.5">Mendukung gambar & dokumen PDF. Akan dilampirkan ke semua laporan.</p>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+
 
           {/* Blocks Configuration */}
           {mode !== "INSTANT_INTERVAL" ? (
@@ -743,6 +698,53 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
               </div>
             </div>
           )}
+
+          {/* Global Upload */}
+          <div>
+            <label className="text-xs font-bold text-white uppercase tracking-wider block mb-1.5">
+              Upload Bukti Dukung Global (Opsional)
+            </label>
+            <div
+              className={`w-full relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${
+                isDragging
+                  ? "border-indigo-400 bg-indigo-400/10 scale-[1.02]"
+                  : "border-white/30 hover:border-white/50 bg-white/5 hover:bg-white/10"
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={handleFileChange}
+              />
+              <div className="flex flex-col items-center justify-center gap-2">
+                {globalBuktiBase64 ? (
+                  <>
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-300">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">{globalBuktiName}</p>
+                      <p className="text-[10px] text-emerald-300 mt-0.5">File berhasil dimuat & akan dilampirkan ke semua laporan</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70">
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Klik / Tarik File Bukti Dukung</p>
+                      <p className="text-[10px] text-white/60 mt-0.5">Mendukung gambar & dokumen PDF. Akan dilampirkan ke semua laporan.</p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Action Footer */}
           <div className="pt-4 border-t border-white/20 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
