@@ -56,19 +56,35 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     },
     {
       id: "b2",
+      waktuMulai: "08.30",
+      waktuSelesai: "09.30",
+      uraianTugas: "Melaksanakan tugas lain sesuai perintah atasan",
+      detailItemPekerjaan: "NORMA: 20 MENIT",
+      context: "Menganalisis berkas dokumen terkait tupoksi"
+    },
+    {
+      id: "b3",
       waktuMulai: "09.30",
       waktuSelesai: "10.30",
       uraianTugas: "Melaksanakan tugas lain sesuai perintah atasan",
       detailItemPekerjaan: "NORMA: 20 MENIT",
-      context: "Verifikasi berkas persyaratan kenaikan pangkat PNS"
+      context: "Verifikasi berkas persyaratan administrasi"
     },
     {
-      id: "b3",
-      waktuMulai: "13.00",
-      waktuSelesai: "14.00",
+      id: "b4",
+      waktuMulai: "10.30",
+      waktuSelesai: "11.30",
       uraianTugas: "Melaksanakan tugas lain",
-      detailItemPekerjaan: "Penataan dokumen dan arsip fisik file kepegawaian",
-      context: "Merapikan arsip fisik kepegawaian ASN purna tugas"
+      detailItemPekerjaan: "Penataan dokumen dan arsip fisik file",
+      context: "Merapikan arsip fisik dokumen administrasi"
+    },
+    {
+      id: "b5",
+      waktuMulai: "11.30",
+      waktuSelesai: "12.30",
+      uraianTugas: "Melaksanakan tugas lain",
+      detailItemPekerjaan: "Merekapitulasi data harian",
+      context: "Menyusun laporan rekapitulasi data harian"
     }
   ]);
 
