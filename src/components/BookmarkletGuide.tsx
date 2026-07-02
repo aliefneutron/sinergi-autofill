@@ -452,39 +452,55 @@ export default function BookmarkletGuide() {
 
       // 2. Fill Start & End Times - SINERGI V2 specific: button#wkt1 / button#wkt2 + hidden input
       function fillSinergiTimePicker(btnId, timeValue) {
-        const timeWithDot = timeValue.includes(':') ? timeValue.replace(':', '.') : timeValue;
         const timeWithColon = timeValue.includes('.') ? timeValue.replace('.', ':') : timeValue;
 
-        // 1. Hack React's internal valueTracker and DOM value
+        function injectReactState(el, value) {
+          if (!el) return;
+          // 1. Direct React Props Injection (The most powerful method)
+          const reactKey = Object.keys(el).find(k => k.startsWith('__reactProps$'));
+          if (reactKey && el[reactKey]) {
+            const props = el[reactKey];
+            const mockEvent = {
+                target: { value: value, name: el.name || el.id || btnId },
+                currentTarget: { value: value, name: el.name || el.id || btnId },
+                type: 'change',
+                bubbles: true
+            };
+            if (typeof props.onChange === 'function') {
+                try { props.onChange(mockEvent); } catch (e) { console.error('onChange fail:', e); }
+            }
+            if (typeof props.onBlur === 'function') {
+                try { props.onBlur(mockEvent); } catch (e) { console.error('onBlur fail:', e); }
+            }
+          }
+          
+          // 2. Native DOM & ValueTracker Fallback
+          try {
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value");
+            if (nativeInputValueSetter && nativeInputValueSetter.set) {
+              nativeInputValueSetter.set.call(el, value);
+            } else {
+              el.value = value;
+            }
+            if (el.valueTracker && typeof el.valueTracker.setValue === 'function') {
+              el.valueTracker.setValue('');
+            } else if (el._valueTracker && typeof el._valueTracker.setValue === 'function') {
+              el._valueTracker.setValue('');
+            }
+            el.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+            el.dispatchEvent(new Event('blur', { bubbles: true, cancelable: true }));
+          } catch(e) {}
+        }
+
+        // Apply state injection to all hidden inputs that RHF might be watching
         const inputs = document.querySelectorAll('input[name="' + btnId + '"], input#' + btnId + ', input[id*="' + btnId + '"]');
         inputs.forEach(input => {
-          const el = input;
-          
-          // Set value via native setter to bypass React's wrapper
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value");
-          if (nativeInputValueSetter && nativeInputValueSetter.set) {
-            nativeInputValueSetter.set.call(el, timeWithColon);
-          } else {
-            el.value = timeWithColon;
-          }
-          
-          // The ultimate React hack: Reset the valueTracker so React thinks the value has changed!
-          if (el.valueTracker && typeof el.valueTracker.setValue === 'function') {
-            el.valueTracker.setValue('');
-          } else if (el._valueTracker && typeof el._valueTracker.setValue === 'function') {
-            el._valueTracker.setValue('');
-          }
-          
-          // Dispatch events that React Hook Form listens to
-          el.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
-          el.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
-          el.dispatchEvent(new Event('blur', { bubbles: true, cancelable: true }));
-          el.dispatchEvent(new Event('focusout', { bubbles: true, cancelable: true }));
-          
-          console.log('⚡ Set native React input state for ' + btnId + ':', timeWithColon);
+          injectReactState(input, timeWithColon);
+          console.log('⚡ Injected React state for ' + btnId + ':', timeWithColon);
         });
 
-        // 2. Update the visual display button span
+        // Update the visual display button span
         const btn = document.getElementById(btnId);
         if (btn) {
           const span = btn.querySelector('span');
@@ -492,10 +508,7 @@ export default function BookmarkletGuide() {
             span.textContent = timeWithColon;
             span.className = 'font-bold text-base-content';
           }
-
-          // 3. Optional: Trigger blur on the button to force UI validation updates
-          btn.dispatchEvent(new Event('blur', { bubbles: true }));
-          btn.dispatchEvent(new Event('focusout', { bubbles: true }));
+          injectReactState(btn, timeWithColon);
         }
       }
 
