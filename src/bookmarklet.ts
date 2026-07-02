@@ -331,49 +331,113 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         }
       }
 
-      // 2. Fill Start & End Times
-      let startInput = findFormInputElement(['mulai', 'start', 'jam_mulai', 'jam_start', 'waktu_mulai', 'jam mulai', 'waktu mulai', 'dari jam', 'waktu awal'], 'input');
-      let endInput = findFormInputElement(['selesai', 'end', 'jam_selesai', 'jam_end', 'waktu_selesai', 'jam selesai', 'waktu selesai', 'sampai', 'hingga', 'waktu akhir'], 'input');
-      
-      if (!startInput || !endInput) {
-        const timeInputs = Array.from(document.querySelectorAll('input[type="time"], input[class*="time" i], input[class*="jam" i], input[class*="clock" i]'));
-        if (timeInputs.length >= 2) {
-          if (!startInput) startInput = timeInputs[0];
-          if (!endInput) endInput = timeInputs[1];
+      // 2. Fill Start & End Times - SINERGI V2 specific: button#wkt1 / button#wkt2 + hidden input
+      function fillSinergiTimePicker(btnId: string, timeValue: string) {
+        const timeWithDot = timeValue.includes(':') ? timeValue.replace(':', '.') : timeValue;
+        const timeWithColon = timeValue.includes('.') ? timeValue.replace('.', ':') : timeValue;
+
+        // 1. Set hidden input value directly
+        const hiddenInput = document.querySelector('input[name="' + btnId + '"]') as HTMLInputElement;
+        if (hiddenInput) {
+          const desc = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+          if (desc && desc.set) desc.set.call(hiddenInput, timeWithDot);
+          else hiddenInput.value = timeWithDot;
+          hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+          hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('⚡ Set hidden time input ' + btnId + ':', timeWithDot);
+        }
+
+        // 2. Update the visual display button span
+        const btn = document.getElementById(btnId) as HTMLButtonElement;
+        if (btn) {
+          const span = btn.querySelector('span');
+          if (span) {
+            span.textContent = timeWithColon;
+            span.className = 'font-bold text-base-content';
+          }
+
+          // 3. Click button to open popup, then select the matching time option
+          btn.click();
+          btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+          setTimeout(function() {
+            const isHelperWidget = (el: Element) => !!el.closest('#sinergi-auto-input-widget');
+            const allEls = Array.from(document.querySelectorAll('button, li, span[class], div[class]'))
+              .filter(el => !isHelperWidget(el) && el !== btn);
+            
+            const match = allEls.find(el => {
+              if (el.children.length > 3) return false;
+              const text = (el.textContent || '').trim();
+              return text === timeWithColon || text === timeWithDot;
+            });
+            
+            if (match) {
+              (match as HTMLElement).click();
+              match.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+              console.log('⚡ Clicked time option in popup:', match.textContent);
+            } else {
+              // Close popup by clicking outside
+              document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            }
+          }, 500);
         }
       }
 
-      if (startInput) {
-        const isTimeInput = startInput.type === 'time';
-        setElementValue(startInput, isTimeInput ? report.waktuMulai.replace('.', ':') : report.waktuMulai.replace(':', '.'));
-        console.log('⚡ Mengisi input Mulai dengan:', report.waktuMulai);
-      } else {
-        const startInputs = Array.from(document.querySelectorAll('input[name*="mulai" i], input[id*="mulai" i], input[placeholder*="mulai" i], input[name*="waktu" i], input[id*="waktu" i], input[placeholder*="waktu" i], input[placeholder*="07.30"], input[placeholder*="07:30"]'));
-        for (const input of startInputs) {
-          const isTimeInput = input.type === 'time';
-          setElementValue(input, isTimeInput ? report.waktuMulai.replace('.', ':') : report.waktuMulai.replace(':', '.'));
-        }
+      fillSinergiTimePicker('wkt1', report.waktuMulai);
+      setTimeout(() => fillSinergiTimePicker('wkt2', report.waktuSelesai), 900);
+
+      // Generic fallback for other sites
+      const startInput = findFormInputElement(['mulai', 'start', 'jam_mulai', 'waktu_mulai'], 'input');
+      const endInput = findFormInputElement(['selesai', 'end', 'jam_selesai', 'waktu_selesai'], 'input');
+      if (startInput && startInput.type !== 'hidden') {
+        setElementValue(startInput, report.waktuMulai.replace(':', '.'));
+      }
+      if (endInput && endInput.type !== 'hidden') {
+        setElementValue(endInput, report.waktuSelesai.replace(':', '.'));
       }
 
-      if (endInput) {
-        const isTimeInput = endInput.type === 'time';
-        setElementValue(endInput, isTimeInput ? report.waktuSelesai.replace('.', ':') : report.waktuSelesai.replace(':', '.'));
-        console.log('⚡ Mengisi input Selesai dengan:', report.waktuSelesai);
-      } else {
-        const endInputs = Array.from(document.querySelectorAll('input[name*="selesai" i], input[id*="selesai" i], input[placeholder*="selesai" i], input[placeholder*="15.30"], input[placeholder*="15:30"]'));
-        for (const input of endInputs) {
-          const isTimeInput = input.type === 'time';
-          setElementValue(input, isTimeInput ? report.waktuSelesai.replace('.', ':') : report.waktuSelesai.replace(':', '.'));
+      // 3. Select Uraian Tugas
+      // 3a. SINERGI V2: Radio button matching (idpekerjaandtl)
+      function fillUraianTugasRadio() {
+        const targetText = (report.uraianTugas || '').toLowerCase().trim();
+        const detailText = (report.detailItemPekerjaan || '').toLowerCase().trim();
+        const radios = Array.from(document.querySelectorAll('input[type="radio"]')).filter(r => !r.closest('#sinergi-auto-input-widget'));
+        
+        for (const radio of radios as HTMLInputElement[]) {
+          let labelText = '';
+          if (radio.id) {
+            const lbl = document.querySelector('label[for="' + radio.id + '"]');
+            if (lbl) labelText = lbl.textContent || '';
+          }
+          if (!labelText && radio.parentElement) {
+            labelText = radio.parentElement.textContent || '';
+          }
+          const lt = labelText.toLowerCase().trim();
+          const matchMain = targetText.length > 5 && lt.includes(targetText.substring(0, Math.min(targetText.length, 20)));
+          const matchDetail = detailText.length > 5 && lt.includes(detailText.substring(0, Math.min(detailText.length, 20)));
+          
+          if (matchMain || matchDetail) {
+            radio.click();
+            radio.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            radio.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('⚡ Dipilih radio uraian tugas:', labelText.substring(0, 60));
+            return true;
+          }
         }
+        return false;
       }
 
-      // 3. Select Uraian Tugas (Dropdown & Custom Dropdown Support)
+      fillUraianTugasRadio();
+      setTimeout(fillUraianTugasRadio, 500);
+      setTimeout(fillUraianTugasRadio, 1500);
+
+      // 3b. Native <select> dropdown fallback
       const selectElements = Array.from(document.querySelectorAll('select[name*="tugas"], select[id*="tugas"], select[name*="uraian"], select'));
       let selectedDropdown = false;
       
       for (const select of selectElements) {
         if (select) {
-          const options = Array.from(select.options);
+          const options = Array.from((select as HTMLSelectElement).options);
           const matchedOption = options.find(opt => {
             const optText = opt.text.toLowerCase().trim();
             const targetText = report.uraianTugas.toLowerCase().trim();
@@ -637,32 +701,36 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
       }
 
       // 4. Fill Deskripsi Pekerjaan & Hasil Pekerjaan
-      let descInput = findFormInputElement(['deskripsi', 'uraian kegiatan', 'pekerjaan', 'detail kegiatan'], 'textarea');
-      let hasilInput = findFormInputElement(['hasil', 'output', 'bukti fisik'], 'textarea');
+      // SINERGI V2: keterangan = narasi/deskripsi, hasil = hasil pekerjaan
+      const keteranganEl = document.querySelector('textarea[name="keterangan"]') as HTMLTextAreaElement;
+      const hasilEl = document.querySelector('textarea[name="hasil"]') as HTMLTextAreaElement;
       
-      if (descInput && descInput !== hasilInput) {
-        setElementValue(descInput, report.deskripsiPekerjaan);
-        console.log('⚡ Mengisi Deskripsi dengan:', report.deskripsiPekerjaan);
+      if (keteranganEl) {
+        setElementValue(keteranganEl, report.deskripsiPekerjaan);
+        console.log('⚡ Mengisi keterangan (SINERGI V2):', report.deskripsiPekerjaan?.substring(0, 30));
       }
-      if (hasilInput && descInput !== hasilInput) {
-        setElementValue(hasilInput, report.hasilPekerjaan);
-        console.log('⚡ Mengisi Hasil dengan:', report.hasilPekerjaan);
+      if (hasilEl) {
+        setElementValue(hasilEl, report.hasilPekerjaan);
+        console.log('⚡ Mengisi hasil (SINERGI V2):', report.hasilPekerjaan?.substring(0, 30));
       }
 
-      if (!descInput || !hasilInput || descInput === hasilInput) {
-        const textareas = Array.from(document.querySelectorAll('textarea'));
-        if (textareas.length >= 2) {
-          setElementValue(textareas[0], report.deskripsiPekerjaan);
-          setElementValue(textareas[1], report.hasilPekerjaan);
-        } else {
-          const descInputs = Array.from(document.querySelectorAll('textarea[name*="deskripsi"], textarea[id*="deskripsi"], textarea[name*="pekerjaan"], textarea[id*="pekerjaan"], textarea[placeholder*="deskripsi"]'));
-          for (const input of descInputs) {
-            setElementValue(input, report.deskripsiPekerjaan);
-          }
+      // Generic fallback for other sites
+      if (!keteranganEl || !hasilEl) {
+        let descInput = findFormInputElement(['deskripsi', 'uraian kegiatan', 'pekerjaan', 'detail kegiatan', 'narasi'], 'textarea');
+        let hasilInput = findFormInputElement(['hasil', 'output', 'bukti fisik'], 'textarea');
+        
+        if (descInput && descInput !== hasilInput) {
+          setElementValue(descInput, report.deskripsiPekerjaan);
+        }
+        if (hasilInput && descInput !== hasilInput) {
+          setElementValue(hasilInput, report.hasilPekerjaan);
+        }
 
-          const hasilInputs = Array.from(document.querySelectorAll('textarea[name*="hasil"], textarea[id*="hasil"], textarea[placeholder*="hasil"]'));
-          for (const input of hasilInputs) {
-            setElementValue(input, report.hasilPekerjaan);
+        if (!descInput || !hasilInput || descInput === hasilInput) {
+          const textareas = Array.from(document.querySelectorAll('textarea'));
+          if (textareas.length >= 2) {
+            setElementValue(textareas[0], report.deskripsiPekerjaan);
+            setElementValue(textareas[1], report.hasilPekerjaan);
           }
         }
       }
