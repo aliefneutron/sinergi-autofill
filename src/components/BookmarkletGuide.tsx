@@ -1045,7 +1045,10 @@ export default function BookmarkletGuide() {
       return;
     }
 
-    const onFormPage = !!(document.getElementById('wkt1') || document.querySelector('input[name="wkt1"]'));
+    const onFormPage = window.location.pathname.includes('/create') || 
+                       window.location.pathname.includes('/tambah') || 
+                       !!(document.getElementById('wkt1') || document.querySelector('input[name="wkt1"]'));
+                       
     if (onFormPage) {
       console.log('🤖 Otomatisasi Batch: Mengisi form ke-' + (currentIndex + 1) + ' dari ' + reports.length);
       
@@ -1089,6 +1092,7 @@ export default function BookmarkletGuide() {
 
         const tambahBtn = Array.from(document.querySelectorAll('a, button')).find(el => {
           if (el.closest('#sinergi-auto-input-widget')) return false;
+          if (el.closest('form')) return false; // Exclude form buttons like +Tambah Bukti
           const txt = (el.textContent || '').toLowerCase().trim();
           return txt === 'tambah' || txt.includes('tambah laporan') || txt.includes('tambah pekerjaan') || txt.includes('tambah aktivitas') || txt === '+ tambah';
         });
@@ -1109,6 +1113,7 @@ export default function BookmarkletGuide() {
     }
   }
 
+
   // Auto-confirm SweetAlert/Swal dialogs if batch automation is active
   setInterval(function() {
     if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
@@ -1121,6 +1126,7 @@ export default function BookmarkletGuide() {
     
     const dialogButtons = Array.from(document.querySelectorAll('button')).filter(btn => {
       if (btn.closest('#sinergi-auto-input-widget')) return false;
+      if (btn.closest('form')) return false; // Exclude form buttons like +Tambah Bukti
       const txt = (btn.textContent || '').toLowerCase().trim();
       return txt === 'ya' || txt === 'yakin' || txt === 'ya, simpan' || txt === 'ya, kirim' || txt === 'setuju' || txt.includes('proses');
     });
@@ -1129,6 +1135,7 @@ export default function BookmarkletGuide() {
       btn.click();
     });
   }, 1200);
+
 
   // Interval periodik untuk selalu memastikan asisten melayang aktif
   const autoActiveOnLoad = localStorage.getItem('sinergi_auto_active') === 'true';
