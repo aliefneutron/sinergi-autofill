@@ -451,65 +451,64 @@ export default function BookmarkletGuide() {
         }
 
       // 2. Fill Start & End Times - SINERGI V2 specific: button#wkt1 / button#wkt2 + hidden input
+      // 2. Fill Start & End Times - SINERGI V2 specific: button#wkt1 / button#wkt2 + hidden input
       function fillSinergiTimePicker(btnId, timeValue) {
         const timeWithColon = timeValue.includes('.') ? timeValue.replace('.', ':') : timeValue;
-
-        function injectReactState(el, value) {
-          if (!el) return;
-          // 1. Direct React Props Injection (The most powerful method)
-          const reactKey = Object.keys(el).find(k => k.startsWith('__reactProps$'));
-          if (reactKey && el[reactKey]) {
-            const props = el[reactKey];
-            const mockEvent = {
-                target: { value: value, name: el.name || el.id || btnId },
-                currentTarget: { value: value, name: el.name || el.id || btnId },
-                type: 'change',
-                bubbles: true
-            };
-            if (typeof props.onChange === 'function') {
-                try { props.onChange(mockEvent); } catch (e) { console.error('onChange fail:', e); }
-            }
-            if (typeof props.onBlur === 'function') {
-                try { props.onBlur(mockEvent); } catch (e) { console.error('onBlur fail:', e); }
-            }
-          }
-          
-          // 2. Native DOM & ValueTracker Fallback
-          try {
-            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value");
-            if (nativeInputValueSetter && nativeInputValueSetter.set) {
-              nativeInputValueSetter.set.call(el, value);
-            } else {
-              el.value = value;
-            }
-            if (el.valueTracker && typeof el.valueTracker.setValue === 'function') {
-              el.valueTracker.setValue('');
-            } else if (el._valueTracker && typeof el._valueTracker.setValue === 'function') {
-              el._valueTracker.setValue('');
-            }
-            el.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
-            el.dispatchEvent(new Event('blur', { bubbles: true, cancelable: true }));
-          } catch(e) {}
-        }
-
-        // Apply state injection to all hidden inputs that RHF might be watching
-        const inputs = document.querySelectorAll('input[name="' + btnId + '"], input#' + btnId + ', input[id*="' + btnId + '"]');
-        inputs.forEach(input => {
-          injectReactState(input, timeWithColon);
-          console.log('⚡ Injected React state for ' + btnId + ':', timeWithColon);
-        });
-
-        // Update the visual display button span
+        const [targetJam, targetMenit] = timeWithColon.split(':');
+        
         const btn = document.getElementById(btnId);
-        if (btn) {
-          const span = btn.querySelector('span');
-          if (span) {
-            span.textContent = timeWithColon;
-            span.className = 'font-bold text-base-content';
-          }
-          injectReactState(btn, timeWithColon);
-        }
+        if (!btn) return;
+        
+        // 1. Open the popup by clicking the main button
+        triggerClickEvents(btn);
+        
+        // 2. Wait for popup animation, then locate columns and click options
+        setTimeout(() => {
+           const container = btn.parentElement;
+           if (!container) return;
+           
+           // Locate the specific popup for this button (sibling div.absolute)
+           const popup = container.querySelector('div.absolute');
+           if (!popup) {
+               console.log('⚡ Popup not found for', btnId);
+               return;
+           }
+           
+           // Sinergi V2 time picker has two flex-col columns: Jam and Menit
+           const columns = popup.querySelectorAll('div.flex-col');
+           if (columns.length >= 2) {
+              const jamBtns = Array.from(columns[0].querySelectorAll('button'));
+              const menitBtns = Array.from(columns[1].querySelectorAll('button'));
+              
+              const jamMatch = jamBtns.find(b => (b.textContent || '').trim() === targetJam);
+              const menitMatch = menitBtns.find(b => (b.textContent || '').trim() === targetMenit);
+              
+              if (jamMatch) {
+                  jamMatch.scrollIntoView({ block: 'nearest' });
+                  triggerClickEvents(jamMatch);
+              }
+              
+              // Add a slight delay before clicking minute to perfectly mimic human timing
+              setTimeout(() => {
+                  if (menitMatch) {
+                      menitMatch.scrollIntoView({ block: 'nearest' });
+                      triggerClickEvents(menitMatch);
+                  }
+                  
+                  console.log('⚡ Human-simulated wheel click for ' + btnId + ': ' + targetJam + ':' + targetMenit);
+                  
+                  // Close the popup by clicking outside
+                  setTimeout(() => {
+                      triggerClickEvents(document.body);
+                  }, 200);
+                  
+              }, 150);
+              
+           } else {
+              console.log('⚡ Columns not found in popup for', btnId);
+           }
+           
+        }, 400); // Wait 400ms for popup to fully render/animate
       }
 
         fillSinergiTimePicker('wkt1', report.waktuMulai);
