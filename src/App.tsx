@@ -205,7 +205,7 @@ export default function App() {
                       <Sparkles className="w-3.5 h-3.5" /> Berdaya dengan Google Gemini 3.5
                     </span>
                     <h1 className="text-3xl font-black text-white tracking-tight leading-none md:text-4xl uppercase">
-                      PENGINPUT <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-white">SINERGI V2</span> KINERJA OTOMATIS
+                      PENGINPUT OTOMATIS <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-white">SINERGI V2</span>
                     </h1>
                     <p className="text-sm text-white/90 leading-relaxed">
                       Selamat datang di asisten cerdas untuk mempermudah, menstrukturkan, dan mengotomatiskan 
