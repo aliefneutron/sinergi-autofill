@@ -412,7 +412,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       <div className="bg-white/10 border-b border-white/20 px-6 py-4 flex justify-between items-center rounded-t-3xl">
         <div>
           <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-yellow-300" /> BATCH GENERATOR AI
+            <Sparkles className="w-5 h-5 text-yellow-300" /> BATCH GENERATOR
           </h2>
           <p className="text-xs text-white/80">
             Rencanakan & buat draf kinerja seminggu/sebulan penuh dalam sekali klik!
@@ -469,7 +469,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 mode === "MULTI_DAY" ? "bg-white text-indigo-700 shadow" : "text-white hover:bg-white/10"
               }`}
             >
-              Mode Multi Hari (Standar)
+              Mode Standar
             </button>
             <button
               type="button"
@@ -479,7 +479,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Mode Instan (Tanpa AI)
+              Mode Instan
             </button>
           </div>
 
