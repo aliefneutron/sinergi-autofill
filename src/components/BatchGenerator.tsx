@@ -804,7 +804,6 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                     />
                   </div>
                 </div>
-                </div>
 
                 {/* Global Upload for Instant Mode */}
                 <div className="mt-4">
