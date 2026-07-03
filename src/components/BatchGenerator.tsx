@@ -96,6 +96,19 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   const [globalBuktiBase64, setGlobalBuktiBase64] = useState<string | undefined>(undefined);
   const [isDragging, setIsDragging] = useState(false);
 
+  const handleGlobalUpload = (file: File) => {
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Ukuran file tidak boleh lebih dari 2MB!");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setGlobalBuktiBase64(e.target?.result as string);
+      setGlobalBuktiName(file.name);
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Daily block schedules
   const [blocks, setBlocks] = useState<Block[]>([
     {
@@ -791,6 +804,56 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                     />
                   </div>
                 </div>
+                </div>
+
+                {/* Global Upload for Instant Mode */}
+                <div className="mt-4">
+                  <label className="text-xs font-bold text-white uppercase tracking-wider block mb-1.5">
+                    Upload Bukti Dukung (Opsional)
+                  </label>
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => { e.preventDefault(); setIsDragging(false); const file = e.dataTransfer.files?.[0]; if (file) handleGlobalUpload(file); }}
+                    className={`border-2 border-dashed rounded-xl p-4 text-center transition-colors ${
+                      isDragging ? "border-emerald-400 bg-emerald-400/10" : "border-white/20 hover:border-white/40"
+                    }`}
+                  >
+                    <input
+                      type="file"
+                      id="global-upload"
+                      className="hidden"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleGlobalUpload(file);
+                      }}
+                    />
+                    <label htmlFor="global-upload" className="cursor-pointer flex flex-col items-center justify-center gap-2">
+                      <Upload className="w-6 h-6 text-slate-400" />
+                      {globalBuktiName ? (
+                        <span className="text-xs text-emerald-400 font-bold break-all">{globalBuktiName}</span>
+                      ) : (
+                        <span className="text-xs text-slate-400">Klik atau drop file di sini untuk melampirkan file ke semua laporan</span>
+                      )}
+                    </label>
+                    {globalBuktiName && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGlobalBuktiName(undefined);
+                          setGlobalBuktiBase64(undefined);
+                          const fileInput = document.getElementById("global-upload") as HTMLInputElement;
+                          if (fileInput) fileInput.value = "";
+                        }}
+                        className="mt-2 text-[10px] text-red-400 hover:text-red-300 font-bold uppercase"
+                      >
+                        Hapus File
+                      </button>
+                    )}
+                  </div>
+                </div>
+
               </div>
             </div>
           )}
