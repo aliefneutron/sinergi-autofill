@@ -225,7 +225,7 @@ export default function App() {
                         onClick={() => setActiveTab("BATCH")}
                         className="flex-1 px-2 py-2.5 bg-white/25 hover:bg-white/35 border border-white/20 text-white font-bold rounded-xl text-[11px] sm:text-xs leading-snug transition-colors cursor-pointer text-center"
                       >
-                        ⚡ Batch Generator (Seminggu)
+                        ⚡ Batch Generator
                       </button>
                       <button
                         onClick={() => setActiveTab("OTOMATISASI")}
