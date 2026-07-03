@@ -301,7 +301,7 @@ export default function ExtensionGuide() {
           }
         }
 
-        item.innerHTML = \'<div style="display:flex;justify-content:space-between;align-items:center;font-weight:bold;"><span style="color:#a5b4fc;">\' + dateFormatted + \'</span><div style="display:flex;align-items:center;gap:6px;">\' + statusBadge + \'<span style="color:#94a3b8;font-size:10px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:6px;">\' + report.waktuMulai + \' - \' + report.waktuSelesai + \'</span></div></div><div style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white;margin-top:2px;">\' + report.uraianTugas + \'</div><div style="color:#94a3b8;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\' + report.deskripsiPekerjaan + \'</div>\';
+        item.innerHTML = \'<div style="display:flex;justify-content:space-between;align-items:center;font-weight:bold;"><span style="color:#a5b4fc;">\' + dateFormatted + \'</span><div style="display:flex;align-items:center;gap:6px;">\' + statusBadge + \'<span style="color:#94a3b8;font-size:10px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:6px;">\' + report.waktuMulai + \' - \' + report.waktuSelesai + \'</span></div></div><div style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white;margin-top:2px;"><span style="color:#fbbf24;margin-right:6px;">\' + (index + 1) + \'.</span>\' + report.uraianTugas + \'</div><div style="color:#94a3b8;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\' + report.deskripsiPekerjaan + \'</div>\';
 
         item.onclick = function() {
           fillForm(report);
