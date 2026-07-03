@@ -286,7 +286,7 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         fillForm(report);
         setTimeout(function() {
           clickSubmitButton();
-        }, 1500);
+        }, 12000);
       };
       
       itemsContainer.appendChild(item);
@@ -1153,7 +1153,7 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
                 const form = document.querySelector('form');
                 if (form) form.submit();
               }
-            }, 6500);
+            }, 12000);
           }, 1500);
         }
       }, 500);
