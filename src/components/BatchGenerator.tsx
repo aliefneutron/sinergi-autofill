@@ -813,7 +813,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 {/* Global Upload for Instant Mode */}
                 <div className="mt-4">
                   <label className="text-xs font-bold text-white uppercase tracking-wider block mb-1.5">
-                    Upload Bukti Dukung <span className="text-red-400">(Wajib)</span>
+                    Upload Bukti Dukung
                   </label>
                   <div
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -834,11 +834,11 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                       }}
                     />
                     <label htmlFor="global-upload" className="cursor-pointer flex flex-col items-center justify-center gap-2">
-                      <Upload className="w-6 h-6 text-slate-400" />
+                      <Upload className="w-6 h-6 text-white/90" />
                       {globalBuktiName ? (
                         <span className="text-xs text-emerald-400 font-bold break-all">{globalBuktiName}</span>
                       ) : (
-                        <span className="text-xs text-slate-400">Klik atau drop file di sini untuk melampirkan file ke semua laporan</span>
+                        <span className="text-xs text-white font-bold drop-shadow-md">Klik atau drop file di sini untuk melampirkan file ke semua laporan</span>
                       )}
                     </label>
                     {globalBuktiName && (
