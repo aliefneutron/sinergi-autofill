@@ -437,69 +437,127 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         }
       }
 
+      // Helper: force-close any open time picker popup
+      function forceCloseAllPopups() {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      }
+
       // 2. Fill Start & End Times - SINERGI V2 specific: button#wkt1 / button#wkt2 + hidden input
-      function fillSinergiTimePicker(btnId: string, timeValue: string) {
+      function fillSinergiTimePicker(inputId: string, timeValue: string, keywords: string[] = []) {
         const timeWithColon = timeValue.includes('.') ? timeValue.replace('.', ':') : timeValue;
         const [targetJam, targetMenit] = timeWithColon.split(':');
         
-        const btn = document.getElementById(btnId) as HTMLButtonElement;
-        if (!btn) return;
+        let el = document.getElementById(inputId);
+        if (!el) {
+          el = document.querySelector(`input[name="${inputId}"], input[id*="${inputId}"]`) || 
+               findFormInputElement([inputId, ...keywords], 'input') ||
+               findFormInputElement([inputId, ...keywords], 'button');
+        }
         
-        // 1. Open the popup by clicking the main button
+        if (!el) {
+          console.log('⚡ Element not found for', inputId);
+          return;
+        }
+
+        if (el.tagName === 'INPUT') {
+          setElementValue(el, timeWithColon);
+          console.log('⚡ Set value for native input', inputId, timeWithColon);
+          return;
+        }
+        
+        const btn = el as HTMLButtonElement;
+
+        function getOpenPopup(): Element | null {
+          const container = btn.parentElement;
+          let popup: Element | null = container ? container.querySelector('div.absolute') : null;
+          // Validate it's a real time picker (>=20 buttons and >=2 flex-col columns)
+          if (popup && popup.querySelectorAll('button').length >= 20 && popup.querySelectorAll('div.flex-col').length >= 2) return popup;
+          popup = null;
+          const popups = document.querySelectorAll('div.absolute, div[role="dialog"]');
+          for (const p of Array.from(popups)) {
+            if (p.querySelectorAll('div.flex-col').length >= 2 && p.querySelectorAll('button').length >= 20) {
+              popup = p; break;
+            }
+          }
+          return popup;
+        }
+
+        function findMatchInList(btns: Element[], target: string): Element | undefined {
+          let m = btns.find(b => (b.textContent || '').trim() === target);
+          if (!m) m = btns.find(b => parseInt((b.textContent || '').trim(), 10) === parseInt(target, 10));
+          return m;
+        }
+        
+        // 1. Open the popup
         triggerClickEvents(btn);
         
-        // 2. Wait for popup animation, then locate columns and click options
+        // 2. Wait for popup to render, then click JAM
         setTimeout(() => {
-           const container = btn.parentElement;
-           if (!container) return;
-           
-           // Locate the specific popup for this button (sibling div.absolute)
-           const popup = container.querySelector('div.absolute');
-           if (!popup) {
-               console.log('⚡ Popup not found for', btnId);
-               return;
-           }
-           
-           // Sinergi V2 time picker has two flex-col columns: Jam and Menit
-           const columns = popup.querySelectorAll('div.flex-col');
-           if (columns.length >= 2) {
-              const jamBtns = Array.from(columns[0].querySelectorAll('button'));
-              const menitBtns = Array.from(columns[1].querySelectorAll('button'));
+          const popup = getOpenPopup();
+          if (!popup) { console.log('⚡ Popup not found for', inputId); return; }
+
+          const columns = popup.querySelectorAll('div.flex-col, .overflow-y-auto');
+          let jamBtns: Element[] = [];
+          if (columns.length >= 2) {
+            jamBtns = Array.from(columns[0].querySelectorAll('button, li, div.cursor-pointer'));
+          } else {
+            jamBtns = Array.from(popup.querySelectorAll('button, li, div.cursor-pointer'));
+          }
+
+          const jamMatch = findMatchInList(jamBtns, targetJam);
+          if (jamMatch) {
+            jamMatch.scrollIntoView({ block: 'center' });
+            setTimeout(() => {
+              triggerClickEvents(jamMatch);
+              console.log('⚡ Klik JAM ' + targetJam + ' untuk ' + inputId);
               
-              const jamMatch = jamBtns.find(b => (b.textContent || '').trim() === targetJam);
-              const menitMatch = menitBtns.find(b => (b.textContent || '').trim() === targetMenit);
-              
-              if (jamMatch) {
-                  jamMatch.scrollIntoView({ block: 'nearest' });
-                  setTimeout(() => triggerClickEvents(jamMatch), 100);
-              }
-              
-              // Add a generous delay before clicking minute to perfectly mimic human timing
+              // 3. Re-query popup AFTER clicking JAM then click MENIT
               setTimeout(() => {
-                  if (menitMatch) {
-                      menitMatch.scrollIntoView({ block: 'nearest' });
-                      setTimeout(() => triggerClickEvents(menitMatch), 100);
-                  }
-                  
-                  console.log('⚡ Human-simulated wheel click for ' + btnId + ': ' + targetJam + ':' + targetMenit);
-                  
-                  // Close the popup by clicking outside
+                const popup2 = getOpenPopup();
+                if (!popup2) { console.log('⚡ Popup hilang setelah klik JAM untuk', inputId); return; }
+
+                // Find overflow-y-auto column with most buttons = menit column (60 items per diagnostic)
+                const overflowCols = Array.from(popup2.querySelectorAll('.overflow-y-auto'));
+                overflowCols.sort((a, b) => b.querySelectorAll('button').length - a.querySelectorAll('button').length);
+                const menitColEl = overflowCols[0] || popup2;
+
+                console.log('⚡ Menit col: ' + menitColEl.querySelectorAll('button').length + ' buttons');
+
+                const allMenitBtns = Array.from(menitColEl.querySelectorAll('button'));
+                const menitMatch = allMenitBtns.find(b => {
+                  const txt = (b.textContent || '').trim();
+                  return txt === targetMenit || parseInt(txt, 10) === parseInt(targetMenit, 10);
+                });
+
+                if (menitMatch) {
+                  const btnOffsetTop = (menitMatch as HTMLElement).offsetTop;
+                  const scrollTarget = Math.max(0, btnOffsetTop - ((menitColEl as HTMLElement).clientHeight / 2));
+                  (menitColEl as HTMLElement).scrollTop = scrollTarget;
+                  console.log('⚡ Scroll menit ke offsetTop=' + btnOffsetTop + ' scrollTarget=' + scrollTarget);
                   setTimeout(() => {
-                      triggerClickEvents(document.body);
-                  }, 500);
-                  
-              }, 600);
-              
-           } else {
-              console.log('⚡ Columns not found in popup for', btnId);
-           }
-           
-        }, 700); // Wait 700ms for popup to fully render/animate
+                    triggerClickEvents(menitMatch);
+                    console.log('⚡ Klik MENIT ' + targetMenit + ' untuk ' + inputId);
+                    setTimeout(() => forceCloseAllPopups(), 400);
+                  }, 300);
+                } else {
+                  console.log('⚡ Menit ' + targetMenit + ' tidak ditemukan, total: ' + allMenitBtns.length);
+                  setTimeout(() => forceCloseAllPopups(), 400);
+                }
+            }, 150);
+          } else {
+            console.log('⚡ Jam ' + targetJam + ' tidak ditemukan untuk', inputId);
+          }
+        }, 700);
       }
 
-        // Add delay before opening time pickers to prevent text-input re-renders from destroying the popup
-        setTimeout(() => fillSinergiTimePicker('wkt1', report.waktuMulai), 1000);
-        setTimeout(() => fillSinergiTimePicker('wkt2', report.waktuSelesai), 2500);
+        // wkt1 starts at 1000ms, finishes ~2800ms. wkt2 starts at 4300ms (safe margin after close)
+        setTimeout(() => fillSinergiTimePicker('wkt1', report.waktuMulai, ['mulai', 'start']), 1000);
+        setTimeout(() => {
+          forceCloseAllPopups();
+          setTimeout(() => fillSinergiTimePicker('wkt2', report.waktuSelesai, ['selesai', 'end']), 300);
+        }, 4000);
 
       // Generic fallback for other sites
       const startInput = findFormInputElement(['mulai', 'start', 'jam_mulai', 'waktu_mulai'], 'input');
@@ -599,14 +657,13 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         return false;
       }
 
-      // Step 1: Open the Uraian Tugas accordion trigger immediately
-      clickUraianTrigger();
-
-      // Step 2: After accordion opens (wait for animation ~300-600ms), click matching radio
-      setTimeout(fillUraianTugasRadio, 500);
-      setTimeout(fillUraianTugasRadio, 1000);
-      setTimeout(fillUraianTugasRadio, 2000);
-      setTimeout(fillUraianTugasRadio, 3500);
+      // Uraian tugas AFTER time pickers done (~6500ms). wkt1=1000ms, wkt2=4300ms, wkt2 done ~6500ms.
+      setTimeout(() => {
+        clickUraianTrigger();
+        setTimeout(fillUraianTugasRadio, 500);
+        setTimeout(fillUraianTugasRadio, 1200);
+        setTimeout(fillUraianTugasRadio, 2500);
+      }, 7000);
 
       // 3b. Native <select> dropdown fallback
       const selectElements = Array.from(document.querySelectorAll('select[name*="tugas"], select[id*="tugas"], select[name*="uraian"], select'));
@@ -761,16 +818,15 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
         return false;
       }
 
-      // Trigger custom dropdown click flow multiple times to ensure robust opening and selection
-      ensureDropdownOpen();
-      setTimeout(ensureDropdownOpen, 300);
-      setTimeout(ensureDropdownOpen, 600);
-
-      setTimeout(clickUraianOption, 400);
-      setTimeout(clickUraianOption, 800);
-      setTimeout(clickUraianOption, 1500);
-      setTimeout(clickUraianOption, 2500);
-      setTimeout(clickUraianOption, 4000);
+      // Dropdown flow AFTER time pickers done
+      setTimeout(() => {
+        ensureDropdownOpen();
+        setTimeout(ensureDropdownOpen, 300);
+        setTimeout(ensureDropdownOpen, 600);
+        setTimeout(clickUraianOption, 400);
+        setTimeout(clickUraianOption, 900);
+        setTimeout(clickUraianOption, 1800);
+      }, 7000);
 
       // 3b. Match and Click "Detail Item Pekerjaan" (e.g. Perjalanan dinas luar daerah / dalam daerah)
       function clickDetailItem() {
@@ -862,11 +918,10 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
       }
 
       if (report.detailItemPekerjaan) {
-        setTimeout(fillDetailItem, 300);
-        setTimeout(fillDetailItem, 800);
-        setTimeout(fillDetailItem, 1500);
-        setTimeout(fillDetailItem, 2500);
-        setTimeout(fillDetailItem, 3500);
+        // Delay AFTER time pickers and uraian tugas done
+        setTimeout(fillDetailItem, 8000);
+        setTimeout(fillDetailItem, 9000);
+        setTimeout(fillDetailItem, 10000);
       }
 
       // Handle custom select2 dropdown if Sinergi V2 uses it
