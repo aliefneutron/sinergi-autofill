@@ -329,77 +329,29 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       return;
     }
 
-    setIsGenerating(true);
-    setProgress(0);
-    const total = dates.length * blocks.length;
-    setTotalTasks(total);
-
     const tempReports: LaporanKinerja[] = [];
-    let processedCount = 0;
 
     for (const date of dates) {
       for (const block of blocks) {
-        try {
-          // Hit the Gemini generation API with context
-          const sessionTime = `(Sesi Jam ${block.waktuMulai} - ${block.waktuSelesai})`;
-          const combinedContext = block.context ? `${block.context} ${sessionTime}` : sessionTime;
-
-          const res = await fetch("/api/gemini/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              uraianTugas: block.uraianTugas,
-              subTugas: block.detailItemPekerjaan,
-              context: combinedContext,
-              count: 1 // We only need 1 per day block
-            })
-          });
-
-          const data = await res.json();
-          const variation = data.variations?.[0] || {
-            deskripsi: `Mengerjakan aktivitas terkait ${block.uraianTugas}.`,
-            hasil: `Terlaksananya kegiatan ${block.uraianTugas}.`
-          };
-
-          tempReports.push({
-            id: `batch-${date}-${block.id}-${Date.now()}`,
-            tanggal: date,
-            waktuMulai: block.waktuMulai,
-            waktuSelesai: block.waktuSelesai,
-            uraianTugas: block.uraianTugas,
-            detailItemPekerjaan: block.detailItemPekerjaan || block.context || block.uraianTugas,
-            deskripsiPekerjaan: variation.deskripsi,
-            hasilPekerjaan: variation.hasil,
-            buktiDukungName: block.buktiDukungName || globalBuktiName,
-            buktiDukungBase64: block.buktiDukungBase64 || globalBuktiBase64,
-            dokumenLainnya: "",
-            status: StatusLaporan.BELUM_DIPERIKSA
-          });
-        } catch (err) {
-          console.error("Gagal men-generate aktivitas:", err);
-          // Fallback static templates safely if API breaks
-          tempReports.push({
-            id: `batch-${date}-${block.id}-${Date.now()}`,
-            tanggal: date,
-            waktuMulai: block.waktuMulai,
-            waktuSelesai: block.waktuSelesai,
-            uraianTugas: block.uraianTugas,
-            detailItemPekerjaan: block.detailItemPekerjaan || block.context || block.uraianTugas,
-            deskripsiPekerjaan: `Melaksanakan kegiatan harian untuk tupoksi ${block.uraianTugas} secara tertib dan disiplin.`,
-            hasilPekerjaan: `Laporan kegiatan ${block.uraianTugas} terdokumentasi.`,
-            buktiDukungName: block.buktiDukungName || globalBuktiName,
-            buktiDukungBase64: block.buktiDukungBase64 || globalBuktiBase64,
-            status: StatusLaporan.BELUM_DIPERIKSA
-          });
-        }
-        processedCount++;
-        setProgress(Math.round((processedCount / total) * 100));
+        tempReports.push({
+          id: `batch-${date}-${block.id}-${Date.now()}`,
+          tanggal: date,
+          waktuMulai: block.waktuMulai,
+          waktuSelesai: block.waktuSelesai,
+          uraianTugas: block.uraianTugas,
+          detailItemPekerjaan: block.detailItemPekerjaan || block.context || block.uraianTugas,
+          deskripsiPekerjaan: block.context || `Melaksanakan kegiatan harian untuk tupoksi ${block.uraianTugas} secara tertib dan disiplin.`,
+          hasilPekerjaan: `Laporan kegiatan ${block.uraianTugas} terdokumentasi.`,
+          buktiDukungName: block.buktiDukungName || globalBuktiName,
+          buktiDukungBase64: block.buktiDukungBase64 || globalBuktiBase64,
+          dokumenLainnya: "",
+          tautan: "",
+          status: StatusLaporan.BELUM_DIPERIKSA
+        });
       }
     }
 
-    setGeneratedReports(tempReports);
-    setStep("PREVIEW");
-    setIsGenerating(false);
+    onSaveBatch(tempReports);
   };
 
   const handleImport = () => {
@@ -835,7 +787,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4" /> Mulai Batch AI Generator
+                    <Play className="w-4 h-4" /> Mulai
                   </>
                 )}
               </button>
