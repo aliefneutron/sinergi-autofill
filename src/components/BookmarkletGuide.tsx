@@ -305,6 +305,9 @@ export default function BookmarkletGuide() {
 
         item.onclick = function() {
           fillForm(report);
+          setTimeout(function() {
+            clickSubmitButton();
+          }, 1500);
         };
 
         itemsContainer.appendChild(item);

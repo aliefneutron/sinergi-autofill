@@ -284,6 +284,9 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
 
       item.onclick = function() {
         fillForm(report);
+        setTimeout(function() {
+          clickSubmitButton();
+        }, 1500);
       };
       
       itemsContainer.appendChild(item);
