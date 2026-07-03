@@ -28,7 +28,7 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
       <label style="font-weight:bold;display:block;color:#a5b4fc;font-size:12px;">Unggah File Payload Kinerja:</label>
       <div style="display:flex;flex-direction:column;gap:6px;">
         <button id="sinergi-btn-upload-trigger" style="width:100%;background:#df3b4f;color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(223,59,79,0.2);">
-          📁 Pilih & Unggah File Payload (.json)
+          📁 Unggah File Payload JSON
         </button>
         <input type="file" id="sinergi-file-input" accept=".json" style="display:none;" />
       </div>
@@ -44,7 +44,7 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
     </div>
     <div id="sinergi-auto-control-section" style="margin-bottom:10px;display:none;flex-direction:column;gap:6px;">
       <button id="sinergi-btn-start-auto" style="width:100%;background:#10b981;color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(16,185,129,0.2);">
-        🚀 Jalankan Otomatisasi Batch (Simpan & Lanjut)
+        🚀 Jalankan Otomatis
       </button>
       <button id="sinergi-btn-stop-auto" style="width:100%;background:#ef4444;color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:none;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(239,68,68,0.2);">
         🛑 Hentikan Otomatisasi Batch
