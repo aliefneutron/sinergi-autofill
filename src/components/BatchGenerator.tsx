@@ -285,6 +285,11 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   };
 
   const handleInstantGenerate = () => {
+    if (!globalBuktiBase64) {
+      alert("Anda harus mengunggah Bukti Dukung terlebih dahulu untuk Mode Instan!");
+      return;
+    }
+
     if (!startDate || !endDate) {
       alert("Harap tentukan tanggal mulai dan tanggal selesai!");
       return;
@@ -808,7 +813,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 {/* Global Upload for Instant Mode */}
                 <div className="mt-4">
                   <label className="text-xs font-bold text-white uppercase tracking-wider block mb-1.5">
-                    Upload Bukti Dukung (Opsional)
+                    Upload Bukti Dukung <span className="text-red-400">(Wajib)</span>
                   </label>
                   <div
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
