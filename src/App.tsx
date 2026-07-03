@@ -164,19 +164,19 @@ export default function App() {
           </nav>
 
           {/* Profile Quick Widget */}
-          <div className="flex items-center gap-3 bg-white/15 p-1.5 pl-3 pr-2.5 rounded-xl border border-white/20 shadow-md">
-            <div className="text-right leading-none hidden xl:block">
-              <span className="font-bold text-white text-xs block">{userProfile.nama}</span>
-              <span className="text-[10px] text-white/75 font-semibold block mt-1">{userProfile.jabatan}</span>
+          <button
+            onClick={() => setIsProfileOpen(true)}
+            className="flex items-center justify-between w-full sm:w-auto gap-3 bg-white/15 hover:bg-white/20 p-1.5 pl-3 pr-2.5 rounded-xl border border-white/20 shadow-md transition-all cursor-pointer text-left"
+            title="Atur Profil Saya"
+          >
+            <div className="leading-none flex-1 overflow-hidden">
+              <span className="font-bold text-white text-[11px] sm:text-xs block truncate">{userProfile.nama}</span>
+              <span className="text-[9px] sm:text-[10px] text-white/75 font-semibold block mt-1 truncate">{userProfile.jabatan}</span>
             </div>
-            <button
-              onClick={() => setIsProfileOpen(true)}
-              className="w-8.5 h-8.5 rounded-lg bg-white/25 text-white flex items-center justify-center border border-white/30 hover:bg-white/40 transition-all cursor-pointer"
-              title="Atur Profil Saya"
-            >
+            <div className="w-8 h-8 rounded-lg bg-white/25 text-white flex items-center justify-center border border-white/30 shrink-0">
               <User className="w-4 h-4" />
-            </button>
-          </div>
+            </div>
+          </button>
         </div>
       </header>
 
