@@ -34,13 +34,7 @@ export const BOOKMARKLET_CODE = `javascript:(function(){
       </div>
       <div id="sinergi-file-name" style="color:#34d399;font-weight:bold;font-size:11px;text-align:center;display:none;background:rgba(52,211,153,0.1);padding:6px;border-radius:6px;border:1px solid rgba(52,211,153,0.15);"></div>
 
-      <details style="margin-top:4px;border-top:1px solid rgba(255,255,255,0.08);padding-top:6px;">
-        <summary style="cursor:pointer;color:#64748b;font-weight:bold;font-size:11px;user-select:none;">Atau Tempel Teks Manual</summary>
-        <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
-          <textarea id="sinergi-data-input" placeholder="Tempel JSON atau Payload e-Kinerja di sini..." style="width:100%;height:60px;background:#1e2230;color:white;border:1px solid #334155;border-radius:6px;padding:8px;box-sizing:border-box;font-family:monospace;font-size:11px;resize:none;outline:none;"></textarea>
-          <button id="sinergi-btn-load" style="width:100%;background:#334155;color:white;border:none;border-radius:6px;padding:6px;font-weight:bold;cursor:pointer;">Muat Manual</button>
-        </div>
-      </details>
+
     </div>
     <div id="sinergi-auto-control-section" style="margin-bottom:10px;display:none;flex-direction:column;gap:6px;">
       <button id="sinergi-btn-start-auto" style="width:100%;background:#10b981;color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(16,185,129,0.2);">
