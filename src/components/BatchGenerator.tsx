@@ -316,37 +316,43 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       return;
     }
 
-    const intervals: {start: string, end: string}[] = [];
-    const [startH, startM] = instantGlobalStart.split(/[.:]/).map(Number);
-    const [endH, endM] = instantGlobalEnd.split(/[.:]/).map(Number);
-    
-    let currentTotalMinutes = startH * 60 + (startM || 0);
-    const endTotalMinutes = endH * 60 + (endM || 0);
-    
-    while (currentTotalMinutes < endTotalMinutes) {
-      const sh = Math.floor(currentTotalMinutes / 60);
-      const sm = currentTotalMinutes % 60;
-      
-      const nextTotalMinutes = currentTotalMinutes + instantDuration;
-      const eh = Math.floor(nextTotalMinutes / 60);
-      const em = nextTotalMinutes % 60;
-      
-      intervals.push({
-        start: `${String(sh).padStart(2, '0')}.${String(sm).padStart(2, '0')}`,
-        end: `${String(eh).padStart(2, '0')}.${String(em).padStart(2, '0')}`
-      });
-      
-      currentTotalMinutes = nextTotalMinutes;
-    }
-    
-    if (intervals.length === 0) {
-      alert("Rentang waktu tidak valid atau durasi terlalu besar!");
-      return;
-    }
-
     const newReports: LaporanKinerja[] = [];
     for (const date of dates) {
-      for (const interval of intervals) {
+      const dateObj = new Date(date);
+      const isFriday = dateObj.getDay() === 5;
+      
+      const [startH, startM] = instantGlobalStart.split(/[.:]/).map(Number);
+      const [endH, endM] = instantGlobalEnd.split(/[.:]/).map(Number);
+      
+      let currentTotalMinutes = isFriday ? (7 * 60) : (startH * 60 + (startM || 0));
+      const endTotalMinutes = isFriday ? (15 * 60) : (endH * 60 + (endM || 0));
+      
+      const intervalsForDay: {start: string, end: string}[] = [];
+      
+      while (currentTotalMinutes < endTotalMinutes) {
+        const sh = Math.floor(currentTotalMinutes / 60);
+        const sm = currentTotalMinutes % 60;
+        
+        const nextTotalMinutes = currentTotalMinutes + instantDuration;
+        const eh = Math.floor(nextTotalMinutes / 60);
+        const em = nextTotalMinutes % 60;
+        
+        let skip = false;
+        if (isFriday && sh >= 10 && sh < 13) {
+          skip = true;
+        }
+        
+        if (!skip) {
+          intervalsForDay.push({
+            start: `${String(sh).padStart(2, '0')}.${String(sm).padStart(2, '0')}`,
+            end: `${String(eh).padStart(2, '0')}.${String(em).padStart(2, '0')}`
+          });
+        }
+        
+        currentTotalMinutes = nextTotalMinutes;
+      }
+
+      for (const interval of intervalsForDay) {
         newReports.push({
           id: `r-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           tanggal: date,
@@ -881,26 +887,45 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                   curr.setDate(curr.getDate() + 1);
                 }
                 
-                let blockCount = blocks.length;
                 if (mode === "INSTANT_INTERVAL") {
                   const [startH, startM] = instantGlobalStart.split(/[.:]/).map(Number);
                   const [endH, endM] = instantGlobalEnd.split(/[.:]/).map(Number);
                   const duration = instantDuration || 60;
-                  let m1 = startH * 60 + (startM || 0);
-                  const m2 = endH * 60 + (endM || 0);
-                  let tempC = 0;
-                  while (m1 < m2) {
-                    tempC++;
-                    m1 += duration;
+                  
+                  let totalTasks = 0;
+                  const curr2 = new Date(start);
+                  while (curr2 <= end) {
+                    const dayOfWeek = curr2.getDay();
+                    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                    const isFriday = dayOfWeek === 5;
+                    
+                    if (!excludeWeekends || !isWeekend) {
+                      let m1 = isFriday ? (7 * 60) : (startH * 60 + (startM || 0));
+                      const m2 = isFriday ? (15 * 60) : (endH * 60 + (endM || 0));
+                      while (m1 < m2) {
+                        const sh = Math.floor(m1 / 60);
+                        let skip = false;
+                        if (isFriday && sh >= 10 && sh < 13) skip = true;
+                        
+                        if (!skip) totalTasks++;
+                        m1 += duration;
+                      }
+                    }
+                    curr2.setDate(curr2.getDate() + 1);
                   }
-                  blockCount = tempC;
+                  
+                  return (
+                    <>
+                      {count} Hari Kerja (Total {totalTasks} Laporan)
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      {count} Hari Kerja &times; {blocks.length} Tugas
+                    </>
+                  );
                 }
-                
-                return (
-                  <>
-                    {count} Hari Kerja &times; {blockCount} Tugas
-                  </>
-                );
               })()}
             </div>
             <div className="flex gap-3 w-full sm:w-auto">
