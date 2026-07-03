@@ -16,7 +16,8 @@ interface Block {
   waktuSelesai: string;
   uraianTugas: string;
   detailItemPekerjaan?: string;
-  context: string;
+  deskripsiPekerjaan: string;
+  hasilPekerjaan: string;
   buktiDukungName?: string;
   buktiDukungBase64?: string;
 }
@@ -58,7 +59,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       waktuSelesai: "08.30",
       uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
       detailItemPekerjaan: "Persiapan dan keberangkatan menuju lokasi dinas",
-      context: "Persiapan administrasi dan perjalanan menuju lokasi dinas daerah"
+      deskripsiPekerjaan: "Persiapan administrasi dan perjalanan menuju lokasi dinas daerah",
+      hasilPekerjaan: "Keberangkatan dinas sesuai jadwal"
     },
     {
       id: "b2",
@@ -66,7 +68,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       waktuSelesai: "09.30",
       uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
       detailItemPekerjaan: "Melakukan koordinasi dengan instansi setempat",
-      context: "Rapat koordinasi dan sinkronisasi data dengan instansi terkait di lokasi"
+      deskripsiPekerjaan: "Rapat koordinasi dan sinkronisasi data dengan instansi terkait di lokasi",
+      hasilPekerjaan: "Terselenggaranya rapat koordinasi"
     },
     {
       id: "b3",
@@ -74,7 +77,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       waktuSelesai: "10.30",
       uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
       detailItemPekerjaan: "Meninjau lapangan dan pengumpulan data",
-      context: "Survei lapangan dan observasi langsung terkait kegiatan dinas"
+      deskripsiPekerjaan: "Survei lapangan dan observasi langsung terkait kegiatan dinas",
+      hasilPekerjaan: "Data lapangan berhasil dihimpun"
     },
     {
       id: "b4",
@@ -82,7 +86,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       waktuSelesai: "11.30",
       uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
       detailItemPekerjaan: "Evaluasi hasil tinjauan dan pengolahan data awal",
-      context: "Melakukan rekapitulasi dan evaluasi data hasil tinjauan lapangan"
+      deskripsiPekerjaan: "Melakukan rekapitulasi dan evaluasi data hasil tinjauan lapangan",
+      hasilPekerjaan: "Rekapitulasi data lapangan"
     },
     {
       id: "b5",
@@ -90,7 +95,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
       waktuSelesai: "12.30",
       uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
       detailItemPekerjaan: "Penyusunan draf laporan dan perjalanan kembali",
-      context: "Penyusunan laporan hasil dinas sementara dan perjalanan pulang"
+      deskripsiPekerjaan: "Penyusunan laporan hasil dinas sementara dan perjalanan pulang",
+      hasilPekerjaan: "Draf laporan perjalanan dinas daerah"
     }
   ]);
 
@@ -120,9 +126,10 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
         id: `block-${Date.now()}`,
         waktuMulai: nextStart,
         waktuSelesai: nextEnd,
-        uraianTugas: "Melaksanakan Perjalanan Dinas Perjalanan, dinas dalam daerah",
-        detailItemPekerjaan: "Melaksanakan perjalanan dinas daerah lanjutan",
-        context: ""
+        uraianTugas: lastBlock ? lastBlock.uraianTugas : DEFAULT_URAIAN_TUGAS[1],
+        detailItemPekerjaan: lastBlock ? lastBlock.detailItemPekerjaan : getDefaultDetailItem(DEFAULT_URAIAN_TUGAS[1]),
+        deskripsiPekerjaan: "",
+        hasilPekerjaan: ""
       }
     ]);
   };
@@ -289,7 +296,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
           buktiDukungName: globalBuktiName,
           buktiDukungBase64: globalBuktiBase64,
           dokumenLainnya: "",
-          tautan: ""
+          tautan: "",
+          status: StatusLaporan.BELUM_DIPERIKSA
         });
       }
     }
@@ -339,9 +347,9 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
           waktuMulai: block.waktuMulai,
           waktuSelesai: block.waktuSelesai,
           uraianTugas: block.uraianTugas,
-          detailItemPekerjaan: block.detailItemPekerjaan || block.context || block.uraianTugas,
-          deskripsiPekerjaan: block.context || `Melaksanakan kegiatan harian untuk tupoksi ${block.uraianTugas} secara tertib dan disiplin.`,
-          hasilPekerjaan: `Laporan kegiatan ${block.uraianTugas} terdokumentasi.`,
+          detailItemPekerjaan: block.detailItemPekerjaan || block.uraianTugas,
+          deskripsiPekerjaan: block.deskripsiPekerjaan,
+          hasilPekerjaan: block.hasilPekerjaan,
           buktiDukungName: block.buktiDukungName || globalBuktiName,
           buktiDukungBase64: block.buktiDukungBase64 || globalBuktiBase64,
           dokumenLainnya: "",
@@ -469,8 +477,6 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             </div>
           </div>
 
-
-
           {/* Blocks Configuration */}
           {mode !== "INSTANT_INTERVAL" ? (
             <div className="space-y-3">
@@ -554,14 +560,28 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
 
                     {/* Context / Keywords */}
                     <div className="md:col-span-3 space-y-1">
-                      <span className="text-[10px] text-white/80 uppercase font-black">Konteks / Kata Kunci</span>
-                      <input
-                        type="text"
-                        placeholder="Misal: verifikasi berkas usulan cuti..."
-                        value={block.context}
-                        onChange={(e) => updateBlock(block.id, "context", e.target.value)}
-                        className="w-full bg-white/40 text-slate-900 placeholder-slate-600 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-medium"
-                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-white/80 uppercase font-black">Deskripsi Kerja</span>
+                          <input
+                            type="text"
+                            value={block.deskripsiPekerjaan}
+                            onChange={(e) => updateBlock(block.id, "deskripsiPekerjaan", e.target.value)}
+                            className="w-full bg-white/40 text-slate-900 placeholder-slate-600 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-medium"
+                            placeholder="Masukkan deskripsi pekerjaan..."
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-white/80 uppercase font-black">Hasil Pekerjaan</span>
+                          <input
+                            type="text"
+                            value={block.hasilPekerjaan}
+                            onChange={(e) => updateBlock(block.id, "hasilPekerjaan", e.target.value)}
+                            className="w-full bg-white/40 text-slate-900 placeholder-slate-600 border border-white/35 focus:border-white/50 focus:outline-none rounded-xl p-2 text-xs font-medium"
+                            placeholder="Masukkan hasil pekerjaan..."
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     {/* Delete & Upload action */}
