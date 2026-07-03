@@ -801,15 +801,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 onClick={mode === "INSTANT_INTERVAL" ? handleInstantGenerate : handleBatchGenerate}
                 className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm bg-white text-indigo-700 hover:bg-white/95 font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg cursor-pointer"
               >
-                {mode === "INSTANT_INTERVAL" ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" /> Buat Instan Tanpa AI
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" /> Mulai
-                  </>
-                )}
+                <Play className="w-4 h-4" /> Mulai
               </button>
             </div>
           </div>
