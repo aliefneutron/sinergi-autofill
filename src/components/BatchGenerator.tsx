@@ -45,8 +45,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
 
   // New Modes
   const [mode, setMode] = useState<"MULTI_DAY" | "INSTANT_INTERVAL">("MULTI_DAY");
-  const [instantGlobalStart, setInstantGlobalStart] = useState("07.30");
-  const [instantGlobalEnd, setInstantGlobalEnd] = useState("15.30");
+  const [instantGlobalStart, setInstantGlobalStart] = useState("07.00");
+  const [instantGlobalEnd, setInstantGlobalEnd] = useState("15.00");
   const [instantDuration, setInstantDuration] = useState(60);
   const [instantUraianTugas, setInstantUraianTugas] = useState(DEFAULT_URAIAN_TUGAS[1]);
   const [instantDetailPekerjaan, setInstantDetailPekerjaan] = useState(getDefaultDetailItem(DEFAULT_URAIAN_TUGAS[1]));
