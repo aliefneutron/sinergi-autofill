@@ -747,7 +747,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                     </div>
                     <div className="flex w-full md:w-auto items-center gap-2">
                       <select 
-                        className="flex-1 md:w-64 bg-slate-800 text-white border border-white/20 rounded-lg p-2 text-xs font-medium focus:outline-none"
+                        className="flex-1 md:w-64 bg-white/30 text-slate-900 border border-white/35 focus:border-white/50 rounded-lg p-2 text-xs font-bold focus:outline-none cursor-pointer"
                         onChange={(e) => {
                           const preset = savedPresets.find(p => p.id === e.target.value);
                           if (preset) {
@@ -759,16 +759,16 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                         }}
                         defaultValue=""
                       >
-                        <option value="" disabled>-- Pilih Template --</option>
+                        <option value="" disabled className="bg-slate-800 text-white font-sans text-xs">-- Pilih Template --</option>
                         {savedPresets.map(p => (
-                          <option key={p.id} value={p.id}>{p.name}</option>
+                          <option key={p.id} value={p.id} className="bg-slate-800 text-white font-sans text-xs">{p.name}</option>
                         ))}
-                        {savedPresets.length === 0 && <option value="" disabled>Belum ada template</option>}
+                        {savedPresets.length === 0 && <option value="" disabled className="bg-slate-800 text-white font-sans text-xs">Belum ada template</option>}
                       </select>
                       <button 
                         type="button"
                         onClick={savePreset}
-                        className="bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 text-indigo-300 px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors whitespace-nowrap flex items-center gap-1.5"
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-md px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
                         title="Simpan input saat ini sebagai template"
                       >
                         <Save className="w-3.5 h-3.5" />
@@ -782,7 +782,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                            if (preset) deletePreset(preset.id);
                          }}
                          disabled={savedPresets.length === 0}
-                         className="bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-300 p-2 rounded-lg transition-colors disabled:opacity-50"
+                         className="bg-red-600 hover:bg-red-500 text-white shadow-md p-2 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                          title="Hapus template tersimpan"
                       >
                          <Trash2 className="w-3.5 h-3.5" />
