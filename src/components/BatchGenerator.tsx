@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { LaporanKinerja, StatusLaporan } from "../types";
 import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP, getDefaultDetailItem } from "../data";
-import { Sparkles, Play, Calendar, Clock, Plus, Trash2, CheckCircle2, ChevronRight, RefreshCw, AlertCircle, Info, FileText, Upload } from "lucide-react";
+import { Sparkles, Play, Calendar, Clock, Plus, Trash2, CheckCircle2, ChevronRight, RefreshCw, AlertCircle, Info, FileText, Upload, Save, Bookmark } from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
 import TimePicker from "./TimePicker";
 
@@ -20,6 +20,13 @@ interface Block {
   hasilPekerjaan: string;
   buktiDukungName?: string;
   buktiDukungBase64?: string;
+}
+
+interface Preset {
+  id: string;
+  name: string;
+  deskripsi: string;
+  hasil: string;
 }
 
 export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorProps) {
@@ -45,6 +52,44 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   const [instantDetailPekerjaan, setInstantDetailPekerjaan] = useState(getDefaultDetailItem(DEFAULT_URAIAN_TUGAS[1]));
   const [instantDeskripsi, setInstantDeskripsi] = useState("Melaksanakan perjalanan dinas daerah");
   const [instantHasil, setInstantHasil] = useState("Laporan hasil perjalanan dinas");
+
+  // Presets
+  const [savedPresets, setSavedPresets] = useState<Preset[]>(() => {
+    try {
+      const stored = localStorage.getItem("sinergi_presets");
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error("Failed to load presets", e);
+    }
+    return [];
+  });
+
+  const savePreset = () => {
+    if (!instantDeskripsi.trim() || !instantHasil.trim()) {
+      alert("Deskripsi dan Hasil Pekerjaan tidak boleh kosong!");
+      return;
+    }
+    const presetName = prompt("Masukkan nama untuk template ini:", "Template Baru");
+    if (!presetName) return;
+
+    const newPreset: Preset = {
+      id: Date.now().toString(),
+      name: presetName,
+      deskripsi: instantDeskripsi,
+      hasil: instantHasil
+    };
+    const newPresets = [...savedPresets, newPreset];
+    setSavedPresets(newPresets);
+    localStorage.setItem("sinergi_presets", JSON.stringify(newPresets));
+    alert("Template berhasil disimpan!");
+  };
+
+  const deletePreset = (id: string) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus template ini?")) return;
+    const newPresets = savedPresets.filter(p => p.id !== id);
+    setSavedPresets(newPresets);
+    localStorage.setItem("sinergi_presets", JSON.stringify(newPresets));
+  };
 
   // Global Bukti Dukung Upload
   const [globalBuktiName, setGlobalBuktiName] = useState<string | undefined>(undefined);
@@ -677,6 +722,56 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2 bg-white/5 p-3 border border-white/10 rounded-xl flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bookmark className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-bold text-white uppercase">Template Tersimpan:</span>
+                    </div>
+                    <div className="flex w-full md:w-auto items-center gap-2">
+                      <select 
+                        className="flex-1 md:w-64 bg-slate-800 text-white border border-white/20 rounded-lg p-2 text-xs font-medium focus:outline-none"
+                        onChange={(e) => {
+                          const preset = savedPresets.find(p => p.id === e.target.value);
+                          if (preset) {
+                            setInstantDeskripsi(preset.deskripsi);
+                            setInstantHasil(preset.hasil);
+                          }
+                          // Reset select so it acts like an action
+                          e.target.value = "";
+                        }}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>-- Pilih Template --</option>
+                        {savedPresets.map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                        {savedPresets.length === 0 && <option value="" disabled>Belum ada template</option>}
+                      </select>
+                      <button 
+                        type="button"
+                        onClick={savePreset}
+                        className="bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 text-indigo-300 px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors whitespace-nowrap flex items-center gap-1.5"
+                        title="Simpan input saat ini sebagai template"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        Simpan
+                      </button>
+                      <button
+                         type="button"
+                         onClick={() => {
+                           const activePreset = prompt("Ketik nama template yang ingin dihapus:\n" + savedPresets.map(p => p.name).join(", "));
+                           const preset = savedPresets.find(p => p.name.toLowerCase() === activePreset?.toLowerCase());
+                           if (preset) deletePreset(preset.id);
+                         }}
+                         disabled={savedPresets.length === 0}
+                         className="bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-300 p-2 rounded-lg transition-colors disabled:opacity-50"
+                         title="Hapus template tersimpan"
+                      >
+                         <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  
                   <div className="space-y-1">
                     <span className="text-[10px] text-white/80 uppercase font-black">Deskripsi Pekerjaan</span>
                     <textarea
