@@ -763,7 +763,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 
                 return (
                   <>
-                    {count} Hari Kerja &times; {blockCount} Tugas = <span className="text-yellow-300 text-sm ml-1">{count * blockCount} Laporan</span>
+                    {count} Hari Kerja &times; {blockCount} Tugas
                   </>
                 );
               })()}
