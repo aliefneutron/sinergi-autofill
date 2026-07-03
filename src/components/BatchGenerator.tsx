@@ -530,8 +530,9 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                   type="button"
                   onClick={addBlock}
                   className="px-3 py-1.5 bg-white text-indigo-700 hover:bg-white/95 text-xs font-bold rounded-xl flex items-center gap-1 transition-transform cursor-pointer shadow-md"
+                  title="Tambah Blok Waktu"
                 >
-                  <Plus className="w-3.5 h-3.5 text-indigo-750" /> Tambah Blok Waktu
+                  <Plus className="w-3.5 h-3.5 text-indigo-750" /> Tambah
                 </button>
               </div>
 
