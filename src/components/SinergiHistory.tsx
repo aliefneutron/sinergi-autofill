@@ -169,17 +169,17 @@ export default function SinergiHistory({
           {/* Add report button */}
           <button
             onClick={onAddClick}
-            className="px-5 py-2.5 bg-white text-indigo-700 hover:bg-white/95 font-bold rounded-xl text-xs flex items-center gap-2 transition-transform hover:-translate-y-0.5 shadow-lg shadow-indigo-500/10 cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-white text-indigo-700 hover:bg-white/95 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 shadow-lg shadow-indigo-500/10 cursor-pointer"
           >
             <Plus className="w-4 h-4" /> TAMBAH LAPORAN
           </button>
 
           {/* Month selector */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="appearance-none bg-white/20 text-white border border-white/20 focus:border-white/40 focus:outline-none rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold cursor-pointer"
+              className="w-full sm:w-auto appearance-none bg-white/20 text-white border border-white/20 focus:border-white/40 focus:outline-none rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold cursor-pointer"
             >
               <option value="" className="text-slate-900">Semua Bulan</option>
               {MONTHS.map((m) => (
@@ -192,11 +192,11 @@ export default function SinergiHistory({
           </div>
 
           {/* Year selector */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="appearance-none bg-white/20 text-white border border-white/20 focus:border-white/40 focus:outline-none rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold cursor-pointer"
+              className="w-full sm:w-auto appearance-none bg-white/20 text-white border border-white/20 focus:border-white/40 focus:outline-none rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold cursor-pointer"
             >
               <option value="" className="text-slate-900">Semua Tahun</option>
               {YEARS.map((y) => (

@@ -120,7 +120,7 @@ export default function App() {
           </div>
 
           {/* Navigation Items (matches original layout style) */}
-          <nav className="flex items-center gap-1.5 bg-white/10 p-1 rounded-xl border border-white/10">
+          <nav className="flex flex-wrap justify-center items-center gap-1.5 bg-white/10 p-1 rounded-xl border border-white/10 w-full sm:w-auto">
             <button
               onClick={() => { setActiveTab("BERANDA"); setIsFormOpen(false); }}
               className={`px-4 py-2 text-xs font-black tracking-wider uppercase rounded-lg transition-all ${
@@ -214,7 +214,7 @@ export default function App() {
                     </p>
                     
                     {/* Fast Action Buttons */}
-                    <div className="flex w-full gap-2 pt-2">
+                    <div className="flex flex-col sm:flex-row w-full gap-2 pt-2">
                       <button
                         onClick={() => setIsFormOpen(true)}
                         className="flex-1 px-2 py-2.5 bg-white text-indigo-700 hover:bg-white/95 font-bold rounded-xl text-[11px] sm:text-xs leading-snug transition-all shadow-lg shadow-indigo-500/10 cursor-pointer text-center"
