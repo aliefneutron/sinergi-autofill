@@ -308,8 +308,12 @@ export default function SinergiHistory({
           </div>
         ) : (
           // Table layout
-          <div className="overflow-x-auto pb-4 custom-scrollbar">
-            <table className="w-full min-w-[768px] text-left text-xs border-collapse">
+          <div className="relative">
+            <div className="sm:hidden flex items-center justify-center gap-2 py-2 text-[10px] text-white/60 bg-white/5 border-b border-white/10 font-bold tracking-widest uppercase">
+              <span>↔ Geser tabel ke kanan untuk melihat aksi</span>
+            </div>
+            <div className="overflow-x-auto pb-2 -webkit-overflow-scrolling-touch">
+              <table className="w-full min-w-[800px] text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-white/10 text-white font-bold border-b border-white/15 uppercase tracking-wider text-[10px]">
                   <th className="p-4 w-48">TANGGAL & WAKTU</th>
