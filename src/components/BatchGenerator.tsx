@@ -413,9 +413,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             <Info className="w-4 h-4 text-white shrink-0 mt-0.5" />
             <div>
               <p>
-                <strong>Cara Kerja:</strong> Tentukan rentang hari kerja, lalu rancang pola jadwal kerja harian Anda di bawah. 
-                AI kami akan melayari rentang tanggal tersebut, mengeksklusi hari Sabtu-Minggu, dan menggunakan Gemini 
-                untuk membuat kalimat deskripsi yang unik & berbeda-beda setiap harinya!
+                <strong>Cara Kerja:</strong> Tentukan rentang hari kerja, lalu rancang pola jadwal kerja harian beserta deskripsi dan hasil pekerjaannya di bawah. 
+                Sistem akan menyalin pola jadwal tersebut ke setiap hari secara instan, dengan secara otomatis mengeksklusi hari Sabtu-Minggu!
               </p>
             </div>
           </div>
