@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LaporanKinerja, StatusLaporan } from "../types";
 import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP, getDefaultDetailItem } from "../data";
 import { Sparkles, Play, Calendar, Clock, Plus, Trash2, CheckCircle2, ChevronRight, RefreshCw, AlertCircle, Info, FileText, Upload, Save, Bookmark } from "lucide-react";
@@ -63,6 +63,20 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     }
     return [];
   });
+
+  // Dynamically update default time based on selected startDate (Friday vs Non-Friday)
+  useEffect(() => {
+    if (startDate) {
+      const dateObj = new Date(startDate);
+      if (dateObj.getDay() === 5) { // Friday
+        setInstantGlobalStart("07.00");
+        setInstantGlobalEnd("15.00");
+      } else { // Non-Friday
+        setInstantGlobalStart("07.30");
+        setInstantGlobalEnd("15.30");
+      }
+    }
+  }, [startDate]);
 
   const savePreset = () => {
     if (!instantDeskripsi.trim() || !instantHasil.trim()) {
