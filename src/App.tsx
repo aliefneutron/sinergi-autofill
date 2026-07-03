@@ -4,7 +4,7 @@ import { SAMPLE_LAPORAN } from "./data";
 import SinergiHistory from "./components/SinergiHistory";
 import SinergiForm from "./components/SinergiForm";
 import BatchGenerator from "./components/BatchGenerator";
-import BookmarkletGuide from "./components/BookmarkletGuide";
+import ExtensionGuide from "./components/ExtensionGuide";
 import { Sparkles, Calendar, Clock, Zap, User, Settings, CheckCircle, ListTodo, Plus, HelpCircle, Save, Award, Quote } from "lucide-react";
 
 export default function App() {
@@ -342,7 +342,7 @@ export default function App() {
             )}
 
             {activeTab === "OTOMATISASI" && (
-              <BookmarkletGuide />
+              <ExtensionGuide />
             )}
           </div>
         )}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Copy, Check, Info, ShieldCheck, Zap, AlertCircle, Puzzle, Download, Globe } from "lucide-react";
 
-export default function BookmarkletGuide() {
+export default function ExtensionGuide() {
   const [activeTab, setActiveTab] = useState<"userscript" | "extension">("userscript");
   const [copiedUserscript, setCopiedUserscript] = useState(false);
   const [copiedManifest, setCopiedManifest] = useState(false);
@@ -307,7 +307,7 @@ export default function BookmarkletGuide() {
           fillForm(report);
           setTimeout(function() {
             clickSubmitButton();
-          }, 1500);
+          }, 12000);
         };
 
         itemsContainer.appendChild(item);
@@ -1183,7 +1183,7 @@ export default function BookmarkletGuide() {
                 const form = document.querySelector('form');
                 if (form) form.submit();
               }
-            }, 6500);
+            }, 12000);
           }, 1500);
         }
       }, 500);
