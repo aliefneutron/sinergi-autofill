@@ -434,6 +434,7 @@ export default function SinergiHistory({
               </tbody>
             </table>
           </div>
+          </div>
         )}
       </div>
     </div>
