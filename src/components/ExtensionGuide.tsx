@@ -84,7 +84,7 @@ export default function ExtensionGuide() {
     // Widget Body
     const body = document.createElement('div');
     body.style.cssText = 'padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;font-size:12px;';
-    body.innerHTML = '<div style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;"><label style="font-weight:bold;display:block;color:#a5b4fc;font-size:12px;">Unggah File Payload Kinerja:</label><div style="display:flex;flex-direction:column;gap:6px;"><button id="sinergi-btn-upload-trigger" style="width:100%;background:linear-gradient(135deg, #6366f1, #ec4899);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(99,102,241,0.2);">📁 Unggah File Payload JSON</button><input type="file" id="sinergi-file-input" accept=".json" style="display:none;" /></div><div id="sinergi-file-name" style="color:#34d399;font-weight:bold;font-size:11px;text-align:center;display:none;background:rgba(52,211,153,0.1);padding:6px;border-radius:6px;border:1px solid rgba(52,211,153,0.15);"></div></div><div id="sinergi-auto-control-section" style="margin-bottom:12px;display:none;flex-direction:column;gap:8px;"><button id="sinergi-btn-start-auto" style="width:100%;background:linear-gradient(135deg, #10b981, #059669);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(16,185,129,0.2);">🚀 Jalankan Otomatis</button><button id="sinergi-btn-stop-auto" style="width:100%;background:linear-gradient(135deg, #ef4444, #dc2626);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:none;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(239,68,68,0.2);">🛑 Hentikan Otomatisasi Batch</button></div><div id="sinergi-report-list-container" style="display:none;border-top:1px dashed rgba(255,255,255,0.1);padding-top:12px;"><div style="font-weight:bold;margin-bottom:8px;color:#a5b4fc;display:flex;justify-content:space-between;align-items:center;"><span>Pilih Laporan Hari Ini:</span><span id="sinergi-count" style="background:linear-gradient(135deg, #6366f1, #ec4899);color:white;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">0</span></div><div id="sinergi-report-items" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;"></div></div><div id="sinergi-fill-status" style="padding:10px;border-radius:8px;background:rgba(16,185,129,0.1);color:#34d399;font-weight:bold;display:none;text-align:center;border:1px solid rgba(16,185,129,0.2);">🎉 Laporan berhasil diisi! Periksa & simpan.</div>';
+    body.innerHTML = '<div style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;"><label style="font-weight:bold;display:block;color:#a5b4fc;font-size:12px;">Unggah File Payload Kinerja:</label><div style="display:flex;flex-direction:column;gap:6px;"><button id="sinergi-btn-upload-trigger" style="width:100%;background:linear-gradient(135deg, #6366f1, #ec4899);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(99,102,241,0.2);">📁 Unggah File Payload JSON</button><input type="file" id="sinergi-file-input" accept=".json" style="display:none;" /></div><div id="sinergi-file-name" style="color:#34d399;font-weight:bold;font-size:11px;text-align:center;display:none;background:rgba(52,211,153,0.1);padding:6px;border-radius:6px;border:1px solid rgba(52,211,153,0.15);"></div></div><div id="sinergi-auto-control-section" style="margin-bottom:12px;display:none;flex-direction:column;gap:8px;"><button id="sinergi-btn-start-auto" style="width:100%;background:linear-gradient(135deg, #10b981, #059669);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(16,185,129,0.2);">🚀 Jalankan Otomatis</button><button id="sinergi-btn-stop-auto" style="width:100%;background:linear-gradient(135deg, #ef4444, #dc2626);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:none;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(239,68,68,0.2);">🛑 Hentikan Otomatisasi Batch</button></div><div id="sinergi-report-list-container" style="display:none;border-top:1px dashed rgba(255,255,255,0.1);padding-top:12px;"><div style="font-weight:bold;margin-bottom:8px;color:#a5b4fc;display:flex;justify-content:space-between;align-items:center;"><span>Pilih Laporan Hari Ini:</span><div style="display:flex;gap:6px;align-items:center;"><button id="sinergi-btn-clear-all" style="background:rgba(239,68,68,0.2);color:#ef4444;border:none;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer;font-weight:bold;" title="Bersihkan Daftar">Bersihkan</button><span id="sinergi-count" style="background:linear-gradient(135deg, #6366f1, #ec4899);color:white;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">0</span></div></div><div id="sinergi-report-items" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;"></div></div><div id="sinergi-fill-status" style="padding:10px;border-radius:8px;background:rgba(16,185,129,0.1);color:#34d399;font-weight:bold;display:none;text-align:center;border:1px solid rgba(16,185,129,0.2);">🎉 Laporan berhasil diisi! Periksa & simpan.</div>';
     widget.appendChild(body);
     document.body.appendChild(widget);
 
@@ -178,24 +178,26 @@ export default function ExtensionGuide() {
     }
 
     // Load Reports Event
-    loadBtn.onclick = function() {
-      const rawVal = txtArea.value.trim();
-      if (!rawVal) {
-        alert(\'Silakan tempel data kinerja terlebih dahulu!\');
-        return;
-      }
-      processPayload(rawVal);
-    };
+    if (loadBtn && txtArea) {
+      loadBtn.onclick = function() {
+        const rawVal = txtArea.value.trim();
+        if (!rawVal) {
+          alert('Silakan tempel data kinerja terlebih dahulu!');
+          return;
+        }
+        processPayload(rawVal);
+      };
+    }
 
     // Start / Stop Auto Automation
-    const controlSection = document.getElementById(\'sinergi-auto-control-section\');
-    const startAutoBtn = document.getElementById(\'sinergi-btn-start-auto\');
-    const stopAutoBtn = document.getElementById(\'sinergi-btn-stop-auto\');
+    const controlSection = document.getElementById('sinergi-auto-control-section');
+    const startAutoBtn = document.getElementById('sinergi-btn-start-auto');
+    const stopAutoBtn = document.getElementById('sinergi-btn-stop-auto');
 
     if (startAutoBtn && stopAutoBtn) {
       startAutoBtn.onclick = function() {
-        const rawVal = localStorage.getItem('sinergi_auto_reports_draft') || txtArea.value.trim();
-        if (!rawVal) {
+        const rawVal = localStorage.getItem('sinergi_auto_reports_draft') || (txtArea ? txtArea.value.trim() : '');
+        if (!rawVal || rawVal === '[]') {
           alert('Silakan unggah payload JSON terlebih dahulu!');
           return;
         }
@@ -242,8 +244,25 @@ export default function ExtensionGuide() {
       };
     }
 
+    const clearAllBtn = document.getElementById('sinergi-btn-clear-all');
+    if (clearAllBtn) {
+      clearAllBtn.onclick = function() {
+        if (confirm('Yakin ingin membersihkan semua daftar laporan?')) {
+          localStorage.removeItem('sinergi_auto_reports_draft');
+          if (localStorage.getItem('sinergi_auto_active') === 'true') {
+             localStorage.removeItem('sinergi_auto_reports');
+          }
+          const ta = document.getElementById('sinergi-data-input');
+          if (ta) ta.value = '';
+          const nameDisp = document.getElementById('sinergi-file-name');
+          if (nameDisp) nameDisp.style.display = 'none';
+          processPayload('[]');
+        }
+      };
+    }
+
     function processPayload(rawVal) {
-      rawVal = rawVal.trim();
+      rawVal = (rawVal || '').trim();
       let reports = [];
       try {
         if (rawVal.startsWith('[')) {
@@ -260,17 +279,20 @@ export default function ExtensionGuide() {
           return;
         }
       } catch(err) {
-        alert(\'Gagal membaca data! Pastikan data/file terformat dengan benar (JSON).\');
+        alert('Gagal membaca data! Pastikan data/file terformat dengan benar (JSON).');
         return;
       }
 
       if (reports.length === 0) {
-        alert(\'Tidak ada laporan kinerja yang ditemukan.\');
+        itemsContainer.innerHTML = '';
+        if (controlSection) controlSection.style.display = 'none';
+        listContainer.style.display = 'none';
+        countBadge.textContent = '0';
         return;
       }
 
       // Populate List
-      itemsContainer.innerHTML = \'\';
+      itemsContainer.innerHTML = '';
       reports.forEach(function(report, index) {
         const item = document.createElement(\'div\');
         item.style.cssText = \'background:#1a1d29;border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:4px;margin-bottom:6px;\';
@@ -311,14 +333,28 @@ export default function ExtensionGuide() {
             statusBadge = \'<span class="sinergi-anim-pulse" style="color:#f59e0b;font-size:10px;font-weight:bold;margin-left:auto;">⏳ Proses</span>\';
           } else if (index < autoIndex) {
              statusBadge = \'<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Selesai</span>\';
+             statusBadge = '<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Selesai</span>';
           } else {
-            statusBadge = \'<span style="color:#64748b;font-size:10px;font-weight:bold;margin-left:auto;">Antrean</span>\';
+            statusBadge = '<span style="color:#64748b;font-size:10px;font-weight:bold;margin-left:auto;">Antrean</span>';
           }
         }
 
-        item.innerHTML = \'<div style="display:flex;justify-content:space-between;align-items:center;font-weight:bold;"><span style="color:#a5b4fc;">\' + dateFormatted + \'</span><div style="display:flex;align-items:center;gap:6px;">\' + statusBadge + \'<span style="color:#94a3b8;font-size:10px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:6px;">\' + report.waktuMulai + \' - \' + report.waktuSelesai + \'</span></div></div><div style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white;margin-top:2px;"><span style="color:#fbbf24;margin-right:6px;">\' + (index + 1) + \'.</span>\' + report.uraianTugas + \'</div><div style="color:#94a3b8;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\' + report.deskripsiPekerjaan + \'</div>\';
+        item.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;font-weight:bold;"><span style="color:#a5b4fc;">' + dateFormatted + '</span><div style="display:flex;align-items:center;gap:6px;">' + statusBadge + '<span style="color:#94a3b8;font-size:10px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:6px;">' + report.waktuMulai + ' - ' + report.waktuSelesai + '</span><button class="sinergi-btn-delete-item" data-index="' + index + '" style="background:none;border:none;color:#ef4444;cursor:pointer;font-weight:bold;padding:0 4px;font-size:12px;display:flex;align-items:center;" title="Hapus Laporan">✕</button></div></div><div style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white;margin-top:2px;"><span style="color:#fbbf24;margin-right:6px;">' + (index + 1) + '.</span>' + report.uraianTugas + '</div><div style="color:#94a3b8;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + report.deskripsiPekerjaan + '</div>';
 
-        item.onclick = function() {
+        item.onclick = function(e) {
+          const deleteBtn = e.target.closest('.sinergi-btn-delete-item');
+          if (deleteBtn) {
+            const idx = parseInt(deleteBtn.getAttribute('data-index'), 10);
+            reports.splice(idx, 1);
+            const strReports = JSON.stringify(reports);
+            localStorage.setItem('sinergi_auto_reports_draft', strReports);
+            if (localStorage.getItem('sinergi_auto_active') === 'true') {
+              localStorage.setItem('sinergi_auto_reports', strReports);
+            }
+            processPayload(strReports);
+            return;
+          }
+
           fillForm(report);
           setTimeout(function() {
             clickSubmitButton();
@@ -344,6 +380,8 @@ export default function ExtensionGuide() {
         }
       }
     }
+    
+    window.sinergiProcessPayload = processPayload;
 
     function fillForm(report) {
       try {
@@ -1204,7 +1242,9 @@ export default function ExtensionGuide() {
       alert('🎉 Otomatisasi Selesai!\\nBerhasil: ' + successes + '\\nGagal: ' + errors);
       
       // Re-draw list to clear status badges
-      processPayload(rawReports);
+      if (typeof window.sinergiProcessPayload === 'function') {
+        window.sinergiProcessPayload(rawReports);
+      }
       return;
     }
 
@@ -1252,6 +1292,7 @@ export default function ExtensionGuide() {
               fillForm(reports[currentIndex]);
             }
 
+            // Beri jeda 10 detik agar seluruh form (termasuk animasi dropdown dan waktu) selesai diisi
             setTimeout(function() {
               if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
               
@@ -1274,7 +1315,7 @@ export default function ExtensionGuide() {
                 }
                 
                 const bodyText = document.body.innerText.toLowerCase();
-                const isSuccess = bodyText.includes('berhasil dikirim') || bodyText.includes('berhasil disimpan') || bodyText.includes('berhasil') || document.querySelector('.swal2-success');
+                const isSuccess = bodyText.includes('berhasil dikirim') || bodyText.includes('berhasil disimpan') || document.querySelector('.swal2-success');
                 const isError = bodyText.includes('gagal') || bodyText.includes('error') || document.querySelector('.swal2-error');
                 
                 if (isSuccess || isError || waitTime >= 10000) {
@@ -1292,7 +1333,9 @@ export default function ExtensionGuide() {
                   
                   // Re-draw list to show badge update
                   const rawReports = localStorage.getItem('sinergi_auto_reports');
-                  if (rawReports) processPayload(rawReports);
+                  if (rawReports && typeof window.sinergiProcessPayload === 'function') {
+                    window.sinergiProcessPayload(rawReports);
+                  }
                   
                   // Navigate to Tambah Laporan page for the next item
                   const tambahBtn = Array.from(document.querySelectorAll('a, button')).find(el => {
@@ -1303,7 +1346,12 @@ export default function ExtensionGuide() {
 
                   if (tambahBtn) {
                     console.log('🤖 Klik tombol Tambah Laporan untuk antrean berikutnya.');
-                    tambahBtn.click();
+                    if (tambahBtn.tagName.toLowerCase() === 'a' && tambahBtn.getAttribute('href')) {
+                      window.location.href = tambahBtn.getAttribute('href');
+                    } else {
+                      tambahBtn.click();
+                      tambahBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+                    }
                   } else {
                     const currentUrl = window.location.href;
                     if (currentUrl.includes('/pekerjaan')) {
@@ -1317,7 +1365,7 @@ export default function ExtensionGuide() {
                 }
               }, 500);
 
-            }, 2500);
+            }, 10000);
           }, 1500);
         }
       }, 500);
@@ -1344,14 +1392,18 @@ export default function ExtensionGuide() {
 
         if (tambahBtn) {
           console.log('🤖 Otomatisasi Batch: Mengklik tombol Tambah.');
-          tambahBtn.click();
-          tambahBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+          if (tambahBtn.tagName.toLowerCase() === 'a' && tambahBtn.getAttribute('href')) {
+            window.location.href = tambahBtn.getAttribute('href');
+          } else {
+            tambahBtn.click();
+            tambahBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+          }
         } else {
           const currentUrl = window.location.href;
           if (currentUrl.includes('/pekerjaan')) {
             const baseUrl = currentUrl.split('/pekerjaan')[0];
             console.log('🤖 Otomatisasi Batch: Mengalihkan via URL redirect ke create page.');
-            window.location.href = baseUrl + '/pekerjaan/create';
+            window.location.href = baseUrl + '/pekerjaan/input/';
           }
         }
       }, 2500);
@@ -1376,6 +1428,12 @@ export default function ExtensionGuide() {
       return txt === 'ya' || txt === 'yakin' || txt === 'ya, simpan' || txt === 'ya, kirim' || txt === 'setuju' || txt.includes('proses');
     });
     
+    // Close Widget Event
+    const closeBtn = document.getElementById('sinergi-widget-close');
+    if (closeBtn) closeBtn.onclick = function() {
+      widget.style.display = 'none';
+    };
+    
     dialogButtons.forEach(btn => {
       btn.click();
     });
@@ -1395,7 +1453,9 @@ export default function ExtensionGuide() {
         if (textArea) {
           textArea.value = rawReports;
         }
-        processPayload(rawReports);
+        if (typeof window.sinergiProcessPayload === 'function') {
+          window.sinergiProcessPayload(rawReports);
+        }
         checkAutoAutomation();
       }, 1000);
     }
