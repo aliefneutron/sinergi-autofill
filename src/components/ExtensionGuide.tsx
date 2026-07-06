@@ -211,13 +211,19 @@ export default function ExtensionGuide() {
         }
         
         const reports = Array.isArray(parsed) ? parsed : [parsed];
-        localStorage.setItem('sinergi_auto_reports', JSON.stringify(reports));
-        localStorage.setItem('sinergi_auto_index', '0');
-        localStorage.setItem('sinergi_auto_active', 'true');
         
-        // Initialize results tracking array
-        const initialResults = new Array(reports.length).fill('null');
-        localStorage.setItem('sinergi_auto_results', JSON.stringify(initialResults));
+        try {
+          localStorage.setItem('sinergi_auto_reports', JSON.stringify(reports));
+          localStorage.setItem('sinergi_auto_index', '0');
+          localStorage.setItem('sinergi_auto_active', 'true');
+          
+          // Initialize results tracking array
+          const initialResults = new Array(reports.length).fill('null');
+          localStorage.setItem('sinergi_auto_results', JSON.stringify(initialResults));
+        } catch (e) {
+          alert('Memori penyimpanan browser penuh (QuotaExceededError). Gagal menyimpan ' + reports.length + ' laporan.\\n\\nSolusi: Jika Anda melampirkan gambar/file Bukti Dukung yang besar, ukuran payload JSON akan membengkak. Cobalah membagi laporan menjadi jumlah yang lebih sedikit (misal: per 3 hari).');
+          return;
+        }
         
         startAutoBtn.style.display = 'none';
         stopAutoBtn.style.display = 'flex';
@@ -262,20 +268,33 @@ export default function ExtensionGuide() {
     }
 
     function processPayload(rawVal) {
+      const listContainer = document.getElementById('sinergi-report-list-container');
+      const itemsContainer = document.getElementById('sinergi-report-items');
+      const countBadge = document.getElementById('sinergi-count');
+      const controlSection = document.getElementById('sinergi-auto-control-section');
+      const startAutoBtn = document.getElementById('sinergi-btn-start-auto');
+      const stopAutoBtn = document.getElementById('sinergi-btn-stop-auto');
+
       rawVal = (rawVal || '').trim();
       let reports = [];
       try {
         if (rawVal.startsWith('[')) {
           const parsed = JSON.parse(rawVal);
           reports = Array.isArray(parsed) ? parsed : [parsed];
-          localStorage.setItem('sinergi_auto_reports_draft', JSON.stringify(reports));
+          try {
+            localStorage.setItem('sinergi_auto_reports_draft', JSON.stringify(reports));
+          } catch(e) {
+            alert('Penyimpanan lokal penuh! JSON ini terlalu besar karena mengandung gambar/dokumen Base64 yang banyak. Mohon kurangi jumlah daftar laporannya.');
+            return;
+          }
         } else if (rawVal.startsWith('{')) {
           const parsed = JSON.parse(rawVal);
           reports = Array.isArray(parsed) ? parsed : [parsed];
-          localStorage.setItem('sinergi_auto_reports_draft', JSON.stringify(reports));
-
+          try {
+            localStorage.setItem('sinergi_auto_reports_draft', JSON.stringify(reports));
+          } catch(e) {}
         } else {
-          alert(\'Format data tidak valid! Harus berupa JSON valid.\');
+          alert('Format data tidak valid! Harus berupa JSON valid.');
           return;
         }
       } catch(err) {
@@ -1399,11 +1418,18 @@ export default function ExtensionGuide() {
             tambahBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
           }
         } else {
+          console.log('🤖 Otomatisasi Batch: Tidak menemukan tombol tambah. Mencoba fallback ke /pekerjaan/input/');
           const currentUrl = window.location.href;
           if (currentUrl.includes('/pekerjaan')) {
             const baseUrl = currentUrl.split('/pekerjaan')[0];
-            console.log('🤖 Otomatisasi Batch: Mengalihkan via URL redirect ke create page.');
             window.location.href = baseUrl + '/pekerjaan/input/';
+          } else {
+            alert('Tombol Tambah Laporan tidak ditemukan! Harap buka halaman Riwayat Pekerjaan terlebih dahulu sebelum menekan Jalankan Otomatis.');
+            localStorage.setItem('sinergi_auto_active', 'false');
+            const startBtn = document.getElementById('sinergi-btn-start-auto');
+            const stopBtn = document.getElementById('sinergi-btn-stop-auto');
+            if (startBtn) startBtn.style.display = 'flex';
+            if (stopBtn) stopBtn.style.display = 'none';
           }
         }
       }, 2500);
