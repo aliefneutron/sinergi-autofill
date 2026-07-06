@@ -352,7 +352,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
         const em = nextTotalMinutes % 60;
         
         let skip = false;
-        if (isFriday && sh >= 10 && sh < 13) {
+        // Hari jumat: 07:00-11:00, 13:00-15:00. Jadi skip jam 11:00 s/d 13:00
+        if (isFriday && sh >= 11 && sh < 13) {
           skip = true;
         }
         
