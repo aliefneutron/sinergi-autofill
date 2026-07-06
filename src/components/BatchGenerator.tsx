@@ -4,6 +4,7 @@ import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP, getDefaultDetailItem } from "..
 import { Sparkles, Play, Calendar, Clock, Plus, Trash2, CheckCircle2, ChevronRight, RefreshCw, AlertCircle, Info, FileText, Upload, Save, Bookmark } from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
 import TimePicker from "./TimePicker";
+import { compressImage } from "../imageUtils";
 
 interface BatchGeneratorProps {
   onSaveBatch: (reports: LaporanKinerja[]) => void;
@@ -49,20 +50,21 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   const [instantGlobalEnd, setInstantGlobalEnd] = useState("15.00");
   const [instantDuration, setInstantDuration] = useState(60);
   const [instantUraianTugas, setInstantUraianTugas] = useState(DEFAULT_URAIAN_TUGAS[1]);
-  const [instantDetailPekerjaan, setInstantDetailPekerjaan] = useState(getDefaultDetailItem(DEFAULT_URAIAN_TUGAS[1]));
-  const [instantDeskripsi, setInstantDeskripsi] = useState("Melaksanakan perjalanan dinas daerah");
-  const [instantHasil, setInstantHasil] = useState("Laporan hasil perjalanan dinas");
+  const [instantDetailPekerjaan, setInstantDetailPekerjaan] = useState(() => getDefaultDetailItem(DEFAULT_URAIAN_TUGAS[1]));
+  const [instantDeskripsi, setInstantDeskripsi] = useState("Menyelesaikan pekerjaan harian sesuai tugas pokok dan fungsi.");
+  const [instantHasil, setInstantHasil] = useState("Pekerjaan diselesaikan dengan baik");
 
   // Presets
-  const [savedPresets, setSavedPresets] = useState<Preset[]>(() => {
-    try {
-      const stored = localStorage.getItem("sinergi_presets");
-      if (stored) return JSON.parse(stored);
-    } catch (e) {
-      console.error("Failed to load presets", e);
+  const [savedPresets, setSavedPresets] = useState<Preset[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("sinergi_presets");
+    if (saved) {
+      try {
+        setSavedPresets(JSON.parse(saved));
+      } catch (e) {}
     }
-    return [];
-  });
+  }, []);
 
   // Dynamically update default time based on selected startDate (Friday vs Non-Friday)
   useEffect(() => {
@@ -79,13 +81,8 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   }, [startDate]);
 
   const savePreset = () => {
-    if (!instantDeskripsi.trim() || !instantHasil.trim()) {
-      alert("Deskripsi dan Hasil Pekerjaan tidak boleh kosong!");
-      return;
-    }
-    const presetName = prompt("Masukkan nama untuk template ini:", "Template Baru");
+    const presetName = prompt("Masukkan nama template:");
     if (!presetName) return;
-
     const newPreset: Preset = {
       id: Date.now().toString(),
       name: presetName,
@@ -110,17 +107,18 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
   const [globalBuktiBase64, setGlobalBuktiBase64] = useState<string | undefined>(undefined);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleGlobalUpload = (file: File) => {
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Ukuran file tidak boleh lebih dari 2MB!");
+  const handleGlobalUpload = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Ukuran file tidak boleh lebih dari 10MB!");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setGlobalBuktiBase64(e.target?.result as string);
+    try {
+      const compressedBase64 = await compressImage(file);
+      setGlobalBuktiBase64(compressedBase64);
       setGlobalBuktiName(file.name);
-    };
-    reader.readAsDataURL(file);
+    } catch(e) {
+      alert("Gagal memproses gambar!");
+    }
   };
 
   // Daily block schedules
@@ -251,15 +249,16 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     }));
   };
 
-  const handleBlockFileChange = (blockId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBlockFileChange = async (blockId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        setBlocks(blocks.map(b => b.id === blockId ? { ...b, buktiDukungName: file.name, buktiDukungBase64: reader.result as string } : b));
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file);
+        setBlocks(blocks.map(b => b.id === blockId ? { ...b, buktiDukungName: file.name, buktiDukungBase64: compressedBase64 } : b));
+      } catch(err) {
+        alert("Gagal memproses gambar!");
+      }
     }
   };
 
@@ -289,13 +288,14 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
     }
   };
 
-  const processFile = (file: File) => {
-    setGlobalBuktiName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setGlobalBuktiBase64(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+  const processFile = async (file: File) => {
+    try {
+      const compressedBase64 = await compressImage(file);
+      setGlobalBuktiBase64(compressedBase64);
+      setGlobalBuktiName(file.name);
+    } catch(err) {
+      alert("Gagal memproses gambar!");
+    }
   };
 
   const handleInstantGenerate = () => {

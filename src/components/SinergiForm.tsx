@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { LaporanKinerja, StatusLaporan } from "../types";
 import { DEFAULT_URAIAN_TUGAS, DETAIL_ITEMS_MAP, getDefaultDetailItem } from "../data";
 import { Sparkles, Save, Clock, Calendar, Check, AlertCircle, RefreshCw, Upload, FileText, ChevronRight } from "lucide-react";
+import { compressImage } from "../imageUtils";
 import CalendarPicker from "./CalendarPicker";
 import TimePicker from "./TimePicker";
 
@@ -139,13 +140,14 @@ export default function SinergiForm({ onSave, onClose, initialData }: SinergiFor
     }
   };
 
-  const processFile = (file: File) => {
-    setBuktiDukungName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBuktiDukungBase64(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+  const processFile = async (file: File) => {
+    try {
+      const compressedBase64 = await compressImage(file);
+      setBuktiDukungBase64(compressedBase64);
+      setBuktiDukungName(file.name);
+    } catch(err) {
+      alert("Gagal memproses gambar!");
+    }
   };
 
   const handleSave = (e: React.FormEvent) => {
