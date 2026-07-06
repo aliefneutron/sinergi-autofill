@@ -10,7 +10,7 @@ export default function ExtensionGuide() {
   const fullUserscriptCode = `// ==UserScript==
 // @name         ⚡ e-Kinerja SINERGI V2 Auto-Fill Helper
 // @namespace    eKinerjaWorkspace
-// @version      1.3
+// @version      1.4
 // @description  Asisten otomatis penginputan e-Kinerja / SINERGI V2 BKPSDM Sumenep menggunakan data AI
 // @author       e-Kinerja AI Workspace
 // @match        *://bkpsdm.sumenepkab.go.id/*
@@ -213,6 +213,10 @@ export default function ExtensionGuide() {
         localStorage.setItem('sinergi_auto_index', '0');
         localStorage.setItem('sinergi_auto_active', 'true');
         
+        // Initialize results tracking array
+        const initialResults = new Array(reports.length).fill('null');
+        localStorage.setItem('sinergi_auto_results', JSON.stringify(initialResults));
+        
         startAutoBtn.style.display = 'none';
         stopAutoBtn.style.display = 'flex';
         
@@ -292,10 +296,21 @@ export default function ExtensionGuide() {
         
         let statusBadge = '';
         if (autoActive) {
-          if (index < autoIndex) {
-            statusBadge = \'<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Selesai</span>\';
+          let results = [];
+          try {
+            results = JSON.parse(localStorage.getItem('sinergi_auto_results') || '[]');
+          } catch(e) {}
+          
+          const status = results[index] || 'null';
+          
+          if (status === 'success') {
+            statusBadge = \'<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Berhasil</span>\';
+          } else if (status === 'error') {
+            statusBadge = \'<span style="color:#ef4444;font-size:10px;font-weight:bold;margin-left:auto;">❌ Gagal</span>\';
           } else if (index === autoIndex) {
             statusBadge = \'<span class="sinergi-anim-pulse" style="color:#f59e0b;font-size:10px;font-weight:bold;margin-left:auto;">⏳ Proses</span>\';
+          } else if (index < autoIndex) {
+             statusBadge = \'<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Selesai</span>\';
           } else {
             statusBadge = \'<span style="color:#64748b;font-size:10px;font-weight:bold;margin-left:auto;">Antrean</span>\';
           }
@@ -662,11 +677,29 @@ export default function ExtensionGuide() {
             // Get the parent <label> card element (the whole clickable card)
             const labelCard = radio.closest('label');
             const labelText = (labelCard ? labelCard.textContent : (radio.parentElement ? radio.parentElement.textContent : '')) || '';
-            const lt = labelText.toLowerCase().trim();
-            const matchMain = targetText.length > 5 && lt.includes(targetText.substring(0, Math.min(targetText.length, 20)));
-            const matchDetail = detailText.length > 5 && lt.includes(detailText.substring(0, Math.min(detailText.length, 20)));
+            const lt = labelText.toLowerCase().replace(/\\s+/g, ' ').trim();
+            const cleanTarget = targetText.replace(/\\s+/g, ' ');
+            const cleanDetail = detailText.replace(/\\s+/g, ' ');
+
+            const matchMain = cleanTarget.length > 5 && lt.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 20)));
+            const matchDetail = cleanDetail.length > 5 && lt.includes(cleanDetail.substring(0, Math.min(cleanDetail.length, 20)));
             
+            let isMatch = false;
             if (matchMain || matchDetail) {
+              isMatch = true;
+              if (cleanDetail.includes("norma:")) {
+                const minutesMatch = cleanDetail.match(/norma:\\s*(\\d+)/);
+                if (minutesMatch) {
+                  const mins = minutesMatch[1];
+                  const regex = new RegExp('\\\\b' + mins + '\\\\b');
+                  if (!regex.test(lt)) {
+                    isMatch = false;
+                  }
+                }
+              }
+            }
+            
+            if (isMatch) {
               // Click the LABEL CARD while accordion is open - React will detect this
               if (labelCard) {
                 labelCard.click();
@@ -675,7 +708,7 @@ export default function ExtensionGuide() {
               radio.click();
               radio.dispatchEvent(new MouseEvent('click', { bubbles: true }));
               radio.dispatchEvent(new Event('change', { bubbles: true }));
-              console.log('\u26a1 Dipilih radio uraian tugas (accordion open):', lt.substring(0, 60));
+              console.log('\\u26a1 Dipilih radio uraian tugas (accordion open):', lt.substring(0, 60));
               return true;
             }
           }
@@ -872,17 +905,42 @@ export default function ExtensionGuide() {
                 const labelEl = document.querySelector('label[for="' + id + '"]');
                 if (labelEl) labelText = labelEl.textContent || '';
               }
+              const labelCard = el.closest('label');
+              if (!labelText && labelCard) {
+                labelText = labelCard.textContent || '';
+              }
               if (!labelText && el.parentElement) {
                 labelText = el.parentElement.textContent || '';
               }
               if (labelText) {
-                const lt = labelText.toLowerCase().trim();
-                if (lt.includes(targetText) || targetText.includes(lt)) {
+                const lt = labelText.toLowerCase().replace(/\\s+/g, ' ').trim();
+                const cleanTarget = targetText.replace(/\\s+/g, ' ');
+                
+                let isMatch = false;
+                if (lt.includes(cleanTarget) || cleanTarget.includes(lt)) {
+                  isMatch = true;
+                } else if (cleanTarget.length > 5 && lt.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 20)))) {
+                  isMatch = true;
+                  if (cleanTarget.includes("norma:")) {
+                    const minutesMatch = cleanTarget.match(/norma:\s*(\d+)/);
+                    if (minutesMatch) {
+                      const mins = minutesMatch[1];
+                      const regex = new RegExp('\\b' + mins + '\\b');
+                      if (!regex.test(lt)) {
+                        isMatch = false;
+                      }
+                    }
+                  }
+                }
+                
+                if (isMatch) {
                   triggerClickEvents(el);
-                  console.log('⚡ Mengklik radio button sub-item via triggerClickEvents:', labelText);
+                  console.log('⚡ Mengklik radio button sub-item via triggerClickEvents:', labelText.trim());
                   
                   // Also trigger click on parent container
-                  if (el.parentElement) {
+                  if (labelCard) {
+                    triggerClickEvents(labelCard);
+                  } else if (el.parentElement) {
                     triggerClickEvents(el.parentElement);
                   }
                   return true;
@@ -895,9 +953,24 @@ export default function ExtensionGuide() {
           const candidates = elements.filter(el => {
             const tag = el.tagName;
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'INPUT') return false;
-            const elText = (el.textContent || '').toLowerCase().trim();
+            const elText = (el.textContent || '').toLowerCase().replace(/\\s+/g, ' ').trim();
+            const cleanTarget = targetText.replace(/\\s+/g, ' ');
             if (!elText || elText.length > 150) return false;
-            return elText.includes(targetText);
+            
+            if (elText.includes(cleanTarget) || cleanTarget.includes(elText)) return true;
+            
+            if (cleanTarget.length > 5 && elText.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 20)))) {
+              if (cleanTarget.includes("norma:")) {
+                const minutesMatch = cleanTarget.match(/norma:\\s*(\\d+)/);
+                if (minutesMatch) {
+                  const mins = minutesMatch[1];
+                  const regex = new RegExp('\\\\b' + mins + '\\\\b');
+                  return regex.test(elText);
+                }
+              }
+              return true;
+            }
+            return false;
           });
 
           if (candidates.length > 0) {
@@ -1112,15 +1185,23 @@ export default function ExtensionGuide() {
       if (startBtn) startBtn.style.display = 'flex';
       if (stopBtn) stopBtn.style.display = 'none';
       
+      let successes = 0;
+      let errors = 0;
+      try {
+        const results = JSON.parse(localStorage.getItem('sinergi_auto_results') || '[]');
+        successes = results.filter(r => r === 'success').length;
+        errors = results.filter(r => r === 'error').length;
+      } catch(e) {}
+
       const statusBanner = document.getElementById('sinergi-fill-status');
       if (statusBanner) {
-        statusBanner.innerHTML = '🎉 Semua laporan (' + reports.length + ' item) telah berhasil diinput!';
+        statusBanner.innerHTML = '🎉 Semua laporan (' + reports.length + ' item) selesai! <br> ✅ Berhasil: ' + successes + ' &nbsp; ❌ Gagal: ' + errors;
         statusBanner.style.display = 'block';
         statusBanner.style.background = 'rgba(16,185,129,0.1)';
         statusBanner.style.color = '#34d399';
         statusBanner.style.border = '1px solid rgba(16,185,129,0.2)';
       }
-      alert('🎉 Semua laporan (' + reports.length + ' item) telah selesai diinput!');
+      alert('🎉 Otomatisasi Selesai!\\nBerhasil: ' + successes + '\\nGagal: ' + errors);
       
       // Re-draw list to clear status badges
       processPayload(rawReports);
@@ -1175,7 +1256,6 @@ export default function ExtensionGuide() {
               if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
               
               console.log('🤖 Otomatisasi Batch: Menyimpan data...');
-              localStorage.setItem('sinergi_auto_index', (currentIndex + 1).toString());
               
               const submitted = clickSubmitButton();
               if (!submitted) {
@@ -1183,7 +1263,61 @@ export default function ExtensionGuide() {
                 const form = document.querySelector('form');
                 if (form) form.submit();
               }
-            }, 12000);
+              
+              // Wait for success/error notification (10 seconds timeout)
+              let waitTime = 0;
+              const notifInterval = setInterval(function() {
+                waitTime += 500;
+                if (localStorage.getItem('sinergi_auto_active') !== 'true') {
+                  clearInterval(notifInterval);
+                  return;
+                }
+                
+                const bodyText = document.body.innerText.toLowerCase();
+                const isSuccess = bodyText.includes('berhasil dikirim') || bodyText.includes('berhasil disimpan') || bodyText.includes('berhasil') || document.querySelector('.swal2-success');
+                const isError = bodyText.includes('gagal') || bodyText.includes('error') || document.querySelector('.swal2-error');
+                
+                if (isSuccess || isError || waitTime >= 10000) {
+                  clearInterval(notifInterval);
+                  console.log('🤖 Hasil submit:', isSuccess ? 'Sukses' : (isError ? 'Gagal' : 'Timeout'));
+                  
+                  let results = [];
+                  try {
+                    results = JSON.parse(localStorage.getItem('sinergi_auto_results') || '[]');
+                  } catch(e) {}
+                  
+                  results[currentIndex] = isSuccess ? 'success' : 'error';
+                  localStorage.setItem('sinergi_auto_results', JSON.stringify(results));
+                  localStorage.setItem('sinergi_auto_index', (currentIndex + 1).toString());
+                  
+                  // Re-draw list to show badge update
+                  const rawReports = localStorage.getItem('sinergi_auto_reports');
+                  if (rawReports) processPayload(rawReports);
+                  
+                  // Navigate to Tambah Laporan page for the next item
+                  const tambahBtn = Array.from(document.querySelectorAll('a, button')).find(el => {
+                    if (el.closest('#sinergi-auto-input-widget') || el.closest('form')) return false;
+                    const txt = (el.textContent || '').toLowerCase().trim();
+                    return txt === 'tambah' || txt.includes('tambah laporan') || txt.includes('tambah pekerjaan') || txt === '+ tambah';
+                  });
+
+                  if (tambahBtn) {
+                    console.log('🤖 Klik tombol Tambah Laporan untuk antrean berikutnya.');
+                    tambahBtn.click();
+                  } else {
+                    const currentUrl = window.location.href;
+                    if (currentUrl.includes('/pekerjaan')) {
+                      const baseUrl = currentUrl.split('/pekerjaan')[0];
+                      window.location.href = baseUrl + '/pekerjaan/input/';
+                    }
+                  }
+                  
+                  // Trigger next step
+                  setTimeout(checkAutoAutomation, 2000);
+                }
+              }, 500);
+
+            }, 2500);
           }, 1500);
         }
       }, 500);
@@ -1285,7 +1419,7 @@ export default function ExtensionGuide() {
   const manifestJsonCode = `{
   "manifest_version": 3,
   "name": "Helper SINERGI V2 e-Kinerja",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Ekstensi Chrome untuk Pengisian Otomatis SINERGI V2 BKPSDM Kabupaten Sumenep",
   "permissions": ["activeTab"],
   "content_scripts": [
