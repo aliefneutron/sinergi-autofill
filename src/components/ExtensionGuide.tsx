@@ -73,7 +73,7 @@ export default function ExtensionGuide() {
 
     const widget = document.createElement('div');
     widget.id = 'sinergi-auto-input-widget';
-    widget.style.cssText = 'position:fixed;bottom:90px;right:25px;width:360px;max-height:75vh;background:#0f111a;border:1.5px solid rgba(255,255,255,0.15);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:999999;font-family:sans-serif;color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden;transition:all 0.3s ease;backdrop-filter:blur(10px);';
+    widget.style.cssText = 'position:fixed;bottom:90px;right:25px;width:360px;max-width:calc(100vw - 32px);max-height:75vh;background:#0f111a;border:1.5px solid rgba(255,255,255,0.15);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:999999;font-family:sans-serif;color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden;transition:all 0.3s ease;backdrop-filter:blur(10px);';
 
     // Widget Header
     const header = document.createElement('div');
@@ -92,7 +92,7 @@ export default function ExtensionGuide() {
     if (!document.getElementById('sinergi-helper-styles')) {
       const styleEl = document.createElement('style');
       styleEl.id = 'sinergi-helper-styles';
-      styleEl.textContent = '@keyframes sinergi-pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } } .sinergi-anim-pulse { animation: sinergi-pulse 1.5s infinite ease-in-out; }';
+      styleEl.textContent = '@keyframes sinergi-pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } } .sinergi-anim-pulse { animation: sinergi-pulse 1.5s infinite ease-in-out; } @media (max-width: 480px) { #sinergi-auto-input-widget { width: calc(100vw - 32px) !important; right: 16px !important; bottom: 16px !important; max-height: 85vh !important; } }';
       document.head.appendChild(styleEl);
     }
 
