@@ -73,17 +73,17 @@ export default function ExtensionGuide() {
 
     const widget = document.createElement('div');
     widget.id = 'sinergi-auto-input-widget';
-    widget.style.cssText = 'position:fixed;bottom:90px;right:25px;width:360px;max-width:calc(100vw - 32px);max-height:75vh;background:#0f111a;border:1.5px solid rgba(255,255,255,0.15);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:999999;font-family:sans-serif;color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden;transition:all 0.3s ease;backdrop-filter:blur(10px);';
+    widget.style.cssText = 'position:fixed;bottom:90px;right:25px;width:360px;max-width:calc(100vw - 32px);max-height:75vh;background:#0f111a;border:1.5px solid rgba(255,255,255,0.15);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:999999;font-family:sans-serif;color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden;transition:opacity 0.3s ease;backdrop-filter:blur(10px);';
 
-    // Widget Header
+    // Widget Header - dengan tombol resize +/-
     const header = document.createElement('div');
-    header.style.cssText = 'background:linear-gradient(90deg, #131722, #1e2230);padding:14px 18px;border-bottom:1.5px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;cursor:move;';
-    header.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><span style="color:#6366f1;font-weight:900;font-size:14px;letter-spacing:0.5px;">⚡ SINERGI AI HELPER</span></div><button id="sinergi-widget-close" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:20px;margin-left:auto;line-height:1;transition:color 0.2s;">&times;</button>';
+    header.style.cssText = 'background:linear-gradient(90deg, #131722, #1e2230);padding:10px 14px;border-bottom:1.5px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;cursor:move;flex-shrink:0;';
+    header.innerHTML = '<div style="display:flex;align-items:center;gap:6px;"><span style="color:#6366f1;font-weight:900;font-size:13px;letter-spacing:0.5px;">⚡ SINERGI AI</span></div><div style="margin-left:auto;display:flex;align-items:center;gap:6px;"><button id="sinergi-btn-smaller" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;cursor:pointer;font-size:11px;border-radius:4px;padding:2px 6px;line-height:1;" title="Perkecil Widget">−</button><button id="sinergi-btn-larger" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;cursor:pointer;font-size:11px;border-radius:4px;padding:2px 6px;line-height:1;" title="Perbesar Widget">+</button><button id="sinergi-widget-minimize" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;cursor:pointer;font-size:10px;border-radius:4px;padding:2px 5px;line-height:1;" title="Sembunyikan isi">▼</button><button id="sinergi-widget-close" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;line-height:1;transition:color 0.2s;padding:0 2px;" title="Tutup">&times;</button></div>';
     widget.appendChild(header);
 
     // Widget Body
     const body = document.createElement('div');
-    body.style.cssText = 'padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;font-size:12px;';
+    body.style.cssText = 'padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;font-size:12px;min-height:0;';
     body.innerHTML = '<div style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;"><label style="font-weight:bold;display:block;color:#a5b4fc;font-size:12px;">Unggah File Payload Kinerja:</label><div style="display:flex;flex-direction:column;gap:6px;"><button id="sinergi-btn-upload-trigger" style="width:100%;background:linear-gradient(135deg, #6366f1, #ec4899);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(99,102,241,0.2);">📁 Unggah File Payload JSON</button><input type="file" id="sinergi-file-input" accept=".json" style="display:none;" /></div><div id="sinergi-file-name" style="color:#34d399;font-weight:bold;font-size:11px;text-align:center;display:none;background:rgba(52,211,153,0.1);padding:6px;border-radius:6px;border:1px solid rgba(52,211,153,0.15);"></div></div><div id="sinergi-auto-control-section" style="margin-bottom:12px;display:none;flex-direction:column;gap:8px;"><button id="sinergi-btn-start-auto" style="width:100%;background:linear-gradient(135deg, #10b981, #059669);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(16,185,129,0.2);">🚀 Jalankan Otomatis</button><button id="sinergi-btn-stop-auto" style="width:100%;background:linear-gradient(135deg, #ef4444, #dc2626);color:white;border:none;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;display:none;align-items:center;justify-content:center;gap:6px;font-size:12px;box-shadow:0 4px 12px rgba(239,68,68,0.2);">🛑 Hentikan Otomatisasi Batch</button></div><div id="sinergi-report-list-container" style="display:none;border-top:1px dashed rgba(255,255,255,0.1);padding-top:12px;"><div style="font-weight:bold;margin-bottom:8px;color:#a5b4fc;display:flex;justify-content:space-between;align-items:center;"><span>Pilih Laporan Hari Ini:</span><div style="display:flex;gap:6px;align-items:center;"><button id="sinergi-btn-clear-all" style="background:rgba(239,68,68,0.2);color:#ef4444;border:none;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer;font-weight:bold;" title="Bersihkan Daftar">Bersihkan</button><span id="sinergi-count" style="background:linear-gradient(135deg, #6366f1, #ec4899);color:white;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">0</span></div></div><div id="sinergi-report-items" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;"></div></div><div id="sinergi-fill-status" style="padding:10px;border-radius:8px;background:rgba(16,185,129,0.1);color:#34d399;font-weight:bold;display:none;text-align:center;border:1px solid rgba(16,185,129,0.2);">🎉 Laporan berhasil diisi! Periksa & simpan.</div>';
     widget.appendChild(body);
     document.body.appendChild(widget);
@@ -99,13 +99,44 @@ export default function ExtensionGuide() {
     // Style elements hover / focus on target
     const ta = document.getElementById(\'sinergi-data-input\');
     if (ta) {
-      ta.onfocus = function() { ta.style.borderColor = \'#6366f1\'; };
-      ta.onblur = function() { ta.style.borderColor = \'rgba(255,255,255,0.1)\'; };
+      ta.onfocus = function() { ta.style.borderColor = '#6366f1'; };
+      ta.onblur = function() { ta.style.borderColor = 'rgba(255,255,255,0.1)'; };
     }
 
     // Close button click
-    document.getElementById(\'sinergi-widget-close\').onclick = function() {
-      widget.style.display = \'none\';
+    document.getElementById('sinergi-widget-close').onclick = function() {
+      widget.style.display = 'none';
+    };
+
+    // Step-based resize buttons (+/-)  — reliable on all browsers & mobile
+    let currentWidgetW = 360;
+    let currentWidgetH = 0; // 0 = height auto (max-height driven)
+    const STEP = 60;
+    const smallerBtn = document.getElementById('sinergi-btn-smaller');
+    const largerBtn = document.getElementById('sinergi-btn-larger');
+    function applyWidgetSize() {
+      widget.style.width = Math.max(280, Math.min(currentWidgetW, window.innerWidth - 20)) + 'px';
+      if (currentWidgetH > 0) {
+        widget.style.height = Math.max(200, Math.min(currentWidgetH, window.innerHeight - 20)) + 'px';
+        widget.style.maxHeight = 'none';
+      } else {
+        widget.style.height = '';
+        widget.style.maxHeight = '75vh';
+      }
+    }
+    if (smallerBtn) smallerBtn.onclick = function(e) {
+      e.stopPropagation();
+      if (currentWidgetH === 0) currentWidgetH = widget.offsetHeight;
+      currentWidgetW -= STEP;
+      currentWidgetH -= STEP;
+      applyWidgetSize();
+    };
+    if (largerBtn) largerBtn.onclick = function(e) {
+      e.stopPropagation();
+      if (currentWidgetH === 0) currentWidgetH = widget.offsetHeight;
+      currentWidgetW += STEP;
+      currentWidgetH += STEP;
+      applyWidgetSize();
     };
 
     // Make Widget Draggable
@@ -118,35 +149,114 @@ export default function ExtensionGuide() {
     let yOffset = 0;
     let lastLoadedPayload = '';
 
-    header.addEventListener(\'mousedown\', function(e) {
+    function makeAbsolute() {
+      if (widget.style.right !== 'auto' || widget.style.bottom !== 'auto') {
+        const rect = widget.getBoundingClientRect();
+        widget.style.right = 'auto';
+        widget.style.bottom = 'auto';
+        widget.style.left = rect.left + 'px';
+        widget.style.top = rect.top + 'px';
+        widget.style.transform = 'none';
+        xOffset = 0; yOffset = 0; currentX = 0; currentY = 0;
+      }
+    }
+
+    header.addEventListener('mousedown', function(e) {
+      if (e.target.tagName === 'BUTTON') return;
+      makeAbsolute();
       initialX = e.clientX - xOffset;
       initialY = e.clientY - yOffset;
-      if (e.target === header || header.contains(e.target)) {
-        isDragging = true;
-      }
+      isDragging = true;
+      widget.style.transition = 'none';
     });
+    header.addEventListener('touchstart', function(e) {
+      if (e.target.tagName === 'BUTTON') return;
+      makeAbsolute();
+      initialX = e.touches[0].clientX - xOffset;
+      initialY = e.touches[0].clientY - yOffset;
+      isDragging = true;
+      widget.style.transition = 'none';
+    }, {passive: false});
 
-    document.addEventListener(\'mousemove\', function(e) {
-      if (isDragging) {
-        e.preventDefault();
-        currentX = e.clientX - initialX;
-        currentY = e.clientY - initialY;
-        xOffset = currentX;
-        yOffset = currentY;
-        widget.style.transform = "translate(" + currentX + "px, " + currentY + "px)";
-      }
+    document.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      currentX = e.clientX - initialX;
+      currentY = e.clientY - initialY;
+      xOffset = currentX; yOffset = currentY;
+      widget.style.transform = 'translate(' + currentX + 'px,' + currentY + 'px)';
     });
+    document.addEventListener('touchmove', function(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      currentX = e.touches[0].clientX - initialX;
+      currentY = e.touches[0].clientY - initialY;
+      xOffset = currentX; yOffset = currentY;
+      widget.style.transform = 'translate(' + currentX + 'px,' + currentY + 'px)';
+    }, {passive: false});
+    document.addEventListener('mouseup', function() { isDragging = false; });
+    document.addEventListener('touchend', function() { isDragging = false; });
 
-    document.addEventListener(\'mouseup\', function() {
-      isDragging = false;
-    });
+    // Minimize & Maximize Logic
+    const minimizeBtn = document.getElementById('sinergi-widget-minimize');
+    const maximizeBtn = document.getElementById('sinergi-widget-maximize');
+    let isMinimized = false;
+    let isMaximized = false;
+    let preMaxWidth = widget.style.maxWidth;
+    let preMaxHeight = widget.style.maxHeight;
+
+    if (minimizeBtn) {
+      minimizeBtn.onclick = function(e) {
+        e.stopPropagation();
+        isMinimized = !isMinimized;
+        if (isMinimized) {
+          body.style.display = 'none';
+          widget.style.height = 'auto';
+          widget.style.resize = 'none';
+        } else {
+          body.style.display = 'flex';
+          widget.style.height = isMaximized ? '100vh' : 'auto';
+          widget.style.resize = 'both';
+        }
+      };
+    }
+
+    if (maximizeBtn) {
+      maximizeBtn.onclick = function(e) {
+        e.stopPropagation();
+        isMaximized = !isMaximized;
+        if (isMaximized) {
+          widget.style.width = '100vw';
+          widget.style.height = '100vh';
+          widget.style.maxWidth = '100vw';
+          widget.style.maxHeight = '100vh';
+          widget.style.bottom = '0';
+          widget.style.right = '0';
+          widget.style.borderRadius = '0';
+          widget.style.transform = 'translate(0px, 0px)';
+          xOffset = 0; yOffset = 0;
+          if (isMinimized) {
+            isMinimized = false;
+            body.style.display = 'flex';
+          }
+        } else {
+          widget.style.width = '360px';
+          widget.style.height = 'auto';
+          widget.style.maxWidth = 'calc(100vw - 32px)';
+          widget.style.maxHeight = '75vh';
+          widget.style.bottom = '90px';
+          widget.style.right = '25px';
+          widget.style.borderRadius = '16px';
+        }
+      };
+    }
 
     // Upload Logic & Event
-    const fileInput = document.getElementById(\'sinergi-file-input\');
-    const uploadTrigger = document.getElementById(\'sinergi-btn-upload-trigger\');
-    const fileNameDisplay = document.getElementById(\'sinergi-file-name\');
+    const fileInput = document.getElementById('sinergi-file-input');
+    const uploadTrigger = document.getElementById('sinergi-btn-upload-trigger');
+    const fileNameDisplay = document.getElementById('sinergi-file-name');
 
-    const loadBtn = document.getElementById(\'sinergi-btn-load\');
+    const loadBtn = document.getElementById('sinergi-btn-load');
     const txtArea = document.getElementById(\'sinergi-data-input\');
     const listContainer = document.getElementById(\'sinergi-report-list-container\');
     const itemsContainer = document.getElementById(\'sinergi-report-items\');
@@ -404,6 +514,21 @@ export default function ExtensionGuide() {
 
     function fillForm(report) {
       try {
+        function getDurationMinutes(mulai, selesai) {
+          if (!mulai || !selesai) return null;
+          try {
+            const parseTime = (t) => {
+              const parts = String(t).replace('.', ':').split(':');
+              if (parts.length >= 2) return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+              return 0;
+            };
+            const start = parseTime(mulai);
+            const end = parseTime(selesai);
+            if (end > start) return end - start;
+          } catch(e) {}
+          return null;
+        }
+        const calcMins = getDurationMinutes(report.waktuMulai, report.waktuSelesai);
         // Helper to set values in a way that React/Vue state recognizes and triggers jQuery/Select2 change
         function setElementValue(element, value) {
           if (!element) return;
@@ -723,62 +848,112 @@ export default function ExtensionGuide() {
 
           // Only try to fill if accordion is open
           if (!isAccordionOpen()) {
-            console.log('\u26a1 Accordion belum terbuka, coba buka dulu...');
+            console.log('\\u26a1 Accordion belum terbuka, coba buka dulu...');
             clickUraianTrigger();
             return false;
           }
 
           const radios = Array.from(document.querySelectorAll('input[type="radio"]')).filter(r => !isHelperWidget(r));
-          
+          const cleanTarget = targetText.replace(/\\s+/g, ' ');
+          const cleanDetail = detailText.replace(/\\s+/g, ' ');
+
+          // Helper: extract minutes from label full text (catches numbers in nested spans)
+          function extractMinsFromLabelText(text) {
+            const t = (text || '').toLowerCase();
+            let m = t.match(/(?:norma|waktu|menit)\\s*[:\\-]?\\s*(\\d+)/) || t.match(/(\\d+)\\s*menit/) || t.match(/(\\d+)\\s*min/);
+            if (m) return parseInt(m[1], 10);
+            // Look for isolated numbers that are valid minute values
+            const validMins = [5,10,15,20,25,30,45,60,90,120];
+            const nums = t.match(/\\b(\\d+)\\b/g);
+            if (nums) {
+              for (const n of nums) {
+                const v = parseInt(n, 10);
+                if (validMins.includes(v)) return v;
+              }
+            }
+            return null;
+          }
+
+          const matchingRadios = [];
+
           for (const radio of radios) {
-            // Get the parent <label> card element (the whole clickable card)
             const labelCard = radio.closest('label');
             const labelText = (labelCard ? labelCard.textContent : (radio.parentElement ? radio.parentElement.textContent : '')) || '';
             const lt = labelText.toLowerCase().replace(/\\s+/g, ' ').trim();
-            const cleanTarget = targetText.replace(/\\s+/g, ' ');
-            const cleanDetail = detailText.replace(/\\s+/g, ' ');
-
-            const matchMain = cleanTarget.length > 5 && lt.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 20)));
-            const matchDetail = cleanDetail.length > 5 && lt.includes(cleanDetail.substring(0, Math.min(cleanDetail.length, 20)));
             
-            let isMatch = false;
-            if (matchMain || matchDetail) {
-              isMatch = true;
-              if (cleanDetail.includes("norma:")) {
-                const minutesMatch = cleanDetail.match(/norma:\\s*(\\d+)/);
-                if (minutesMatch) {
-                  const mins = minutesMatch[1];
-                  const regex = new RegExp('\\\\b' + mins + '\\\\b');
-                  if (!regex.test(lt)) {
-                    isMatch = false;
-                  }
+            let score = 0;
+
+            const exactMain = cleanTarget.length > 5 && (lt.includes(cleanTarget) || cleanTarget.includes(lt));
+            const exactDetail = cleanDetail.length > 5 && (lt.includes(cleanDetail) || cleanDetail.includes(lt));
+            
+            if (exactMain) score += 100;
+            else if (cleanTarget.length > 5 && lt.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 25)))) score += 10;
+            
+            if (exactDetail) score += 100;
+            else if (cleanDetail.length > 5 && lt.includes(cleanDetail.substring(0, Math.min(cleanDetail.length, 25)))) score += 10;
+            
+            if (score > 0) {
+              const ltMins = extractMinsFromLabelText(lt);
+
+              if (calcMins !== null && ltMins !== null) {
+                if (Math.abs(calcMins - ltMins) <= 5) {
+                  score += 200; // Very strong bonus for exact minute match
+                  console.log('\\u26a1 Menit cocok: label=' + ltMins + ' target=' + calcMins);
+                } else {
+                  score -= 200; // Very strong penalty prevents wrong selection
+                  console.log('\\u26a1 Menit TIDAK cocok: label=' + ltMins + ' target=' + calcMins);
                 }
               }
+              matchingRadios.push({ radio, labelCard, lt, score, value: parseInt(radio.value || '0', 10), ltMins });
             }
-            
-            if (isMatch) {
-              // Click the LABEL CARD while accordion is open - React will detect this
-              if (labelCard) {
-                labelCard.click();
-                labelCard.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-              }
-              radio.click();
-              radio.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-              radio.dispatchEvent(new Event('change', { bubbles: true }));
-              console.log('\\u26a1 Dipilih radio uraian tugas (accordion open):', lt.substring(0, 60));
-              return true;
+          }
+
+          if (matchingRadios.length === 0) return false;
+
+          // Sort by score; if tied, use radio value as tie-breaker:
+          // Higher value = more minutes (confirmed: 4466=60min > 4465=45min)
+          matchingRadios.sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            if (calcMins !== null) {
+              return calcMins >= 30 ? b.value - a.value : a.value - b.value;
             }
+            return b.value - a.value;
+          });
+
+          const best = matchingRadios[0];
+          console.log('\\u26a1 Kandidat terpilih (score=' + best.score + ', value=' + best.value + ', ltMins=' + best.ltMins + ', calcMins=' + calcMins + '):', best.lt.substring(0, 80));
+
+          if (best && best.score > 0) {
+            if (best.labelCard) {
+              best.labelCard.click();
+              best.labelCard.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            }
+            best.radio.click();
+            best.radio.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            best.radio.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('\\u26a1 Dipilih radio uraian tugas (score: ' + best.score + '):', best.lt.substring(0, 60));
+            return true;
           }
           return false;
         }
 
         // Step 1: Open the Uraian Tugas accordion AFTER time pickers are done (wkt2 finishes ~6500ms)
+        // Guard: only run until success to prevent flip-flop
+        let uraianFilled = false;
+        function tryFillUraian() {
+          if (uraianFilled) return;
+          const result = fillUraianTugasRadio();
+          if (result) {
+            uraianFilled = true;
+            console.log('\\u26a1 Uraian tugas berhasil diisi, tidak akan diulang lagi.');
+          }
+        }
         setTimeout(() => {
           clickUraianTrigger();
-          // Step 2: After accordion opens, click matching radio
-          setTimeout(fillUraianTugasRadio, 500);
-          setTimeout(fillUraianTugasRadio, 1200);
-          setTimeout(fillUraianTugasRadio, 2500);
+          setTimeout(tryFillUraian, 500);
+          setTimeout(tryFillUraian, 1200);
+          setTimeout(tryFillUraian, 2500);
+          setTimeout(tryFillUraian, 4000);
         }, 7000);
 
         // 3b. Native <select> dropdown fallback
@@ -948,11 +1123,15 @@ export default function ExtensionGuide() {
         function clickDetailItem() {
           if (!report.detailItemPekerjaan) return false;
           const targetText = report.detailItemPekerjaan.toLowerCase().trim();
-          console.log('⚡ Mencari detail item pekerjaan: ' + targetText);
+          console.log('\\u26a1 Mencari detail item pekerjaan: ' + targetText);
 
           const isHelperWidget = (el) => !!el.closest('#sinergi-auto-input-widget');
           const elements = Array.from(document.querySelectorAll('div, label, span, p, button, input[type="radio"]')).filter(el => !isHelperWidget(el));
           
+          let bestEl = null;
+          let bestScore = 0;
+          let bestLabelText = "";
+
           // 1st Pass: Radio buttons
           for (const el of elements) {
             if (el.tagName === 'INPUT' && el.type === 'radio') {
@@ -963,84 +1142,111 @@ export default function ExtensionGuide() {
                 if (labelEl) labelText = labelEl.textContent || '';
               }
               const labelCard = el.closest('label');
-              if (!labelText && labelCard) {
-                labelText = labelCard.textContent || '';
-              }
-              if (!labelText && el.parentElement) {
-                labelText = el.parentElement.textContent || '';
-              }
+              if (!labelText && labelCard) labelText = labelCard.textContent || '';
+              if (!labelText && el.parentElement) labelText = el.parentElement.textContent || '';
+              
               if (labelText) {
                 const lt = labelText.toLowerCase().replace(/\\s+/g, ' ').trim();
                 const cleanTarget = targetText.replace(/\\s+/g, ' ');
                 
-                let isMatch = false;
-                if (lt.includes(cleanTarget) || cleanTarget.includes(lt)) {
-                  isMatch = true;
-                } else if (cleanTarget.length > 5 && lt.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 20)))) {
-                  isMatch = true;
-                  if (cleanTarget.includes("norma:")) {
-                    const minutesMatch = cleanTarget.match(/norma:\s*(\d+)/);
-                    if (minutesMatch) {
-                      const mins = minutesMatch[1];
-                      const regex = new RegExp('\\b' + mins + '\\b');
-                      if (!regex.test(lt)) {
-                        isMatch = false;
-                      }
-                    }
+                let score = 0;
+                if (cleanTarget.length > 5 && (lt.includes(cleanTarget) || cleanTarget.includes(lt))) score += 100;
+                else if (cleanTarget.length > 5 && lt.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 25)))) score += 10;
+                
+                if (score > 0) {
+                  let targetMins = null;
+                  let combinedTarget = cleanTarget + " " + (report.uraianTugas || "").toLowerCase();
+                  let targetMatch = combinedTarget.match(/(?:norma|waktu|menit)\s*[:\-]?\s*(\d+)/) || combinedTarget.match(/(\d+)\s*menit/);
+                  if (targetMatch) {
+                    targetMins = parseInt(targetMatch[1], 10);
+                  } else if (calcMins) {
+                    targetMins = calcMins;
+                  }
+                  
+                  let ltMins = null;
+                  let ltMatch = lt.match(/(?:norma|waktu|menit)\s*[:\-]?\s*(\d+)/) || lt.match(/(\d+)\s*menit/);
+                  if (ltMatch) ltMins = parseInt(ltMatch[1], 10);
+
+                  if (targetMins !== null && ltMins !== null) {
+                    if (Math.abs(targetMins - ltMins) <= 5) score += 50;
+                    else score -= 50;
+                  } else if (targetMins !== null && ltMins === null) {
+                    score -= 5;
                   }
                 }
                 
-                if (isMatch) {
-                  triggerClickEvents(el);
-                  console.log('⚡ Mengklik radio button sub-item via triggerClickEvents:', labelText.trim());
-                  
-                  // Also trigger click on parent container
-                  if (labelCard) {
-                    triggerClickEvents(labelCard);
-                  } else if (el.parentElement) {
-                    triggerClickEvents(el.parentElement);
-                  }
-                  return true;
+                // Tie breaker: if scores are equal, prefer the one with a higher absolute match length or one that is already checked
+                if (score > bestScore || (score === bestScore && score > 0 && el.checked)) {
+                  bestScore = score;
+                  bestEl = el;
+                  bestLabelText = lt;
                 }
               }
             }
           }
 
+          if (bestEl && bestScore > 0) {
+            triggerClickEvents(bestEl);
+            console.log('\\u26a1 Mengklik radio button sub-item (score: ' + bestScore + '):', bestLabelText.substring(0, 60));
+            const labelCard = bestEl.closest('label');
+            if (labelCard) triggerClickEvents(labelCard);
+            else if (bestEl.parentElement) triggerClickEvents(bestEl.parentElement);
+            return true;
+          }
+
           // 2nd Pass: Clickable cards or divs
+          bestEl = null;
+          bestScore = 0;
+          bestLabelText = "";
+
           const candidates = elements.filter(el => {
             const tag = el.tagName;
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'INPUT') return false;
             const elText = (el.textContent || '').toLowerCase().replace(/\\s+/g, ' ').trim();
-            const cleanTarget = targetText.replace(/\\s+/g, ' ');
             if (!elText || elText.length > 150) return false;
-            
-            if (elText.includes(cleanTarget) || cleanTarget.includes(elText)) return true;
-            
-            if (cleanTarget.length > 5 && elText.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 20)))) {
-              if (cleanTarget.includes("norma:")) {
-                const minutesMatch = cleanTarget.match(/norma:\\s*(\\d+)/);
-                if (minutesMatch) {
-                  const mins = minutesMatch[1];
-                  const regex = new RegExp('\\\\b' + mins + '\\\\b');
-                  return regex.test(elText);
-                }
-              }
-              return true;
-            }
-            return false;
+            return true;
           });
 
-          if (candidates.length > 0) {
-            candidates.sort((a, b) => (a.textContent || '').length - (b.textContent || '').length);
-            const bestCandidate = candidates[0];
-            console.log('⚡ Mengklik sub-item kandidat terbaik:', bestCandidate.textContent?.trim());
-            
-            triggerClickEvents(bestCandidate);
-            
-            // Click closest clickable container button/label/card/li if it exists, instead of loop-clicking all parents
-            const container = bestCandidate.closest('button, [role="button"], [role="radio"], [role="checkbox"], label, li, .card');
-            if (container && container !== bestCandidate) {
-              console.log('⚡ Mengklik container terdekat dari sub-item:', container.tagName, container.className);
+          for (const el of candidates) {
+             const elText = (el.textContent || '').toLowerCase().replace(/\\s+/g, ' ').trim();
+             const cleanTarget = targetText.replace(/\\s+/g, ' ');
+             
+             let score = 0;
+             if (cleanTarget.length > 5 && (elText.includes(cleanTarget) || cleanTarget.includes(elText))) score += 100;
+             else if (cleanTarget.length > 5 && elText.includes(cleanTarget.substring(0, Math.min(cleanTarget.length, 25)))) score += 10;
+             
+             if (score > 0) {
+                let targetMins = null;
+                let combinedTarget = cleanTarget + " " + (report.uraianTugas || "").toLowerCase();
+                let targetMatch = combinedTarget.match(/(?:norma|waktu|menit)\s*[:\-]?\s*(\d+)/) || combinedTarget.match(/(\d+)\s*menit/);
+                if (targetMatch) {
+                  targetMins = parseInt(targetMatch[1], 10);
+                } else if (calcMins) {
+                  targetMins = calcMins;
+                }
+                
+                let ltMins = null;
+                let ltMatch = elText.match(/(?:norma|waktu|menit)\s*[:\-]?\s*(\\d+)/) || elText.match(/(\\d+)\\s*menit/);
+                if (ltMatch) ltMins = parseInt(ltMatch[1], 10);
+
+                if (targetMins !== null && ltMins !== null) {
+                  if (Math.abs(targetMins - ltMins) <= 5) score += 50;
+                  else score -= 50;
+                }
+             }
+             
+             if (score > bestScore) {
+               bestScore = score;
+               bestEl = el;
+               bestLabelText = elText;
+             }
+          }
+
+          if (bestEl && bestScore > 0) {
+            console.log('\\u26a1 Mengklik sub-item kandidat terbaik (score: ' + bestScore + '):', bestLabelText.substring(0, 60));
+            triggerClickEvents(bestEl);
+            const container = bestEl.closest('button, [role="button"], [role="radio"], [role="checkbox"], label, li, .card');
+            if (container && container !== bestEl) {
               triggerClickEvents(container);
             }
             return true;
@@ -1074,10 +1280,19 @@ export default function ExtensionGuide() {
         }
 
         if (report.detailItemPekerjaan) {
-          // Delay detail item AFTER time pickers and uraian tugas are done
-          setTimeout(fillDetailItem, 8000);
-          setTimeout(fillDetailItem, 9000);
-          setTimeout(fillDetailItem, 10000);
+          // Guard: only run detail item until success, AFTER uraian tugas is done
+          let detailFilled = false;
+          function tryFillDetail() {
+            // Skip if uraian not yet settled, or already done
+            if (detailFilled) return;
+            const result = fillDetailItem();
+            if (result) {
+              detailFilled = true;
+              console.log('\\u26a1 Detail item berhasil diisi, tidak akan diulang lagi.');
+            }
+          }
+          setTimeout(tryFillDetail, 12000);
+          setTimeout(tryFillDetail, 14000);
         }
 
         // Handle custom select2 dropdown if Sinergi V2 uses it
