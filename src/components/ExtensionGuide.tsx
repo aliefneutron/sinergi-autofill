@@ -485,9 +485,24 @@ export default function ExtensionGuide() {
           }
 
           fillForm(report);
-          setTimeout(function() {
-            clickSubmitButton();
-          }, 12000);
+          // Tunggu uraian tugas terpilih dulu, baru submit
+          let submitAttempts = 0;
+          const submitPoller = setInterval(function() {
+            submitAttempts++;
+            // Cek apakah ada radio button yang sudah terpilih (uraian tugas dipilih)
+            const selectedRadio = document.querySelector('input[type="radio"]:checked:not(#sinergi-auto-input-widget input)');
+            const maxWait = submitAttempts >= 28; // max 14 detik (28 x 500ms)
+            if (selectedRadio || maxWait) {
+              clearInterval(submitPoller);
+              if (selectedRadio) {
+                console.log('\u26a1 Uraian tugas terpilih, submit dalam 1.5 detik...');
+                setTimeout(function() { clickSubmitButton(); }, 1500);
+              } else {
+                console.log('\u26a1 Timeout tunggu uraian tugas, submit sekarang...');
+                clickSubmitButton();
+              }
+            }
+          }, 500);
         };
 
         itemsContainer.appendChild(item);
@@ -1527,83 +1542,38 @@ export default function ExtensionGuide() {
             }
 
             // Beri jeda 10 detik agar seluruh form (termasuk animasi dropdown dan waktu) selesai diisi
-            setTimeout(function() {
-              if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
-              
-              console.log('🤖 Otomatisasi Batch: Menyimpan data...');
-              
-              const submitted = clickSubmitButton();
-              if (!submitted) {
-                console.error('🤖 Gagal mensubmit secara otomatis. Mencoba submit form fallback...');
-                const form = document.querySelector('form');
-                if (form) form.submit();
+            // Setelah form diisi, poll sampai uraian terpilih, lalu submit
+            let batchSubmitAttempts = 0;
+            const batchSubmitPoller = setInterval(function() {
+              batchSubmitAttempts++;
+              if (localStorage.getItem('sinergi_auto_active') !== 'true') {
+                clearInterval(batchSubmitPoller); return;
               }
-              
-              // Wait for success/error notification (10 seconds timeout)
-              let waitTime = 0;
-              const notifInterval = setInterval(function() {
-                waitTime += 500;
-                if (localStorage.getItem('sinergi_auto_active') !== 'true') {
-                  clearInterval(notifInterval);
-                  return;
-                }
-                
-                const bodyText = document.body.innerText.toLowerCase();
-                const isSuccess = bodyText.includes('berhasil dikirim') || bodyText.includes('berhasil disimpan') || document.querySelector('.swal2-success');
-                const isError = bodyText.includes('gagal') || bodyText.includes('error') || document.querySelector('.swal2-error');
-                
-                if (isSuccess || isError || waitTime >= 10000) {
-                  clearInterval(notifInterval);
-                  console.log('🤖 Hasil submit:', isSuccess ? 'Sukses' : (isError ? 'Gagal' : 'Timeout'));
-                  
-                  let results = [];
-                  try {
-                    results = JSON.parse(localStorage.getItem('sinergi_auto_results') || '[]');
-                  } catch(e) {}
-                  
-                  results[currentIndex] = isSuccess ? 'success' : 'error';
-                  localStorage.setItem('sinergi_auto_results', JSON.stringify(results));
-                  localStorage.setItem('sinergi_auto_index', (currentIndex + 1).toString());
-                  
-                  // Re-draw list to show badge update
-                  const rawReports = localStorage.getItem('sinergi_auto_reports');
-                  if (rawReports && typeof window.sinergiProcessPayload === 'function') {
-                    window.sinergiProcessPayload(rawReports);
-                  }
-                  
-                  // Navigate to Tambah Laporan page for the next item
-                  const tambahBtn = Array.from(document.querySelectorAll('a, button')).find(el => {
-                    if (el.closest('#sinergi-auto-input-widget') || el.closest('form')) return false;
-                    const txt = (el.textContent || '').toLowerCase().trim();
-                    return txt === 'tambah' || txt.includes('tambah laporan') || txt.includes('tambah pekerjaan') || txt === '+ tambah';
-                  });
-
-                  if (tambahBtn) {
-                    console.log('🤖 Klik tombol Tambah Laporan untuk antrean berikutnya.');
-                    if (tambahBtn.tagName.toLowerCase() === 'a' && tambahBtn.getAttribute('href')) {
-                      window.location.href = tambahBtn.getAttribute('href');
-                    } else {
-                      tambahBtn.click();
-                      tambahBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+              const selectedRadio = document.querySelector('input[type="radio"]:checked:not(#sinergi-auto-input-widget input)');
+              const maxWait = batchSubmitAttempts >= 36; // max 18 detik (36 x 500ms)
+              if (selectedRadio || maxWait) {
+                clearInterval(batchSubmitPoller);
+                if (selectedRadio) {
+                  console.log('\u26a1 Batch: Uraian tugas terpilih, submit dalam 1.5 detik...');
+                  setTimeout(function() {
+                    if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
+                    console.log('\u26a1 Batch: Menyimpan data...');
+                    const submitted = clickSubmitButton();
+                    if (!submitted) {
+                      const form = document.querySelector('form');
+                      if (form) form.submit();
                     }
-                  } else {
-                    const currentUrl = window.location.href;
-                    if (currentUrl.includes('/pekerjaan')) {
-                      const baseUrl = currentUrl.split('/pekerjaan')[0];
-                      window.location.href = baseUrl + '/pekerjaan/input/';
-                    }
+                  }, 1500);
+                } else {
+                  console.log('\u26a1 Batch: Timeout tunggu uraian, submit sekarang...');
+                  const submitted = clickSubmitButton();
+                  if (!submitted) {
+                    const form = document.querySelector('form');
+                    if (form) form.submit();
                   }
-                  
-                  // Trigger next step
-                  setTimeout(checkAutoAutomation, 2000);
                 }
-              }, 500);
-
-            }, 10000);
-          }, 1500);
-        }
-      }, 500);
-    } else {
+              }
+            }, 500);
       console.log('🤖 Otomatisasi Batch: Mencari tombol "+ Tambah Laporan"...');
       const statusBanner = document.getElementById('sinergi-fill-status');
       if (statusBanner) {
