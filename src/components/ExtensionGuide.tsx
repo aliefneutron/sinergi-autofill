@@ -1318,100 +1318,98 @@ export default function ExtensionGuide() {
           }
         }
 
-        // 4. Fill Deskripsi Pekerjaan & Hasil Pekerjaan
-        // SINERGI V2: keterangan = narasi/deskripsi, hasil = hasil pekerjaan
-        const keteranganEl = document.querySelector('textarea[name="keterangan"]');
-        const hasilEl = document.querySelector('textarea[name="hasil"]');
-        
-        if (keteranganEl) {
-          setElementValue(keteranganEl, report.deskripsiPekerjaan);
-          console.log('⚡ Mengisi keterangan (SINERGI V2):', report.deskripsiPekerjaan ? report.deskripsiPekerjaan.substring(0,30) : '');
-        }
-        if (hasilEl) {
-          setElementValue(hasilEl, report.hasilPekerjaan);
-          console.log('⚡ Mengisi hasil (SINERGI V2):', report.hasilPekerjaan ? report.hasilPekerjaan.substring(0,30) : '');
-        }
-
-        // Generic fallback for other sites
-        if (!keteranganEl || !hasilEl) {
-          let descInput = findFormInputElement(['deskripsi', 'uraian kegiatan', 'pekerjaan', 'detail kegiatan', 'narasi'], 'textarea');
-          let hasilInput = findFormInputElement(['hasil', 'output', 'bukti fisik'], 'textarea');
+        // 4. Wait for Uraian Tugas to be selected before filling Deskripsi, Hasil, and Bukti Dukung
+        // Ini memastikan urutan input berurutan persis seperti aslinya
+        let finishAttempts = 0;
+        const finishPoller = setInterval(function() {
+          finishAttempts++;
+          const selectedRadio = document.querySelector('input[type="radio"]:checked:not(#sinergi-auto-input-widget input)');
+          const maxWait = finishAttempts >= 28; // max 14 detik
           
-          if (descInput && descInput !== hasilInput) {
-            setElementValue(descInput, report.deskripsiPekerjaan);
-          }
-          if (hasilInput && descInput !== hasilInput) {
-            setElementValue(hasilInput, report.hasilPekerjaan);
-          }
+          if (selectedRadio || maxWait) {
+            clearInterval(finishPoller);
+            
+            // Beri jeda 500ms agar DOM stabil setelah radio terpilih
+            setTimeout(function() {
+              // 4a. Fill Deskripsi Pekerjaan & Hasil Pekerjaan
+              const keteranganEl = document.querySelector('textarea[name="keterangan"]');
+              const hasilEl = document.querySelector('textarea[name="hasil"]');
+              
+              if (keteranganEl) {
+                setElementValue(keteranganEl, report.deskripsiPekerjaan);
+                console.log('⚡ Mengisi keterangan (SINERGI V2):', report.deskripsiPekerjaan ? report.deskripsiPekerjaan.substring(0,30) : '');
+              }
+              if (hasilEl) {
+                setElementValue(hasilEl, report.hasilPekerjaan);
+                console.log('⚡ Mengisi hasil (SINERGI V2):', report.hasilPekerjaan ? report.hasilPekerjaan.substring(0,30) : '');
+              }
 
-          if (!descInput || !hasilInput || descInput === hasilInput) {
-            const textareas = Array.from(document.querySelectorAll('textarea'));
-            if (textareas.length >= 2) {
-              setElementValue(textareas[0], report.deskripsiPekerjaan);
-              setElementValue(textareas[1], report.hasilPekerjaan);
-            }
-          }
-        }
+              if (!keteranganEl || !hasilEl) {
+                let descInput = findFormInputElement(['deskripsi', 'uraian kegiatan', 'pekerjaan', 'detail kegiatan', 'narasi'], 'textarea');
+                let hasilInput = findFormInputElement(['hasil', 'output', 'bukti fisik'], 'textarea');
+                
+                if (descInput && descInput !== hasilInput) setElementValue(descInput, report.deskripsiPekerjaan);
+                if (hasilInput && descInput !== hasilInput) setElementValue(hasilInput, report.hasilPekerjaan);
 
-        // 5. Auto-upload Bukti Dukung (Supporting Document) if available
-        if (report.buktiDukungBase64 && report.buktiDukungName) {
-          try {
-            const fileInputs = Array.from(document.querySelectorAll('input[type="file"]')).filter(input => !input.closest('#sinergi-auto-input-widget'));
-            if (fileInputs.length > 0) {
-              const base64Str = report.buktiDukungBase64;
-              const filename = report.buktiDukungName;
-              
-              let mime = 'application/octet-stream';
-              if (filename.endsWith('.pdf')) {
-                mime = 'application/pdf';
-              } else if (filename.endsWith('.png')) {
-                mime = 'image/png';
-              } else if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
-                mime = 'image/jpeg';
-              }
-              
-              let base64Data = base64Str;
-              if (base64Str.includes(',')) {
-                const arr = base64Str.split(',');
-                const match = arr[0].match(/:(.*?);/);
-                if (match) mime = match[1];
-                base64Data = arr[1];
-              }
-              
-              const bstr = atob(base64Data);
-              let n = bstr.length;
-              const u8arr = new Uint8Array(n);
-              while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-              }
-              const file = new File([u8arr], filename, { type: mime });
-              
-              fileInputs.forEach(fileInput => {
-                try {
-                  const dataTransfer = new DataTransfer();
-                  dataTransfer.items.add(file);
-                  fileInput.files = dataTransfer.files;
-                  
-                  fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-                } catch (fileInputErr) {
-                  console.error('Gagal memproses salah satu file input:', fileInputErr);
+                if (!descInput || !hasilInput || descInput === hasilInput) {
+                  const textareas = Array.from(document.querySelectorAll('textarea'));
+                  if (textareas.length >= 2) {
+                    setElementValue(textareas[0], report.deskripsiPekerjaan);
+                    setElementValue(textareas[1], report.hasilPekerjaan);
+                  }
                 }
-              });
-              console.log('⚡ Bukti dukung "' + filename + '" otomatis diunggah!');
-            }
-          } catch(fileErr) {
-            console.error('Gagal mengunggah bukti dukung otomatis:', fileErr);
-          }
-        }
+              }
 
-        // Tampilkan Banner Sukses
-        const statusBanner = document.getElementById('sinergi-fill-status');
-        if (statusBanner) {
-          statusBanner.style.display = 'block';
-          setTimeout(function() {
-            statusBanner.style.display = 'none';
-          }, 5000);
-        }
+              // 5. Auto-upload Bukti Dukung
+              if (report.buktiDukungBase64 && report.buktiDukungName) {
+                try {
+                  const fileInputs = Array.from(document.querySelectorAll('input[type="file"]')).filter(input => !input.closest('#sinergi-auto-input-widget'));
+                  if (fileInputs.length > 0) {
+                    const base64Str = report.buktiDukungBase64;
+                    const filename = report.buktiDukungName;
+                    
+                    let mime = 'application/octet-stream';
+                    if (filename.endsWith('.pdf')) mime = 'application/pdf';
+                    else if (filename.endsWith('.png')) mime = 'image/png';
+                    else if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) mime = 'image/jpeg';
+                    
+                    let base64Data = base64Str;
+                    if (base64Str.includes(',')) {
+                      const arr = base64Str.split(',');
+                      const match = arr[0].match(/:(.*?);/);
+                      if (match) mime = match[1];
+                      base64Data = arr[1];
+                    }
+                    
+                    const bstr = atob(base64Data);
+                    let n = bstr.length;
+                    const u8arr = new Uint8Array(n);
+                    while (n--) u8arr[n] = bstr.charCodeAt(n);
+                    
+                    const file = new File([u8arr], filename, { type: mime });
+                    
+                    fileInputs.forEach(fileInput => {
+                      try {
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+                        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                      } catch (err) {}
+                    });
+                    console.log('⚡ Bukti dukung "' + filename + '" otomatis diunggah!');
+                  }
+                } catch(fileErr) {}
+              }
+
+              // Tampilkan Banner Sukses (selesai pengisian, tinggal tunggu poller submit)
+              const statusBanner = document.getElementById('sinergi-fill-status');
+              if (statusBanner) {
+                statusBanner.style.display = 'block';
+                setTimeout(() => statusBanner.style.display = 'none', 5000);
+              }
+            }, 500);
+          }
+        }, 500);
 
       } catch (e) {
         alert('Gagal mengisi form otomatis: ' + e.message);
