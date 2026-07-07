@@ -1682,6 +1682,10 @@ export default function ExtensionGuide() {
         }
       }, 2500);
     }
+  }
+
+  // Auto-confirm SweetAlert/Swal dialogs if batch automation is active
+  setInterval(function() {
     if (localStorage.getItem('sinergi_auto_active') !== 'true') return;
     
     const swalConfirm = document.querySelector('.swal2-confirm, .swal-button--confirm');
