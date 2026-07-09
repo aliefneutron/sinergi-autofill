@@ -1,6 +1,6 @@
 {
   "name": "Sinergi V2 Autofill",
-  "short_name": "Sinergi",
+  "short_name": "Sinergi Autofill",
   "description": "Asisten otomatis penginputan e-Kinerja / SINERGI V2",
   "start_url": "/",
   "display": "standalone",
