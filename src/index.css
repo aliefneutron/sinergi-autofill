@@ -6,3 +6,10 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
+:root {
+  --theme-text: #4338ca; /* indigo-700 */
+}
+[data-theme='indigo'] { --theme-text: #4338ca; }
+[data-theme='emerald'] { --theme-text: #047857; }
+[data-theme='slate'] { --theme-text: #334155; }
+[data-theme='orange'] { --theme-text: #c2410c; }

@@ -1962,7 +1962,7 @@ export default function ExtensionGuide() {
               </div>
               <button
                 onClick={handleCopyUserscript}
-                className="inline-flex items-center gap-2 px-6 py-4 bg-white hover:bg-white/95 text-indigo-700 font-extrabold rounded-xl shadow-lg border border-white/25 transition-transform hover:-translate-y-0.5 cursor-pointer shrink-0"
+                className="inline-flex items-center gap-2 px-6 py-4 bg-white hover:bg-white/95 text-[var(--theme-text)] font-extrabold rounded-xl shadow-lg border border-white/25 transition-transform hover:-translate-y-0.5 cursor-pointer shrink-0"
               >
                 {copiedUserscript ? (
                   <>
@@ -2084,7 +2084,7 @@ export default function ExtensionGuide() {
                 <div className="pt-2">
                   <button
                     onClick={() => handleDownloadFile(manifestJsonCode, "manifest.json", "application/json")}
-                    className="w-full bg-white hover:bg-white/95 text-indigo-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
+                    className="w-full bg-white hover:bg-white/95 text-[var(--theme-text)] py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" /> Unduh manifest.json
                   </button>

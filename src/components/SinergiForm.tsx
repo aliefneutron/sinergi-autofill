@@ -298,7 +298,7 @@ export default function SinergiForm({ onSave, onClose, initialData }: SinergiFor
               type="button"
               disabled={isGenerating}
               onClick={handleAiGenerate}
-              className="px-3 py-1.5 text-xs bg-white hover:bg-white/90 text-indigo-700 font-bold rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer shadow-md"
+              className="px-3 py-1.5 text-xs bg-white hover:bg-white/90 text-[var(--theme-text)] font-bold rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer shadow-md"
             >
               {isGenerating ? (
                 <>
@@ -461,7 +461,7 @@ export default function SinergiForm({ onSave, onClose, initialData }: SinergiFor
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-xl text-sm bg-white text-indigo-700 hover:bg-white/95 font-bold flex items-center gap-1.5 transition-all shadow-lg cursor-pointer"
+            className="px-6 py-2.5 rounded-xl text-sm bg-white text-[var(--theme-text)] hover:bg-white/95 font-bold flex items-center gap-1.5 transition-all shadow-lg cursor-pointer"
           >
             <Save className="w-4 h-4" />
             {initialData ? "Simpan Perubahan" : "Kirim Laporan Kinerja"}

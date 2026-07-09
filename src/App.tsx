@@ -5,7 +5,14 @@ import SinergiHistory from "./components/SinergiHistory";
 import SinergiForm from "./components/SinergiForm";
 import BatchGenerator from "./components/BatchGenerator";
 import ExtensionGuide from "./components/ExtensionGuide";
-import { Sparkles, Calendar, Clock, Zap, User, Settings, CheckCircle, ListTodo, Plus, HelpCircle, Save, Award, Quote } from "lucide-react";
+import { Sparkles, Calendar, Clock, Zap, User, Settings, CheckCircle, ListTodo, Plus, HelpCircle, Save, Award, Quote, Palette } from "lucide-react";
+
+const THEMES = [
+  { id: 'indigo', name: '🟣 Indigo', bg: 'from-[#6366f1] via-[#a855f7] to-[#ec4899]', text: 'text-[var(--theme-text)]' },
+  { id: 'emerald', name: '🟢 Emerald', bg: 'from-[#10b981] via-[#3b82f6] to-[#06b6d4]', text: 'text-emerald-700' },
+  { id: 'slate', name: '⚫ Dark Slate', bg: 'from-[#0f172a] via-[#1e293b] to-[#334155]', text: 'text-slate-800' },
+  { id: 'orange', name: '🟠 Orange', bg: 'from-[#f97316] via-[#f59e0b] to-[#ef4444]', text: 'text-orange-700' },
+];
 
 export default function App() {
   const [reports, setReports] = useState<LaporanKinerja[]>([]);
@@ -20,6 +27,9 @@ export default function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<LaporanKinerja | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const [activeThemeId, setActiveThemeId] = useState('indigo');
+  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
 
   // Load initial reports from localStorage, or populate sample ones
   useEffect(() => {
@@ -41,7 +51,24 @@ export default function App() {
         setUserProfile(JSON.parse(savedProfile));
       } catch (e) {}
     }
+
+    const savedTheme = localStorage.getItem("sinergi_theme");
+    if (savedTheme && THEMES.find(t => t.id === savedTheme)) {
+      setActiveThemeId(savedTheme);
+    }
   }, []);
+
+  const activeTheme = THEMES.find(t => t.id === activeThemeId) || THEMES[0];
+  
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', activeTheme.id);
+  }, [activeTheme.id]);
+  
+  const handleThemeChange = (id: string) => {
+    setActiveThemeId(id);
+    localStorage.setItem("sinergi_theme", id);
+    setIsThemePickerOpen(false);
+  };
 
   // Save reports to localStorage on change
   const saveReports = (newReports: LaporanKinerja[]) => {
@@ -99,7 +126,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#6366f1] via-[#a855f7] to-[#ec4899] text-white flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+    <div className={`min-h-screen bg-gradient-to-br ${activeTheme.bg} text-white flex flex-col font-sans antialiased selection:bg-white/30 selection:text-white`}>
       {/* Upper Navigation Bar */}
       <header className="bg-white/10 sticky top-0 z-50 backdrop-blur-xl border-b border-white/20 px-4 py-3.5 shadow-lg">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -163,20 +190,54 @@ export default function App() {
             </button>
           </nav>
 
-          {/* Profile Quick Widget */}
-          <button
-            onClick={() => setIsProfileOpen(true)}
-            className="flex items-center justify-between w-full sm:w-auto gap-3 bg-white/15 hover:bg-white/20 p-1.5 pl-3 pr-2.5 rounded-xl border border-white/20 shadow-md transition-all cursor-pointer text-left"
-            title="Atur Profil Saya"
-          >
-            <div className="leading-none flex-1 overflow-hidden">
-              <span className="font-bold text-white text-[11px] sm:text-xs block truncate">{userProfile.nama}</span>
-              <span className="text-[9px] sm:text-[10px] text-white/75 font-semibold block mt-1 truncate">{userProfile.jabatan}</span>
+          {/* Top Right Controls */}
+          <div className="flex items-center gap-2">
+            {/* Theme Picker */}
+            <div className="relative">
+              <button
+                onClick={() => setIsThemePickerOpen(!isThemePickerOpen)}
+                className="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/20 border border-white/20 shadow-md flex items-center justify-center transition-all text-white"
+                title="Pilih Tema"
+              >
+                <Palette className="w-4 h-4" />
+              </button>
+              
+              {isThemePickerOpen && (
+                <div className="absolute right-0 top-12 w-48 bg-white/20 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-xl overflow-hidden z-50">
+                  <div className="p-2 space-y-1">
+                    {THEMES.map((theme) => (
+                      <button
+                        key={theme.id}
+                        onClick={() => handleThemeChange(theme.id)}
+                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-all ${
+                          activeThemeId === theme.id 
+                            ? 'bg-white/30 font-bold text-white shadow-sm' 
+                            : 'text-white/90 hover:bg-white/20'
+                        }`}
+                      >
+                        {theme.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="w-8 h-8 rounded-lg bg-white/25 text-white flex items-center justify-center border border-white/30 shrink-0">
-              <User className="w-4 h-4" />
-            </div>
-          </button>
+
+            {/* Profile Quick Widget */}
+            <button
+              onClick={() => setIsProfileOpen(true)}
+              className="flex items-center justify-between w-full sm:w-auto gap-3 bg-white/15 hover:bg-white/20 p-1.5 pl-3 pr-2.5 rounded-xl border border-white/20 shadow-md transition-all cursor-pointer text-left"
+              title="Atur Profil Saya"
+            >
+              <div className="leading-none flex-1 overflow-hidden">
+                <span className="font-bold text-white text-[11px] sm:text-xs block truncate">{userProfile.nama}</span>
+                <span className="text-[9px] sm:text-[10px] text-white/75 font-semibold block mt-1 truncate">{userProfile.jabatan}</span>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-white/25 text-white flex items-center justify-center border border-white/30 shrink-0">
+                <User className="w-4 h-4" />
+              </div>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -217,7 +278,7 @@ export default function App() {
                     <div className="flex flex-col sm:flex-row w-full gap-2 pt-2">
                       <button
                         onClick={() => setIsFormOpen(true)}
-                        className="flex-1 px-2 py-2.5 bg-white text-indigo-700 hover:bg-white/95 font-bold rounded-xl text-[11px] sm:text-xs leading-snug transition-all shadow-lg shadow-indigo-500/10 cursor-pointer text-center"
+                        className={`flex-1 px-2 py-2.5 bg-white ${activeTheme.text} hover:bg-white/95 font-bold rounded-lg flex flex-col items-center justify-center transition-all border border-transparent shadow-md`}
                       >
                         + Tambah Laporan Tunggal
                       </button>
@@ -413,7 +474,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => handleSaveProfile(userProfile)}
-                  className="px-5 py-2 bg-white text-indigo-700 hover:bg-white/95 font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-lg cursor-pointer"
+                  className={`px-5 py-2 bg-white ${activeTheme.text} hover:bg-white/95 font-bold rounded-lg flex items-center gap-2 transition-all shadow-md`}
                 >
                   <Save className="w-4 h-4" /> Simpan Profil
                 </button>

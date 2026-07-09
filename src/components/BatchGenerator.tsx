@@ -509,7 +509,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
               type="button"
               onClick={() => setMode("MULTI_DAY")}
               className={`px-4 py-2 whitespace-nowrap rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                mode === "MULTI_DAY" ? "bg-white text-indigo-700 shadow" : "text-white hover:bg-white/10"
+                mode === "MULTI_DAY" ? "bg-white text-[var(--theme-text)] shadow" : "text-white hover:bg-white/10"
               }`}
             >
               Mode Standar
@@ -518,7 +518,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
               type="button"
               onClick={() => setMode("INSTANT_INTERVAL")}
               className={`px-4 py-2 whitespace-nowrap rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                mode === "INSTANT_INTERVAL" ? "bg-white text-indigo-700 shadow" : "text-white hover:bg-white/10"
+                mode === "INSTANT_INTERVAL" ? "bg-white text-[var(--theme-text)] shadow" : "text-white hover:bg-white/10"
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -570,7 +570,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
                 <button
                   type="button"
                   onClick={addBlock}
-                  className="px-3 py-1.5 bg-white text-indigo-700 hover:bg-white/95 text-xs font-bold rounded-xl flex items-center gap-1 transition-transform cursor-pointer shadow-md"
+                  className="px-3 py-1.5 bg-white text-[var(--theme-text)] hover:bg-white/95 text-xs font-bold rounded-xl flex items-center gap-1 transition-transform cursor-pointer shadow-md"
                   title="Tambah Blok Waktu"
                 >
                   <Plus className="w-3.5 h-3.5 text-indigo-750" /> Tambah
@@ -954,7 +954,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
               <button
                 type="button"
                 onClick={mode === "INSTANT_INTERVAL" ? handleInstantGenerate : handleBatchGenerate}
-                className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm bg-white text-indigo-700 hover:bg-white/95 font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg cursor-pointer"
+                className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm bg-white text-[var(--theme-text)] hover:bg-white/95 font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg cursor-pointer"
               >
                 <Play className="w-4 h-4" /> Mulai
               </button>
@@ -1035,7 +1035,7 @@ export default function BatchGenerator({ onSaveBatch, onClose }: BatchGeneratorP
             </button>
             <button
               onClick={handleImport}
-              className="px-6 py-2.5 bg-white hover:bg-white/95 text-indigo-700 font-bold rounded-xl text-xs transition-colors shadow-lg cursor-pointer"
+              className="px-6 py-2.5 bg-white hover:bg-white/95 text-[var(--theme-text)] font-bold rounded-xl text-xs transition-colors shadow-lg cursor-pointer"
             >
               Simpan Semua ke Riwayat
             </button>

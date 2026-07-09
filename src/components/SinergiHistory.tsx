@@ -169,7 +169,7 @@ export default function SinergiHistory({
           {/* Add report button */}
           <button
             onClick={onAddClick}
-            className="w-full sm:w-auto px-5 py-2.5 bg-white text-indigo-700 hover:bg-white/95 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 shadow-lg shadow-indigo-500/10 cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-white text-[var(--theme-text)] hover:bg-white/95 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 shadow-lg shadow-indigo-500/10 cursor-pointer"
           >
             <Plus className="w-4 h-4" /> TAMBAH LAPORAN
           </button>
@@ -237,7 +237,7 @@ export default function SinergiHistory({
             {/* Download Payload Button (Recommended Primary) */}
             <button
               onClick={handleDownloadPayload}
-              className="px-4 py-2 text-xs font-black bg-white text-indigo-700 rounded-lg hover:bg-white/95 transition-all flex items-center gap-1.5 w-full sm:w-auto justify-center shadow-md shadow-indigo-500/10 cursor-pointer border border-white"
+              className="px-4 py-2 text-xs font-black bg-white text-[var(--theme-text)] rounded-lg hover:bg-white/95 transition-all flex items-center gap-1.5 w-full sm:w-auto justify-center shadow-md shadow-indigo-500/10 cursor-pointer border border-white"
             >
               <Download className="w-4 h-4" /> Unduh File Payload (.json)
             </button>
