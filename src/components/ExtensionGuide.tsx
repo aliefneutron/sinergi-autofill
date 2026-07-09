@@ -363,6 +363,7 @@ export default function ExtensionGuide() {
           const content = evt.target.result;
           const ta = document.getElementById('sinergi-data-input');
           if (ta) ta.value = content;
+          localStorage.removeItem('sinergi_auto_results');
           processPayload(content);
         };
         reader.readAsText(file);
@@ -377,6 +378,7 @@ export default function ExtensionGuide() {
           alert('Silakan tempel data kinerja terlebih dahulu!');
           return;
         }
+        localStorage.removeItem('sinergi_auto_results');
         processPayload(rawVal);
       };
     }
@@ -450,6 +452,7 @@ export default function ExtensionGuide() {
           if (localStorage.getItem('sinergi_auto_active') === 'true') {
              localStorage.removeItem('sinergi_auto_reports');
           }
+          localStorage.removeItem('sinergi_auto_results');
           const ta = document.getElementById('sinergi-data-input');
           if (ta) ta.value = '';
           const nameDisp = document.getElementById('sinergi-file-name');
