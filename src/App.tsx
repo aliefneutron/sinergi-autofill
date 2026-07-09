@@ -203,7 +203,7 @@ export default function App() {
               </button>
               
               {isThemePickerOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:right-0 top-12 w-48 bg-white/20 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-xl overflow-hidden z-50">
+                <div className="absolute left-0 sm:left-auto sm:right-0 top-12 w-48 bg-white/20 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-xl overflow-hidden z-50">
                   <div className="p-2 space-y-1">
                     {THEMES.map((theme) => (
                       <button
