@@ -11,7 +11,7 @@ const THEMES = [
   { id: 'indigo', name: '🟣 Indigo', bg: 'from-[#6366f1] via-[#a855f7] to-[#ec4899]', text: 'text-[var(--theme-text)]' },
   { id: 'emerald', name: '🟢 Emerald', bg: 'from-[#10b981] via-[#3b82f6] to-[#06b6d4]', text: 'text-[var(--theme-text)]' },
   { id: 'slate', name: '⚫ Dark Slate', bg: 'from-[#0f172a] via-[#1e293b] to-[#334155]', text: 'text-[var(--theme-text)]' },
-  { id: 'burgundy', name: '🍷 Merah Burgundy', bg: 'from-[#881337] via-[#be123c] to-[#4c0519]', text: 'text-[var(--theme-text)]' },
+  { id: 'burgundy', name: '🔴 Merah Burgundy', bg: 'from-[#881337] via-[#be123c] to-[#4c0519]', text: 'text-[var(--theme-text)]' },
 ];
 
 export default function App() {
