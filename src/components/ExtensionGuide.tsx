@@ -55,8 +55,90 @@ export default function ExtensionGuide() {
       toggleBtn.style.boxShadow = '0 8px 24px rgba(99,102,241,0.4)';
     });
 
+    // Make Toggle Button Draggable
+    let isBtnDragging = false;
+    let btnDragMoved = false;
+    let btnInitialX = 0;
+    let btnInitialY = 0;
+    let btnStartLeft = 0;
+    let btnStartTop = 0;
+
+    function makeBtnAbsolute() {
+      if (toggleBtn.style.right !== 'auto' || toggleBtn.style.bottom !== 'auto') {
+        const rect = toggleBtn.getBoundingClientRect();
+        toggleBtn.style.right = 'auto';
+        toggleBtn.style.bottom = 'auto';
+        toggleBtn.style.left = rect.left + 'px';
+        toggleBtn.style.top = rect.top + 'px';
+      }
+    }
+
+    toggleBtn.addEventListener('mousedown', function(e) {
+      makeBtnAbsolute();
+      btnInitialX = e.clientX;
+      btnInitialY = e.clientY;
+      const rect = toggleBtn.getBoundingClientRect();
+      btnStartLeft = rect.left;
+      btnStartTop = rect.top;
+      isBtnDragging = true;
+      btnDragMoved = false;
+      toggleBtn.style.transition = 'none';
+    });
+
+    toggleBtn.addEventListener('touchstart', function(e) {
+      makeBtnAbsolute();
+      btnInitialX = e.touches[0].clientX;
+      btnInitialY = e.touches[0].clientY;
+      const rect = toggleBtn.getBoundingClientRect();
+      btnStartLeft = rect.left;
+      btnStartTop = rect.top;
+      isBtnDragging = true;
+      btnDragMoved = false;
+      toggleBtn.style.transition = 'none';
+    }, {passive: false});
+
+    document.addEventListener('mousemove', function(e) {
+      if (!isBtnDragging) return;
+      btnDragMoved = true;
+      e.preventDefault();
+      const dx = e.clientX - btnInitialX;
+      const dy = e.clientY - btnInitialY;
+      toggleBtn.style.left = (btnStartLeft + dx) + 'px';
+      toggleBtn.style.top = (btnStartTop + dy) + 'px';
+    });
+
+    document.addEventListener('touchmove', function(e) {
+      if (!isBtnDragging) return;
+      btnDragMoved = true;
+      e.preventDefault();
+      const dx = e.touches[0].clientX - btnInitialX;
+      const dy = e.touches[0].clientY - btnInitialY;
+      toggleBtn.style.left = (btnStartLeft + dx) + 'px';
+      toggleBtn.style.top = (btnStartTop + dy) + 'px';
+    }, {passive: false});
+
+    document.addEventListener('mouseup', function() { 
+      if (isBtnDragging) {
+        toggleBtn.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        setTimeout(function() { isBtnDragging = false; }, 50);
+      }
+    });
+    
+    document.addEventListener('touchend', function() { 
+      if (isBtnDragging) {
+        toggleBtn.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        setTimeout(function() { isBtnDragging = false; }, 50);
+      }
+    });
+
     // Ketika diklik, tampilkan / sembunyikan widget asisten utama
-    toggleBtn.onclick = function() {
+    toggleBtn.onclick = function(e) {
+      if (btnDragMoved) {
+        e.preventDefault();
+        e.stopPropagation();
+        btnDragMoved = false;
+        return;
+      }
       const widget = document.getElementById('sinergi-auto-input-widget');
       if (!widget) {
         createWidget();
@@ -73,11 +155,11 @@ export default function ExtensionGuide() {
 
     const widget = document.createElement('div');
     widget.id = 'sinergi-auto-input-widget';
-    widget.style.cssText = 'position:fixed;bottom:90px;right:25px;width:360px;max-width:calc(100vw - 32px);max-height:75vh;background:#0f111a;border:1.5px solid rgba(255,255,255,0.15);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:999999;font-family:sans-serif;color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden;transition:opacity 0.3s ease;backdrop-filter:blur(10px);';
+    widget.style.cssText = 'position:fixed;bottom:90px;right:25px;width:360px;max-width:calc(100vw - 32px);max-height:75vh;background:rgba(15, 17, 26, 0.4);border:1.5px solid rgba(255,255,255,0.15);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:999999;font-family:sans-serif;color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden;transition:opacity 0.3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);';
 
     // Widget Header - dengan tombol resize +/-
     const header = document.createElement('div');
-    header.style.cssText = 'background:linear-gradient(90deg, #131722, #1e2230);padding:10px 14px;border-bottom:1.5px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;cursor:move;flex-shrink:0;';
+    header.style.cssText = 'background:rgba(19, 23, 34, 0.5);padding:10px 14px;border-bottom:1.5px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;cursor:move;flex-shrink:0;';
     header.innerHTML = '<div style="display:flex;align-items:center;gap:6px;"><span style="color:#6366f1;font-weight:900;font-size:13px;letter-spacing:0.5px;">⚡ SINERGI AUTOFILL</span></div><div style="margin-left:auto;display:flex;align-items:center;gap:6px;"><button id="sinergi-btn-smaller" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;cursor:pointer;font-size:11px;border-radius:4px;padding:2px 6px;line-height:1;" title="Perkecil Widget">−</button><button id="sinergi-btn-larger" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;cursor:pointer;font-size:11px;border-radius:4px;padding:2px 6px;line-height:1;" title="Perbesar Widget">+</button><button id="sinergi-widget-minimize" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;cursor:pointer;font-size:10px;border-radius:4px;padding:2px 5px;line-height:1;" title="Sembunyikan isi">▼</button><button id="sinergi-widget-close" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;line-height:1;transition:color 0.2s;padding:0 2px;" title="Tutup">&times;</button></div>';
     widget.appendChild(header);
 
@@ -438,30 +520,32 @@ export default function ExtensionGuide() {
         let dateFormatted = report.tanggal;
         try {
           const d = new Date(report.tanggal);
-          const options = { day: \'numeric\', month: \'short\', year: \'numeric\' };
-          dateFormatted = d.toLocaleDateString(\'id-ID\', options);
+          const options = { day: 'numeric', month: 'short', year: 'numeric' };
+          dateFormatted = d.toLocaleDateString('id-ID', options);
         } catch(e) {}
 
-        const autoActive = localStorage.getItem(\'sinergi_auto_active\') === \'true\';
-        const autoIndex = parseInt(localStorage.getItem(\'sinergi_auto_index\') || \'0\', 10);
+        const autoActive = localStorage.getItem('sinergi_auto_active') === 'true';
+        const autoIndex = parseInt(localStorage.getItem('sinergi_auto_index') || '0', 10);
         
         let statusBadge = '';
-        if (autoActive) {
-          let results = [];
-          try {
-            results = JSON.parse(localStorage.getItem('sinergi_auto_results') || '[]');
-          } catch(e) {}
-          
-          const status = results[index] || 'null';
-          
-          if (status === 'success') {
-            statusBadge = \'<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Berhasil</span>\';
-          } else if (status === 'error') {
-            statusBadge = \'<span style="color:#ef4444;font-size:10px;font-weight:bold;margin-left:auto;">❌ Gagal</span>\';
-          } else if (index === autoIndex) {
-            statusBadge = \'<span class="sinergi-anim-pulse" style="color:#f59e0b;font-size:10px;font-weight:bold;margin-left:auto;">⏳ Proses</span>\';
+        let results = [];
+        try {
+          results = JSON.parse(localStorage.getItem('sinergi_auto_results') || '[]');
+        } catch(e) {}
+        
+        const status = results[index] || 'null';
+        const manualActiveIndex = parseInt(localStorage.getItem('sinergi_manual_active_index') || '-1', 10);
+        
+        if (status === 'success') {
+          statusBadge = '<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Berhasil</span>';
+        } else if (status === 'error') {
+          statusBadge = '<span style="color:#ef4444;font-size:10px;font-weight:bold;margin-left:auto;">❌ Gagal</span>';
+        } else if (index === manualActiveIndex) {
+          statusBadge = '<span class="sinergi-anim-pulse" style="color:#f59e0b;font-size:10px;font-weight:bold;margin-left:auto;">⏳ Proses</span>';
+        } else if (autoActive) {
+          if (index === autoIndex) {
+            statusBadge = '<span class="sinergi-anim-pulse" style="color:#f59e0b;font-size:10px;font-weight:bold;margin-left:auto;">⏳ Proses</span>';
           } else if (index < autoIndex) {
-             statusBadge = \'<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Selesai</span>\';
              statusBadge = '<span style="color:#10b981;font-size:10px;font-weight:bold;margin-left:auto;">✅ Selesai</span>';
           } else {
             statusBadge = '<span style="color:#64748b;font-size:10px;font-weight:bold;margin-left:auto;">Antrean</span>';
@@ -485,6 +569,37 @@ export default function ExtensionGuide() {
           }
 
           fillForm(report);
+          
+          localStorage.setItem('sinergi_manual_active_index', index.toString());
+          processPayload(localStorage.getItem('sinergi_auto_reports_draft'));
+          
+          const markManualResult = function(status) {
+            let res = [];
+            try { res = JSON.parse(localStorage.getItem('sinergi_auto_results') || '[]'); } catch(e) {}
+            while(res.length <= index) res.push('null');
+            res[index] = status;
+            localStorage.setItem('sinergi_auto_results', JSON.stringify(res));
+            localStorage.setItem('sinergi_manual_active_index', '-1');
+            
+            const statusBanner = document.getElementById('sinergi-fill-status');
+            if (statusBanner) {
+              statusBanner.style.display = 'block';
+              if (status === 'success') {
+                statusBanner.textContent = '🎉 Laporan manual berhasil dikirim!';
+                statusBanner.style.color = '#34d399';
+                statusBanner.style.background = 'rgba(16,185,129,0.1)';
+                statusBanner.style.borderColor = 'rgba(16,185,129,0.2)';
+              } else {
+                statusBanner.textContent = '❌ Laporan manual gagal diproses!';
+                statusBanner.style.color = '#ef4444';
+                statusBanner.style.background = 'rgba(239,68,68,0.1)';
+                statusBanner.style.borderColor = 'rgba(239,68,68,0.2)';
+              }
+              setTimeout(function() { statusBanner.style.display = 'none'; }, 5000);
+            }
+            processPayload(localStorage.getItem('sinergi_auto_reports_draft'));
+          };
+
           // Tunggu uraian tugas terpilih dulu, baru submit
           let submitAttempts = 0;
           const submitPoller = setInterval(function() {
@@ -495,11 +610,14 @@ export default function ExtensionGuide() {
             if (selectedRadio || maxWait) {
               clearInterval(submitPoller);
               if (selectedRadio) {
-                console.log('\u26a1 Uraian tugas terpilih, submit dalam 1.5 detik...');
-                setTimeout(function() { clickSubmitButton(); }, 1500);
+                console.log('\\u26a1 Uraian tugas terpilih, submit dalam 1.5 detik...');
+                setTimeout(function() { 
+                  clickSubmitButton(); 
+                  markManualResult('success');
+                }, 1500);
               } else {
-                console.log('\u26a1 Timeout tunggu uraian tugas, submit sekarang...');
-                clickSubmitButton();
+                console.log('\\u26a1 Timeout tunggu uraian tugas, gagal proses...');
+                markManualResult('error');
               }
             }
           }, 500);
