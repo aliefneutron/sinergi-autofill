@@ -141,7 +141,7 @@ export default function App() {
                 <span className="text-[10px] font-bold bg-white/20 text-white px-1.5 py-0.5 rounded border border-white/30">HELPER</span>
               </div>
               <span className="text-[10px] text-white/70 uppercase tracking-widest font-extrabold block mt-0.5">
-                KAB. SUMENEP
+                Created by Alief Neutron
               </span>
             </div>
           </div>
@@ -486,7 +486,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="bg-black/10 border-t border-white/10 py-6 mt-12 text-center text-[11px] text-white/75 backdrop-blur-sm">
-        <p>© 2026 SINERGI V2 Auto-Input Helper. Dioptimasi untuk BKPSDM Kabupaten Sumenep.</p>
+        <p>© 2026 SINERGI V2 AutoFill - Created by Alief Neutron</p>
         <p className="mt-1">
           Didukung teknologi Kecerdasan Buatan Google Gemini AI. Membantu produktivitas ASN secara maksimal.
         </p>
