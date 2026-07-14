@@ -487,9 +487,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-black/10 border-t border-white/10 py-6 mt-12 text-center text-[11px] text-white/75 backdrop-blur-sm">
         <p>© 2026 SINERGI V2 AutoFill - Created by Alief Neutron</p>
-        <p className="mt-1">
-          Didukung teknologi Kecerdasan Buatan Google Gemini AI. Membantu produktivitas ASN secara maksimal.
-        </p>
+
       </footer>
     </div>
   );
